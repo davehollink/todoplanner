@@ -65,8 +65,10 @@
         </div>
     </header>
 
-    <main id="view-vandaag" class="tab-content active px-6 mt-6 relative z-10">
-        <h2 class="text-2xl font-bold mb-4">Mijn taken</h2>
+    <main id="view-vandaag" class="tab-content active px-6 mt-6 space-y-4 relative z-10">
+        <div class="flex justify-between items-end mb-2">
+            <h2 class="text-2xl font-bold mb-4">Mijn taken</h2>
+        </div>
         <div id="task-list" class="space-y-4 pb-8"></div>
     </main>
 
@@ -111,29 +113,27 @@
         <div id="discover-list" class="grid grid-cols-2 gap-4 pb-8"></div>
     </main>
 
-    <nav class="fixed bottom-6 left-6 right-6 bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] z-40 px-4 py-4 flex justify-between items-center border border-gray-100">
-        <button onclick="switchTab('vandaag')" id="nav-vandaag" class="nav-btn flex flex-col items-center text-[#20B271] w-12">
+    <nav class="fixed bottom-6 left-6 right-6 bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] z-40 py-4 grid grid-cols-5 place-items-center border border-gray-100">
+        <button onclick="switchTab('vandaag')" id="nav-vandaag" class="nav-btn flex flex-col items-center text-[#20B271] w-full">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
             <span class="text-[10px] font-bold">Taken</span>
         </button>
-        <button onclick="switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-12">
+        <button onclick="switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <span class="text-[10px] font-semibold">Doelen</span>
         </button>
         
-        <div class="w-16 relative">
-            <div class="absolute left-1/2 transform -translate-x-1/2 -top-10">
-                <button onclick="openSmartModal()" class="w-16 h-16 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-full shadow-[0_10px_25px_rgba(32,178,113,0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-300 border-[5px] border-[#F4F6F8]">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14m-7-7h14"></path></svg>
-                </button>
-            </div>
+        <div class="relative w-full flex justify-center">
+            <button onclick="openSmartModal()" class="absolute -top-12 w-16 h-16 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-full shadow-[0_10px_25px_rgba(32,178,113,0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-300 border-[5px] border-[#F4F6F8]">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14m-7-7h14"></path></svg>
+            </button>
         </div>
 
-        <button onclick="switchTab('journal')" id="nav-journal" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-12">
+        <button onclick="switchTab('journal')" id="nav-journal" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             <span class="text-[10px] font-semibold">Journal</span>
         </button>
-        <button onclick="switchTab('ontdek')" id="nav-ontdek" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-12">
+        <button onclick="switchTab('ontdek')" id="nav-ontdek" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <span class="text-[10px] font-semibold">Ontdek</span>
         </button>
@@ -178,8 +178,26 @@
         </div>
     </div>
 
-    <script>
-        // GLOBALE UI VARIABELEN
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1Pm8LrSl7LmuRdRP-pYl_N9RBiI9Ktv4",
+            authDomain: "todoplanner-965eb.firebaseapp.com",
+            projectId: "todoplanner-965eb",
+            storageBucket: "todoplanner-965eb.firebasestorage.app",
+            messagingSenderId: "288993132473",
+            appId: "1:288993132473:web:0ec5ba55d05267dcaec068"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.currentUser = null;
         window.tasks = [];
         window.habits = [];
         window.journalNotes = [];
@@ -191,21 +209,52 @@
         window.selectedDate.setHours(0,0,0,0);
         window.getDateKey = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 
-        // Helpers voor Gewoontes per Dag bijhouden
-        window.getHabitProgress = (habit, dateKey) => {
-            if (!habit.history) habit.history = {};
-            if (habit.current !== undefined && typeof habit.current === 'number') {
-                habit.history[window.getDateKey(new Date())] = habit.current;
-                delete habit.current;
-            }
-            return habit.history[dateKey] || 0;
-        };
+        // --- AUTHENTICATIE ---
+        window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(error => console.error(error));
+        window.logoutGoogle = () => { if(confirm("Weet je zeker dat je wilt uitloggen?")) signOut(auth); };
 
-        window.setHabitProgress = (habit, dateKey, val) => {
-            if (!habit.history) habit.history = {};
-            if (val < 0) val = 0;
-            if (val > habit.target) val = habit.target;
-            habit.history[dateKey] = val;
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                const loginScreen = document.getElementById('login-screen');
+                loginScreen.classList.add('animate-fade-out');
+                setTimeout(() => loginScreen.classList.add('hidden'), 500);
+
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'daar';
+                document.getElementById('user-greeting').innerHTML = `Hi ${firstName},<br>focus voor vandaag?`;
+                const photo = user.photoURL ? user.photoURL : `https://ui-avatars.com/api/?name=${firstName}&background=20B271&color=fff`;
+                document.getElementById('avatar-container').innerHTML = `
+                    <img src="${photo}" alt="Profiel" class="w-12 h-12 rounded-full shadow-sm border-2 border-white object-cover">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#20B271] border-2 border-white rounded-full"></div>
+                `;
+                await loadCloudData();
+            } else {
+                window.currentUser = null;
+                const loginScreen = document.getElementById('login-screen');
+                loginScreen.classList.remove('hidden', 'animate-fade-out');
+            }
+        });
+
+        async function loadCloudData() {
+            if (!window.currentUser) return;
+            try {
+                const docSnap = await getDoc(doc(db, "users", window.currentUser.uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.tasks = data.tasks || [];
+                    window.habits = data.habits || [];
+                    window.journalNotes = data.journalNotes || [];
+                } else {
+                    await window.syncToCloud();
+                }
+                window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscover();
+            } catch(e) { console.error(e); }
+        }
+
+        window.syncToCloud = async () => {
+            if (!window.currentUser) return;
+            try { await setDoc(doc(db, "users", window.currentUser.uid), { tasks: window.tasks, habits: window.habits, journalNotes: window.journalNotes }); } 
+            catch(e) { console.error(e); }
         };
 
         // --- KALENDER LOGICA ---
@@ -306,15 +355,14 @@
             if(!challenge) return;
             window.modalMode = 'custom_habit';
             window.customizingIcon = challenge.icon;
-            
             document.getElementById('main-modal').classList.remove('hidden');
             document.getElementById('modal-title').innerText = 'Doel aanpassen';
             document.getElementById('modal-input').value = challenge.title;
             document.getElementById('custom-habit-target').value = challenge.target;
             document.getElementById('custom-habit-unit').value = challenge.unit;
-            
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
+            setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
         window.closeSmartModal = () => { 
@@ -333,7 +381,6 @@
             } else if (window.modalMode === 'custom_habit') {
                 const target = document.getElementById('custom-habit-target').value || 1;
                 const unit = document.getElementById('custom-habit-unit').value || 'keer';
-                // Check if it already exists to prevent duplicate titles
                 if(!window.habits.some(h => h.title === title)) {
                     window.habits.push({ id: Date.now(), title: title, history: {}, target: parseInt(target), unit: unit, icon: window.customizingIcon });
                     window.renderHabits(); 
@@ -406,12 +453,23 @@
         };
 
         // --- HABITS (DOELEN) ---
-        let editHabitId = null;
+        window.getHabitProgress = (habit, dateKey) => {
+            if (!habit.history) habit.history = {};
+            if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
+            return habit.history[dateKey] || 0;
+        };
+
+        window.setHabitProgress = (habit, dateKey, val) => {
+            if (!habit.history) habit.history = {};
+            if (val < 0) val = 0;
+            if (val > habit.target) val = habit.target;
+            habit.history[dateKey] = val;
+        };
 
         window.clickHabit = (id) => {
             if(window.isSwiping) return; 
             const h = window.habits.find(x => x.id === id);
-            editHabitId = id; 
+            window.editHabitId = id; 
             const dKey = window.getDateKey(window.selectedDate);
             const currentProgress = window.getHabitProgress(h, dKey);
 
@@ -438,7 +496,7 @@
         window.updateHabitVal = (amount) => {
             const input = document.getElementById('habit-number-val');
             let val = parseInt(input.value) || 0;
-            const h = window.habits.find(x => x.id === editHabitId);
+            const h = window.habits.find(x => x.id === window.editHabitId);
             val += amount;
             if (val < 0) val = 0; 
             if (val > h.target) val = h.target; 
@@ -450,7 +508,7 @@
         window.saveHabitInput = () => { 
             const v = parseInt(document.getElementById('habit-number-val').value); 
             if(!isNaN(v)){
-                const h = window.habits.find(x => x.id === editHabitId);
+                const h = window.habits.find(x => x.id === window.editHabitId);
                 const dKey = window.getDateKey(window.selectedDate);
                 window.setHabitProgress(h, dKey, v); 
                 window.renderHabits(); 
@@ -480,23 +538,23 @@
 
             window.habits.forEach(h => {
                 const currentVal = window.getHabitProgress(h, currentSelectedDateKey);
-                const progressPercentage = (currentVal / h.target) * 100;
+                const progressPercentage = Math.min((currentVal / h.target) * 100, 100);
                 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-3xl w-full">
                         <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                         <div id="card-habit-${h.id}" ontouchstart="window.hTStart(event, ${h.id}, 'habit')" ontouchmove="window.hTMove(event, ${h.id}, 'habit')" ontouchend="window.hTEnd(event, ${h.id}, 'habit')" class="relative z-10 bg-white p-4 rounded-3xl shadow-sm border border-gray-100 w-full flex items-center">
                             
-                            <div class="flex-1 cursor-pointer" onclick="window.clickHabit(${h.id})">
+                            <div class="flex-1 cursor-pointer pr-4" onclick="window.clickHabit(${h.id})">
                                 <div class="flex justify-between items-center mb-3 pointer-events-none">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-xl shrink-0">${h.icon}</div>
                                         <h3 class="font-bold text-gray-900">${h.title}</h3>
                                     </div>
-                                    <span class="text-sm font-bold text-gray-500 shrink-0 mr-4">${currentVal} <span class="text-xs font-medium">/ ${h.target}</span></span>
+                                    <span class="text-sm font-bold text-gray-500 shrink-0">${currentVal} <span class="text-xs font-medium">/ ${h.target}</span></span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none pr-4">
-                                    <div class="bg-[#20B271] h-2 rounded-full transition-all" style="width: ${progressPercentage}%"></div>
+                                <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none overflow-hidden">
+                                    <div class="bg-[#20B271] h-full rounded-full transition-all" style="width: ${progressPercentage}%"></div>
                                 </div>
                             </div>
 
@@ -510,11 +568,10 @@
         };
 
         // --- SWIPE LOGICA ---
-        let startX=0, currX=0; window.isSwiping=false; 
-        window.hTStart = (e, id, t) => { startX=e.touches[0].clientX; currX=startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
-        window.hTMove = (e, id, t) => { currX=e.touches[0].clientX; const diff=currX-startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
+        window.hTStart = (e, id, t) => { window.startX=e.touches[0].clientX; window.currX=window.startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
+        window.hTMove = (e, id, t) => { window.currX=e.touches[0].clientX; const diff=window.currX-window.startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
         window.hTEnd = (e, id, t) => {
-            const diff=currX-startX; const c=document.getElementById(`card-${t}-${id}`); if(!c) return; c.style.transition='transform 0.3s';
+            const diff=window.currX-window.startX; const c=document.getElementById(`card-${t}-${id}`); if(!c) return; c.style.transition='transform 0.3s';
             if(diff<-80) { c.style.transform=`translateX(-120%)`; setTimeout(()=>{ if(t==='task')window.tasks=window.tasks.filter(x=>x.id!==id); if(t==='habit')window.habits=window.habits.filter(x=>x.id!==id); if(t==='journal')window.journalNotes=window.journalNotes.filter(x=>x.id!==id); window.renderTasks(); window.renderHabits(); window.renderJournal(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); }, 300); } else { c.style.transform=`translateX(0)`; }
         };
 
@@ -582,86 +639,9 @@
                 `);
             });
         };
-        
-        window.addDisc = (t, tg, u, i, btn) => { 
-            if(!window.habits.some(h=>h.title===t)){ 
-                window.habits.push({id:Date.now(), title:t, history:{}, target:tg, unit:u, icon:i}); 
-                window.renderHabits(); 
-                if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
-            } 
-            btn.innerHTML='✓ Toegevoegd'; btn.classList.replace('bg-gray-50','bg-[#20B271]'); btn.classList.replace('text-[#20B271]','text-white');
-            setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
-        };
 
-        // --- FIREBASE SCRIPT ---
-        </script><script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1Pm8LrSl7LmuRdRP-pYl_N9RBiI9Ktv4",
-            authDomain: "todoplanner-965eb.firebaseapp.com",
-            projectId: "todoplanner-965eb",
-            storageBucket: "todoplanner-965eb.firebasestorage.app",
-            messagingSenderId: "288993132473",
-            appId: "1:288993132473:web:0ec5ba55d05267dcaec068"
-        };
-
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const provider = new GoogleAuthProvider();
-
-            window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(error => console.error(error));
-            window.logoutGoogle = () => { if(confirm("Weet je zeker dat je wilt uitloggen?")) signOut(auth); };
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const loginScreen = document.getElementById('login-screen');
-                    loginScreen.classList.add('animate-fade-out');
-                    setTimeout(() => loginScreen.classList.add('hidden'), 500);
-
-                    const firstName = user.displayName ? user.displayName.split(' ')[0] : 'daar';
-                    document.getElementById('user-greeting').innerHTML = `Hi ${firstName},<br>focus voor vandaag?`;
-                    const photo = user.photoURL ? user.photoURL : `https://ui-avatars.com/api/?name=${firstName}&background=20B271&color=fff`;
-                    document.getElementById('avatar-container').innerHTML = `
-                        <img src="${photo}" alt="Profiel" class="w-12 h-12 rounded-full shadow-sm border-2 border-white object-cover">
-                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#20B271] border-2 border-white rounded-full"></div>
-                    `;
-                    
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        window.tasks = data.tasks || [];
-                        window.habits = data.habits || [];
-                        window.journalNotes = data.journalNotes || [];
-                    }
-                    
-                    window.syncToCloud = async () => {
-                        try { await setDoc(doc(db, "users", user.uid), { tasks: window.tasks, habits: window.habits, journalNotes: window.journalNotes }); } 
-                        catch(e) { console.error(e); }
-                    };
-
-                    window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscover();
-                } else {
-                    const loginScreen = document.getElementById('login-screen');
-                    loginScreen.classList.remove('hidden', 'animate-fade-out');
-                }
-            });
-        } catch (error) {
-            console.error("Firebase lokaal foutje", error);
-        }
-        </script>
-        
-        <script>
-        // Init
-        window.generateCalendar();
         window.renderDiscover();
-        window.renderTasks(); 
-        window.renderHabits(); 
-        window.renderJournal();
+
     </script>
 </body>
 </html>
