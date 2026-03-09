@@ -30,7 +30,6 @@
     <div id="login-screen" class="fixed inset-0 bg-[#F4F6F8] z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
         <div class="text-center mb-16">
             <img src="focusplanner-icon.png" alt="FocusPlanner Icon" class="w-24 h-24 rounded-[2rem] shadow-xl mx-auto mb-6 border-4 border-white object-cover bg-white">
-            
             <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">FocusPlanner</h1>
             <p class="text-gray-500 mt-3 font-medium">Jouw persoonlijke doelen en taken, overal gesynchroniseerd.</p>
         </div>
@@ -61,7 +60,6 @@
         <div class="px-6" id="calendar-container">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="font-bold text-lg capitalize" id="current-month-text">Kalender</h2>
-                
                 <div class="flex items-center space-x-2">
                     <div class="relative w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 cursor-pointer overflow-hidden hover:bg-gray-50 transition-colors">
                         <span class="text-sm pointer-events-none">📅</span>
@@ -71,7 +69,6 @@
                         Vandaag
                     </button>
                 </div>
-
             </div>
             <div class="flex space-x-3 overflow-x-auto calendar-scroll pb-2" id="calendar-strip"></div>
         </div>
@@ -172,18 +169,38 @@
 
     <div id="main-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-end">
         <div class="absolute inset-0" onclick="window.closeSmartModal()"></div>
-        <div class="relative bg-white w-full rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
+        <div class="relative bg-white w-full max-h-[90vh] overflow-y-auto rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
             <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-900">Nieuw Item</h2>
-            <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271]">
             
-            <div id="modal-task-extra" class="flex items-center space-x-4 mb-8">
+            <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-bold">
+            
+            <div id="modal-task-extra" class="flex items-center space-x-4 mb-4">
                 <input type="time" id="time-input" class="p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
                 <span class="text-sm text-gray-500 font-medium">Tijd (optioneel)</span>
             </div>
 
-            <div id="modal-custom-habit-extra" class="hidden flex space-x-4 mb-8">
+            <div id="modal-custom-habit-extra" class="hidden flex space-x-4 mb-4">
                 <input type="number" id="custom-habit-target" placeholder="Doel (bijv. 10)" class="w-1/2 p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
                 <input type="text" id="custom-habit-unit" placeholder="Eenheid (bijv. min)" class="w-1/2 p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
+            </div>
+
+            <div id="modal-recurrence-extra" class="mb-8">
+                <span class="text-sm text-gray-500 font-bold block mb-3 uppercase tracking-wider">Herhalen instellen</span>
+                <div class="flex space-x-2 overflow-x-auto pb-2">
+                    <button type="button" onclick="window.setRecurrence('none')" id="rec-btn-none" class="rec-btn px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm shrink-0 transition-colors">Eenmalig</button>
+                    <button type="button" onclick="window.setRecurrence('daily')" id="rec-btn-daily" class="rec-btn px-4 py-3 rounded-xl bg-[#20B271] text-white font-bold text-sm shrink-0 transition-colors">Elke dag</button>
+                    <button type="button" onclick="window.setRecurrence('custom')" id="rec-btn-custom" class="rec-btn px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm shrink-0 transition-colors">Kies dagen...</button>
+                </div>
+                
+                <div id="custom-days-wrapper" class="hidden mt-3 flex justify-between space-x-1">
+                    <button type="button" onclick="window.toggleCustomDay(1, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Ma</button>
+                    <button type="button" onclick="window.toggleCustomDay(2, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Di</button>
+                    <button type="button" onclick="window.toggleCustomDay(3, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Wo</button>
+                    <button type="button" onclick="window.toggleCustomDay(4, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Do</button>
+                    <button type="button" onclick="window.toggleCustomDay(5, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Vr</button>
+                    <button type="button" onclick="window.toggleCustomDay(6, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Za</button>
+                    <button type="button" onclick="window.toggleCustomDay(0, this)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold text-xs transition-colors">Zo</button>
+                </div>
             </div>
 
             <div class="flex space-x-4">
@@ -237,6 +254,15 @@
                         window.tasks = data.tasks || [];
                         window.habits = data.habits || [];
                         window.journalNotes = data.journalNotes || [];
+                        
+                        // Achterwaartse compatibiliteit voor oude taken (Zodat ze niet verdwijnen)
+                        window.tasks.forEach(t => {
+                            if(t.completedHistory === undefined) {
+                                t.completedHistory = {};
+                                if(t.completed !== undefined) { t.completedHistory[t.dateKey] = t.completed; }
+                            }
+                        });
+
                         window.saveToLocal(); 
                     }
                     
@@ -274,7 +300,55 @@
             localStorage.setItem('cleanJournal', JSON.stringify(window.journalNotes));
         };
 
-        // KALENDER
+        // --- HERHALING LOGICA ---
+        window.currentRecurrence = 'none';
+        window.customDays = [];
+
+        window.setRecurrence = (val) => {
+            window.currentRecurrence = val;
+            const btns = ['none', 'daily', 'custom'];
+            btns.forEach(b => {
+                const el = document.getElementById('rec-btn-' + b);
+                if(b === val) {
+                    el.classList.replace('bg-gray-100', 'bg-[#20B271]'); el.classList.replace('text-gray-600', 'text-white');
+                } else {
+                    el.classList.replace('bg-[#20B271]', 'bg-gray-100'); el.classList.replace('text-white', 'text-gray-600');
+                }
+            });
+            document.getElementById('custom-days-wrapper').classList.toggle('hidden', val !== 'custom');
+        };
+
+        window.toggleCustomDay = (dayInt, el) => {
+            if(window.customDays.includes(dayInt)) {
+                window.customDays = window.customDays.filter(d => d !== dayInt);
+                el.classList.replace('bg-[#20B271]', 'bg-gray-100'); el.classList.replace('text-white', 'text-gray-600');
+            } else {
+                window.customDays.push(dayInt);
+                el.classList.replace('bg-gray-100', 'bg-[#20B271]'); el.classList.replace('text-gray-600', 'text-white');
+            }
+        };
+
+        // Bepaalt of een taak/doel op de geselecteerde dag zichtbaar moet zijn
+        window.shouldShowItem = (item, isHabit) => {
+            const currentDKey = window.getDateKey(window.selectedDate);
+            
+            // Oude items zonder repeat settings
+            if(!item.repeat) {
+                if(isHabit) return true; // Oude doelen staan altijd aan
+                return item.dateKey === currentDKey; // Oude taken alleen op hun eigen dag
+            }
+            
+            // Als de datum in het verleden ligt t.o.v. de startdatum van het doel, verberg hem
+            if(currentDKey < item.dateKey) return false; 
+            
+            if(item.repeat === 'none') return item.dateKey === currentDKey;
+            if(item.repeat === 'daily') return true;
+            if(Array.isArray(item.repeat)) return item.repeat.includes(window.selectedDate.getDay());
+            
+            return false;
+        };
+
+        // --- KALENDER ---
         window.resetToToday = () => { 
             window.selectedDate = new Date(); window.selectedDate.setHours(0,0,0,0); 
             window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal();
@@ -295,8 +369,7 @@
 
         window.generateCalendar = () => {
             const s = document.getElementById('calendar-strip'); s.innerHTML=""; 
-            const centerDate = new Date(window.selectedDate);
-            centerDate.setHours(0,0,0,0);
+            const centerDate = new Date(window.selectedDate); centerDate.setHours(0,0,0,0);
             const actualToday = new Date(); actualToday.setHours(0,0,0,0);
 
             document.getElementById('current-month-text').innerText = centerDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
@@ -315,21 +388,7 @@
             setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
         }
 
-        // HABIT PROGRESS
-        window.getHabitProgress = (habit, dateKey) => {
-            if (!habit.history) habit.history = {};
-            if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
-            return habit.history[dateKey] || 0;
-        };
-
-        window.setHabitProgress = (habit, dateKey, val) => {
-            if (!habit.history) habit.history = {};
-            if (val < 0) val = 0;
-            if (val > habit.target) val = habit.target;
-            habit.history[dateKey] = val;
-        };
-
-        // NAV & MODALS
+        // --- NAV & MODALS ---
         window.switchTab = (tab) => {
             window.currentTab = tab;
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -340,36 +399,52 @@
             document.getElementById('calendar-container').style.display = (tab === 'ontdek') ? 'none' : 'block';
         };
 
+        window.resetModalState = () => {
+            document.getElementById('modal-input').value = "";
+            document.getElementById('time-input').value = "";
+            document.getElementById('custom-habit-target').value = "";
+            document.getElementById('custom-habit-unit').value = "";
+            window.customDays = [];
+            document.querySelectorAll('#custom-days-wrapper button').forEach(el => {
+                el.classList.replace('bg-[#20B271]', 'bg-gray-100'); el.classList.replace('text-white', 'text-gray-600');
+            });
+        };
+
         window.openSmartModal = () => {
             if (window.currentTab === 'uitdaging' || window.currentTab === 'ontdek') { window.openCustomHabitModal(); return; }
             window.modalMode = window.currentTab;
+            window.resetModalState();
+            
             document.getElementById('main-modal').classList.remove('hidden');
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
+            document.getElementById('modal-recurrence-extra').classList.add('hidden');
 
             if(window.currentTab === 'vandaag') {
                 document.getElementById('modal-title').innerText = 'Nieuwe taak';
                 document.getElementById('modal-input').placeholder = 'Wat ga je doen?';
-                document.getElementById('modal-input').value = "";
                 document.getElementById('modal-task-extra').classList.remove('hidden');
+                document.getElementById('modal-recurrence-extra').classList.remove('hidden');
+                window.setRecurrence('none'); // Taken standaard eenmalig
             } else if (window.currentTab === 'journal') {
                 document.getElementById('modal-title').innerText = 'Nieuwe notitie';
                 document.getElementById('modal-input').placeholder = 'Waar denk je aan?';
-                document.getElementById('modal-input').value = "";
             }
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
         window.openCustomHabitModal = () => {
             window.modalMode = 'custom_habit'; window.customizingIcon = '✨';
+            window.resetModalState();
+
             document.getElementById('main-modal').classList.remove('hidden');
             document.getElementById('modal-title').innerText = 'Nieuw doel';
-            document.getElementById('modal-input').value = "";
             document.getElementById('modal-input').placeholder = 'Naam (bijv. Gitaar spelen)';
-            document.getElementById('custom-habit-target').value = "";
-            document.getElementById('custom-habit-unit').value = "";
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
+            document.getElementById('modal-recurrence-extra').classList.remove('hidden');
+            
+            window.setRecurrence('daily'); // Doelen standaard dagelijks
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
@@ -377,6 +452,8 @@
             const challenge = window.discoverChallenges.find(c => c.id === id);
             if(!challenge) return;
             window.modalMode = 'custom_habit'; window.customizingIcon = challenge.icon;
+            window.resetModalState();
+
             document.getElementById('main-modal').classList.remove('hidden');
             document.getElementById('modal-title').innerText = 'Doel aanpassen';
             document.getElementById('modal-input').value = challenge.title;
@@ -384,6 +461,9 @@
             document.getElementById('custom-habit-unit').value = challenge.unit;
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
+            document.getElementById('modal-recurrence-extra').classList.remove('hidden');
+            
+            window.setRecurrence('daily');
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
@@ -393,6 +473,12 @@
             const title = document.getElementById('modal-input').value;
             if (title.trim() === "") return;
 
+            let finalRepeat = window.currentRecurrence;
+            if(finalRepeat === 'custom') {
+                if(window.customDays.length === 0) finalRepeat = 'daily'; // fallback als ze niets kiezen
+                else finalRepeat = [...window.customDays];
+            }
+
             if (window.modalMode === 'journal') {
                 const emojis = ['🌊', '🌿', '✨', '🧘‍♀️', '☕', '☀️', '💡'];
                 window.journalNotes.push({ id: Date.now(), text: title, dateKey: window.getDateKey(window.selectedDate), displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }), emoji: emojis[Math.floor(Math.random() * emojis.length)] });
@@ -400,44 +486,57 @@
             } else if (window.modalMode === 'custom_habit') {
                 const target = document.getElementById('custom-habit-target').value || 1;
                 const unit = document.getElementById('custom-habit-unit').value || 'keer';
-                if(!window.habits.some(h => h.title === title)) {
-                    window.habits.push({ id: Date.now(), title: title, history: {}, target: parseInt(target), unit: unit, icon: window.customizingIcon });
-                    window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
-                }
+                // Genereer unieke ID's ipv naam check, zo mag je 2x zelfde doen
+                window.habits.push({ id: Date.now(), title: title, history: {}, target: parseInt(target), unit: unit, icon: window.customizingIcon, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
+                window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else {
-                window.tasks.push({ id: Date.now(), title: title, time: document.getElementById('time-input').value || null, completed: false, dateKey: window.getDateKey(window.selectedDate) });
+                window.tasks.push({ id: Date.now(), title: title, time: document.getElementById('time-input').value || null, completedHistory: {}, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
                 window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             }
             window.closeSmartModal();
         };
 
-        // RENDERS
+        // --- RENDERS ---
         window.toggleTask = (id) => {
             if(window.isSwiping) return;
             const task = window.tasks.find(t => t.id === id);
-            if(task) { task.completed = !task.completed; window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); }
+            if(task) { 
+                const dKey = window.getDateKey(window.selectedDate);
+                if(!task.completedHistory) task.completedHistory = {};
+                task.completedHistory[dKey] = !task.completedHistory[dKey]; 
+                window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
+            }
         }
 
         window.renderTasks = () => {
             const list = document.getElementById('task-list'); list.innerHTML = "";
             const currentSelectedDateKey = window.getDateKey(window.selectedDate);
-            const tasksToRender = window.tasks.filter(t => t.dateKey === currentSelectedDateKey || (!t.dateKey && currentSelectedDateKey === window.getDateKey(new Date())));
+            
+            const tasksToRender = window.tasks.filter(t => window.shouldShowItem(t, false));
 
             if(tasksToRender.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen taken gepland voor deze dag.</p>`;
 
             tasksToRender.forEach(t => {
-                const checkedCard = t.completed ? 'opacity-60 bg-gray-50' : 'bg-white';
-                const checkedText = t.completed ? 'line-through text-gray-400' : 'text-gray-900';
-                const checkIcon = t.completed ? 'bg-[#20B271] border-[#20B271]' : 'border-gray-300';
+                const isCompleted = t.completedHistory ? t.completedHistory[currentSelectedDateKey] : t.completed;
+                const checkedCard = isCompleted ? 'opacity-60 bg-gray-50' : 'bg-white';
+                const checkedText = isCompleted ? 'line-through text-gray-400' : 'text-gray-900';
+                const checkIcon = isCompleted ? 'bg-[#20B271] border-[#20B271]' : 'border-gray-300';
+                
+                // Show repeat icon if recurring
+                const repIcon = (t.repeat && t.repeat !== 'none') ? `<svg class="w-3 h-3 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>` : '';
+
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-3xl w-full">
                         <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                         <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id})" class="relative z-10 ${checkedCard} p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center space-x-4 w-full cursor-pointer transition-all duration-300">
                             <div class="w-6 h-6 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 transition-colors">
-                                ${t.completed ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                                ${isCompleted ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
                             </div>
                             <div class="pointer-events-none w-full transition-all">
-                                <h3 class="font-bold ${checkedText} transition-all">${t.title}</h3>
+                                <div class="flex items-center">
+                                    <h3 class="font-bold ${checkedText} transition-all">${t.title}</h3>
+                                    ${repIcon}
+                                </div>
                                 ${t.time ? `<div class="flex items-center mt-1"><span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">${t.time}</span></div>` : ''}
                             </div>
                         </div>
@@ -463,6 +562,20 @@
                         </div>
                     </div>`);
             });
+        };
+
+        // HABIT FUNCTIES
+        window.getHabitProgress = (habit, dateKey) => {
+            if (!habit.history) habit.history = {};
+            if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
+            return habit.history[dateKey] || 0;
+        };
+
+        window.setHabitProgress = (habit, dateKey, val) => {
+            if (!habit.history) habit.history = {};
+            if (val < 0) val = 0;
+            if (val > habit.target) val = habit.target;
+            habit.history[dateKey] = val;
         };
 
         window.clickHabit = (id) => {
@@ -520,22 +633,24 @@
             const list = document.getElementById('habit-list'); list.innerHTML = "";
             const currentSelectedDateKey = window.getDateKey(window.selectedDate);
 
+            const habitsToRender = window.habits.filter(h => window.shouldShowItem(h, true));
+
             let tp = 0;
-            if (window.habits.length > 0) {
-                window.habits.forEach(h => { 
+            if (habitsToRender.length > 0) {
+                habitsToRender.forEach(h => { 
                     const prog = window.getHabitProgress(h, currentSelectedDateKey);
                     tp += Math.min(prog / h.target, 1); 
                 });
-                const avg = Math.round((tp / window.habits.length) * 100);
+                const avg = Math.round((tp / habitsToRender.length) * 100);
                 document.getElementById('daily-focus-text').innerText = avg + '%';
                 document.getElementById('daily-focus-circle').setAttribute('stroke-dasharray', `${avg}, 100`);
             } else { 
                 document.getElementById('daily-focus-text').innerText = '0%'; 
                 document.getElementById('daily-focus-circle').setAttribute('stroke-dasharray', '0, 100'); 
-                list.innerHTML = `<p class="text-gray-400 text-sm">Voeg een doel toe via Ontdek!</p>`; 
+                list.innerHTML = `<p class="text-gray-400 text-sm">Geen doelen gepland voor deze dag.</p>`; 
             }
 
-            window.habits.forEach(h => {
+            habitsToRender.forEach(h => {
                 const currentVal = window.getHabitProgress(h, currentSelectedDateKey);
                 const progressPercentage = Math.min((currentVal / h.target) * 100, 100);
                 
@@ -641,7 +756,7 @@
         
         window.addDisc = (t, tg, u, i, btn) => { 
             if(!window.habits.some(h=>h.title===t)){ 
-                window.habits.push({id:Date.now(), title:t, history:{}, target:tg, unit:u, icon:i}); 
+                window.habits.push({id:Date.now(), title:t, history:{}, target:tg, unit:u, icon:i, dateKey: window.getDateKey(window.selectedDate), repeat: 'daily'}); 
                 window.saveToLocal(); window.renderHabits(); 
                 if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
             } 
