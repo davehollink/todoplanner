@@ -137,13 +137,19 @@
     </nav>
 
     <div id="habit-input-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] flex items-center justify-center px-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-slide-up">
-            <h3 class="font-bold text-lg mb-2" id="habit-input-title">Waarde toevoegen</h3>
-            <p class="text-sm text-gray-500 mb-4" id="habit-input-desc">Hoeveel heb je er gedaan?</p>
-            <input type="number" id="habit-number-val" class="w-full bg-gray-100 p-4 rounded-xl font-bold text-xl text-center outline-none focus:ring-2 focus:ring-[#20B271] mb-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-slide-up text-center">
+            <h3 class="font-bold text-xl mb-1 text-gray-900" id="habit-input-title">Waarde toevoegen</h3>
+            <p class="text-sm text-gray-500 mb-6" id="habit-input-desc">Doel: -</p>
+            
+            <div class="flex items-center justify-center space-x-6 mb-8">
+                <button onclick="updateHabitVal(-1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">-</button>
+                <input type="number" id="habit-number-val" class="w-24 bg-transparent text-4xl font-extrabold text-center outline-none text-[#20B271]">
+                <button onclick="updateHabitVal(1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">+</button>
+            </div>
+            
             <div class="flex space-x-3">
-                <button onclick="closeHabitInput()" class="flex-1 py-3 bg-gray-100 font-bold rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">Annuleren</button>
-                <button onclick="saveHabitInput()" class="flex-1 py-3 bg-[#20B271] text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
+                <button onclick="closeHabitInput()" class="flex-1 py-4 bg-gray-100 font-bold rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">Annuleren</button>
+                <button onclick="saveHabitInput()" class="flex-1 py-4 bg-[#20B271] text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
             </div>
         </div>
     </div>
@@ -249,7 +255,6 @@
         window.selectedDate = new Date();
         window.selectedDate.setHours(0,0,0,0);
         
-        // Genereert een YYYY-MM-DD string om aan taken/journals te koppelen
         const getDateKey = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 
         // --- TAB & MODAL LOGICA ---
@@ -261,7 +266,6 @@
             document.getElementById(`nav-${tab}`).classList.remove('text-gray-400');
             document.getElementById(`nav-${tab}`).classList.add('text-[#20B271]');
             
-            // Toon kalender op Vandaag én Journal tab
             document.getElementById('calendar-container').style.display = (tab === 'vandaag' || tab === 'journal') ? 'block' : 'none';
         };
 
@@ -332,7 +336,6 @@
             const list = document.getElementById('task-list'); list.innerHTML = "";
             const currentSelectedDateKey = getDateKey(window.selectedDate);
             
-            // Filter taken op geselecteerde datum (oude taken zonder datum tonen we op 'vandaag')
             const tasksToRender = tasks.filter(t => t.dateKey === currentSelectedDateKey || (!t.dateKey && currentSelectedDateKey === getDateKey(new Date())));
 
             if(tasksToRender.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen taken gepland voor deze dag.</p>`;
@@ -360,14 +363,12 @@
         window.renderJournal = () => {
             const list = document.getElementById('journal-list'); list.innerHTML = "";
             const currentSelectedDateKey = getDateKey(window.selectedDate);
-            
-            // Filter journal op geselecteerde datum
             const notesToRender = journalNotes.filter(n => n.dateKey === currentSelectedDateKey || (!n.dateKey && currentSelectedDateKey === getDateKey(new Date())));
 
             if(notesToRender.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen notities voor deze dag.</p>`;
 
             [...notesToRender].reverse().forEach(n => {
-                const displayDate = n.displayDate || n.date; // Fallback voor oude notes
+                const displayDate = n.displayDate || n.date;
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-3xl w-full">
                         <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
@@ -379,7 +380,45 @@
             });
         };
 
-        // Habits Renders (Onafhankelijk van kalender)
+        // --- HABITS & SMART INPUT LOGICA ---
+        let editHabitId = null;
+
+        // Iedere habit opent nu het modal in plaats van direct te updaten
+        window.clickHabit = (id) => {
+            if(window.isSwiping) return; 
+            const h = habits.find(x => x.id === id);
+            editHabitId = id; 
+            document.getElementById('habit-input-title').innerText = h.title; 
+            document.getElementById('habit-input-desc').innerText = `Doel: ${h.target} ${h.unit}`; 
+            document.getElementById('habit-number-val').value = h.current; 
+            document.getElementById('habit-input-modal').classList.remove('hidden');
+        };
+
+        window.updateHabitVal = (amount) => {
+            const input = document.getElementById('habit-number-val');
+            let val = parseInt(input.value) || 0;
+            const h = habits.find(x => x.id === editHabitId);
+            
+            val += amount;
+            if (val < 0) val = 0; // Niet minder dan 0
+            if (val > h.target) val = h.target; // Cap op het doel
+            
+            input.value = val;
+        };
+
+        window.closeHabitInput = () => document.getElementById('habit-input-modal').classList.add('hidden');
+        
+        window.saveHabitInput = () => { 
+            const v = parseInt(document.getElementById('habit-number-val').value); 
+            if(!isNaN(v)){
+                const habit = habits.find(h => h.id === editHabitId);
+                habit.current = v > habit.target ? habit.target : v; 
+                window.renderHabits(); 
+                syncToCloud();
+            } 
+            window.closeHabitInput(); 
+        };
+
         window.renderHabits = () => {
             const list = document.getElementById('habit-list'); list.innerHTML = "";
             let tp = 0;
@@ -403,15 +442,6 @@
             });
         };
 
-        let editHabitId = null;
-        window.clickHabit = (id) => {
-            if(window.isSwiping) return; const h=habits.find(x=>x.id===id);
-            if(h.target>20){ editHabitId=id; document.getElementById('habit-input-title').innerText=h.title; document.getElementById('habit-number-val').value=h.current; document.getElementById('habit-input-modal').classList.remove('hidden');}
-            else { if(h.current<h.target){h.current+=1; window.renderHabits(); syncToCloud();} }
-        };
-        window.closeHabitInput = () => document.getElementById('habit-input-modal').classList.add('hidden');
-        window.saveHabitInput = () => { const v=parseInt(document.getElementById('habit-number-val').value); if(!isNaN(v)){habits.find(h=>h.id===editHabitId).current = v > habits.find(h=>h.id===editHabitId).target ? habits.find(h=>h.id===editHabitId).target : v; window.renderHabits(); syncToCloud();} window.closeHabitInput(); };
-
         // --- SWIPE LOGICA ---
         let startX=0, currX=0; window.isSwiping=false; 
         window.hTStart = (e, id, t) => { startX=e.touches[0].clientX; currX=startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
@@ -421,44 +451,44 @@
             if(diff<-80) { c.style.transform=`translateX(-120%)`; setTimeout(()=>{ if(t==='task')tasks=tasks.filter(x=>x.id!==id); if(t==='habit')habits=habits.filter(x=>x.id!==id); if(t==='journal')journalNotes=journalNotes.filter(x=>x.id!==id); window.renderTasks(); window.renderHabits(); window.renderJournal(); syncToCloud(); }, 300); } else { c.style.transform=`translateX(0)`; }
         };
 
-        // --- GROTE ONTDEK LIJST ---
+        // --- ONTDEK LIJST ---
         const rawC = [
             {title: 'Water drinken', target: 8, unit: 'glazen', icon: '💧'}, {title: 'Mindfulness', target: 10, unit: 'min', icon: '🧘‍♀️'},
             {title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️'}, {title: 'Boek lezen', target: 20, unit: 'pagina\'s', icon: '📚'},
             {title: 'Digitale detox', target: 1, unit: 'uur', icon: '📱'}, {title: 'Vroeg opstaan', target: 1, unit: 'keer', icon: '🌅'},
             {title: 'Koud douchen', target: 1, unit: 'keer', icon: '🚿'}, {title: 'Gezond eten', target: 3, unit: 'maaltijden', icon: '🥗'},
-            {title: 'Sporten', target: 30, unit: 'min', icon: '🏋️‍♀️'}, {title: 'Wandelen in de natuur', target: 1, unit: 'keer', icon: '🌳'},
+            {title: 'Sporten', target: 30, unit: 'min', icon: '🏋️‍♀️'}, {title: 'Wandelen', target: 1, unit: 'keer', icon: '🌳'},
             {title: 'Suikervrij eten', target: 1, unit: 'dag', icon: '🚫'}, {title: 'Journal schrijven', target: 1, unit: 'notitie', icon: '✍️'},
             {title: '8 uur slapen', target: 8, unit: 'uur', icon: '😴'}, {title: 'Stretchen', target: 15, unit: 'min', icon: '🤸‍♀️'},
-            {title: 'Podcast luisteren', target: 1, unit: 'afl.', icon: '🎧'}, {title: 'Nieuw woord leren', target: 1, unit: 'woord', icon: '🧠'},
+            {title: 'Podcast luisteren', target: 1, unit: 'afl.', icon: '🎧'}, {title: 'Woord leren', target: 1, unit: 'woord', icon: '🧠'},
             {title: 'Compliment geven', target: 1, unit: 'keer', icon: '💬'}, {title: 'Cafeïnevrij', target: 1, unit: 'dag', icon: '☕'},
             {title: 'Schermvrije avond', target: 1, unit: 'keer', icon: '📵'}, {title: 'Diep ademhalen', target: 5, unit: 'keer', icon: '🌬️'},
-            {title: 'Creatief bezig zijn', target: 30, unit: 'min', icon: '🎨'}, {title: 'Dankbaarheid opschrijven', target: 3, unit: 'dingen', icon: '🙏'},
+            {title: 'Creatief bezig zijn', target: 30, unit: 'min', icon: '🎨'}, {title: 'Dankbaarheid', target: 3, unit: 'dingen', icon: '🙏'},
             {title: 'Plank challenge', target: 1, unit: 'min', icon: '⏱️'}, {title: 'Social media limiet', target: 30, unit: 'min', icon: '⏳'},
             {title: 'Bed opmaken', target: 1, unit: 'keer', icon: '🛏️'}, {title: 'Yoga', target: 15, unit: 'min', icon: '🧘‍♂️'},
             {title: 'Hardlopen', target: 5, unit: 'km', icon: '🏃‍♀️'}, {title: 'Kort opruimen', target: 10, unit: 'min', icon: '🧹'},
-            {title: 'Alcoholvrij', target: 1, unit: 'dag', icon: '🍷'}, {title: 'Geen nieuws lezen', target: 1, unit: 'dag', icon: '📰'},
+            {title: 'Alcoholvrij', target: 1, unit: 'dag', icon: '🍷'}, {title: 'Geen nieuws', target: 1, unit: 'dag', icon: '📰'},
             {title: 'Familie bellen', target: 1, unit: 'keer', icon: '📞'}, {title: 'Buiten zijn', target: 1, unit: 'uur', icon: '🌤️'},
             {title: 'Pomodoro sessie', target: 4, unit: 'keer', icon: '🍅'}, {title: 'Taal oefenen', target: 15, unit: 'min', icon: '🌍'},
             {title: 'Schermvrij eten', target: 1, unit: 'keer', icon: '🍽️'}, {title: 'Doelen noteren', target: 1, unit: 'keer', icon: '🎯'},
-            {title: 'Klassieke muziek luisteren', target: 30, unit: 'min', icon: '🎼'}, {title: 'Fruit eten', target: 2, unit: 'stuks', icon: '🍎'},
-            {title: 'Nieuw recept koken', target: 1, unit: 'keer', icon: '🍳'}, {title: 'Geen fastfood', target: 1, unit: 'dag', icon: '🍔'},
-            {title: 'Groene thee drinken', target: 1, unit: 'kop', icon: '🍵'}, {title: 'De trap nemen', target: 1, unit: 'dag', icon: '🪜'},
-            {title: 'Documentaire kijken', target: 1, unit: 'keer', icon: '🎬'}, {title: 'Bureau opruimen', target: 1, unit: 'keer', icon: '🗄️'},
-            {title: 'Artikel lezen', target: 1, unit: 'keer', icon: '📄'}, {title: 'Luisterboek luisteren', target: 30, unit: 'min', icon: '🎧'},
-            {title: 'Goed doel steunen', target: 1, unit: 'keer', icon: '💖'}, {title: 'Geen snoep', target: 1, unit: 'dag', icon: '🍬'},
-            {title: 'Lachen in de spiegel', target: 1, unit: 'keer', icon: '😄'}, {title: 'To-do lijst maken', target: 1, unit: 'keer', icon: '📋'},
+            {title: 'Klassieke muziek', target: 30, unit: 'min', icon: '🎼'}, {title: 'Fruit eten', target: 2, unit: 'stuks', icon: '🍎'},
+            {title: 'Nieuw recept', target: 1, unit: 'keer', icon: '🍳'}, {title: 'Geen fastfood', target: 1, unit: 'dag', icon: '🍔'},
+            {title: 'Groene thee', target: 1, unit: 'kop', icon: '🍵'}, {title: 'De trap nemen', target: 1, unit: 'dag', icon: '🪜'},
+            {title: 'Documentaire', target: 1, unit: 'keer', icon: '🎬'}, {title: 'Bureau opruimen', target: 1, unit: 'keer', icon: '🗄️'},
+            {title: 'Artikel lezen', target: 1, unit: 'keer', icon: '📄'}, {title: 'Luisterboek', target: 30, unit: 'min', icon: '🎧'},
+            {title: 'Goed doel', target: 1, unit: 'keer', icon: '💖'}, {title: 'Geen snoep', target: 1, unit: 'dag', icon: '🍬'},
+            {title: 'Spiegel lachen', target: 1, unit: 'keer', icon: '😄'}, {title: 'To-do lijst maken', target: 1, unit: 'keer', icon: '📋'},
             {title: 'Visualiseren', target: 5, unit: 'min', icon: '👁️'}, {title: 'Koffievrij', target: 1, unit: 'dag', icon: '🍵'},
             {title: 'Zelf bakken', target: 1, unit: 'keer', icon: '🍞'}, {title: 'Puzzelen', target: 15, unit: 'min', icon: '🧩'},
-            {title: 'Mailbox zero', target: 15, unit: 'min', icon: '📧'}, {title: 'Vreemde groeten', target: 1, unit: 'keer', icon: '🗣️'},
+            {title: 'Mailbox zero', target: 15, unit: 'min', icon: '📧'}, {title: 'Vreemden groeten', target: 1, unit: 'keer', icon: '🗣️'},
             {title: 'Lezen in bed', target: 15, unit: 'min', icon: '📖'}, {title: 'Kast opruimen', target: 15, unit: 'min', icon: '👗'},
             {title: 'Vrijwilligerswerk', target: 1, unit: 'uur', icon: '🤝'}, {title: 'Foto maken', target: 1, unit: 'keer', icon: '📸'},
             {title: 'Meezingen', target: 1, unit: 'keer', icon: '🎤'}, {title: 'Bordspel spelen', target: 1, unit: 'keer', icon: '🎲'},
             {title: 'Bedankje sturen', target: 1, unit: 'keer', icon: '✉️'}, {title: 'Vegetarisch eten', target: 1, unit: 'dag', icon: '🥦'},
-            {title: 'Water bij opstaan', target: 1, unit: 'glas', icon: '🥛'}, {title: 'Nieuw feitje leren', target: 1, unit: 'keer', icon: '💡'},
+            {title: 'Water bij opstaan', target: 1, unit: 'glas', icon: '🥛'}, {title: 'Feitje leren', target: 1, unit: 'keer', icon: '💡'},
             {title: 'Niet klagen', target: 1, unit: 'dag', icon: '🤐'}, {title: 'Recyclen', target: 1, unit: 'dag', icon: '♻️'},
-            {title: 'Financiën checken', target: 15, unit: 'min', icon: '💰'}, {title: 'Pc opschonen', target: 15, unit: 'min', icon: '💻'},
-            {title: 'Huisdier knuffelen', target: 1, unit: 'keer', icon: '🐶'}, {title: 'Planten water geven', target: 1, unit: 'keer', icon: '🪴'},
+            {title: 'Financiën check', target: 15, unit: 'min', icon: '💰'}, {title: 'Pc opschonen', target: 15, unit: 'min', icon: '💻'},
+            {title: 'Huisdier knuffelen', target: 1, unit: 'keer', icon: '🐶'}, {title: 'Planten wateren', target: 1, unit: 'keer', icon: '🪴'},
             {title: 'Vloggen', target: 1, unit: 'video', icon: '🎥'}, {title: 'Meditatiewandeling', target: 20, unit: 'min', icon: '🚶‍♀️'}
         ]; 
         const discoverChallenges = rawC.map((c, index) => ({ ...c, id: 'disc_' + index }));
@@ -481,64 +511,7 @@
             btn.innerHTML='✓ Toegevoegd'; btn.classList.replace('bg-gray-50','bg-[#20B271]'); btn.classList.replace('text-[#20B271]','text-white');
             setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
         };
-        
-        // --- KALENDER UPDATE LOGICA ---
-        window.resetToToday = () => { 
-            window.selectedDate = new Date(); 
-            window.selectedDate.setHours(0,0,0,0); 
-            window.generateCalendar(); 
-            window.renderTasks();
-            window.renderJournal();
-        };
 
-        window.selectDate = (ts, el) => {
-            window.selectedDate = new Date(ts); 
-            document.getElementById('current-month-text').innerText = window.selectedDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
-            
-            // Verwijder active state van alle dagen
-            document.querySelectorAll('.calendar-item').forEach(x => {
-                x.classList.remove('bg-[#20B271]','text-white','shadow-md','active-day'); 
-                // Check of de dag toevallig VANDAAG is, geef die een groen randje zodat je weet wat vandaag is
-                const isActualToday = (parseInt(x.dataset.ts) === new Date().setHours(0,0,0,0));
-                if (isActualToday) {
-                    x.classList.add('border-2', 'border-[#20B271]', 'text-[#20B271]');
-                } else {
-                    x.classList.add('bg-transparent','text-gray-600');
-                }
-            });
-
-            // Voeg active state toe aan de aangeklikte dag
-            el.classList.remove('bg-transparent','text-gray-600', 'border-2', 'border-[#20B271]', 'text-[#20B271]'); 
-            el.classList.add('bg-[#20B271]','text-white','shadow-md','active-day'); 
-            el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-            
-            // Laad de data voor deze specifieke datum in
-            window.renderTasks();
-            window.renderJournal();
-        };
-
-        window.generateCalendar = () => {
-            const s = document.getElementById('calendar-strip'); s.innerHTML=""; 
-            const today = new Date(); today.setHours(0,0,0,0);
-            document.getElementById('current-month-text').innerText = window.selectedDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
-            
-            for(let i=-15; i<=15; i++){ 
-                let d = new Date(today); d.setDate(today.getDate()+i); 
-                const isSelected = d.getTime() === window.selectedDate.getTime();
-                const isActualToday = d.getTime() === today.getTime();
-                
-                let stylingClass = 'bg-transparent text-gray-600 hover:bg-gray-100';
-                if (isSelected) {
-                    stylingClass = 'bg-[#20B271] text-white shadow-md active-day';
-                } else if (isActualToday) {
-                    stylingClass = 'border-2 border-[#20B271] text-[#20B271] hover:bg-green-50'; // Vandaag indicator
-                }
-
-                s.insertAdjacentHTML('beforeend',`<div data-ts="${d.getTime()}" onclick="window.selectDate(${d.getTime()}, this)" class="calendar-item flex flex-col items-center justify-center w-12 h-16 rounded-full shrink-0 cursor-pointer transition-all ${stylingClass}"><span class="text-[10px] uppercase font-bold mb-1 pointer-events-none opacity-80">${d.toLocaleDateString('nl-NL',{weekday:'short'}).charAt(0)}</span><span class="font-bold text-lg pointer-events-none">${d.getDate()}</span></div>`); 
-            }
-            setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
-        }
-        
         window.generateCalendar();
         window.renderDiscover();
     </script>
