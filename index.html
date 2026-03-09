@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clean Productivity App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F4F6F8; color: #1A1A1A; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { display: none; }
+        .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .calendar-scroll { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        .calendar-item { scroll-snap-align: center; }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+        .animate-fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
+    </style>
+</head>
+<body class="max-w-md mx-auto min-h-screen pb-32 relative selection:bg-[#20B271] selection:text-white overflow-x-hidden">
+
+    <div id="login-screen" class="fixed inset-0 bg-[#F4F6F8] z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+        <div class="text-center mb-16">
+            <div class="w-24 h-24 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-[2rem] flex items-center justify-center shadow-xl mx-auto mb-6 border-4 border-white">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14m-7-7h14"></path></svg>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Clean Habits</h1>
+            <p class="text-gray-500 mt-3 font-medium">Jouw persoonlijke doelen en taken, overal gesynchroniseerd.</p>
+        </div>
+        
+        <div class="w-full max-w-xs space-y-4">
+            <button onclick="loginWithGoogle()" class="w-full bg-white px-6 py-4 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center space-x-3 hover:bg-gray-50 active:scale-95 transition-all font-bold text-gray-700">
+                <svg class="w-6 h-6" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                </svg>
+                <span>Doorgaan met Google</span>
+            </button>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-40 bg-[#F4F6F8]/90 backdrop-blur-md pt-8 pb-4 border-b border-gray-200">
+        <div class="px-6 flex justify-between items-center mb-6">
+            <div>
+                <h1 id="user-greeting" class="text-[28px] font-extrabold leading-tight tracking-tight text-gray-900">Laden...</h1>
+            </div>
+            <div id="avatar-container" onclick="logoutGoogle()" class="relative cursor-pointer hover:opacity-80 transition-opacity" title="Uitloggen">
+                <div class="w-12 h-12 rounded-full bg-gray-200 animate-pulse"></div>
+            </div>
+        </div>
+
+        <div class="px-6" id="calendar-container">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-lg capitalize" id="current-month-text">Mei 2024</h2>
+                <button onclick="resetToToday()" class="bg-white px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-gray-200 flex items-center hover:bg-gray-50 active:scale-95 transition-transform text-gray-700">
+                    📅 Vandaag
+                </button>
+            </div>
+            <div class="flex space-x-3 overflow-x-auto calendar-scroll pb-2" id="calendar-strip"></div>
+        </div>
+    </header>
+
+    <main id="view-vandaag" class="tab-content active px-6 mt-6 space-y-4 relative z-10">
+        <div class="flex justify-between items-end mb-2">
+            <h3 class="font-bold text-xl">Mijn Taken</h3>
+        </div>
+        <div id="task-list" class="space-y-4 pb-8"></div>
+    </main>
+
+    <main id="view-uitdaging" class="tab-content px-6 mt-6 space-y-4 relative z-10">
+        <div class="bg-gray-900 rounded-[2rem] p-6 text-white shadow-xl mb-6 flex justify-between items-center">
+            <div>
+                <span class="bg-[#20B271] text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Progressie</span>
+                <h2 class="text-xl font-bold mt-2">Goede voortgang! 👍</h2>
+            </div>
+            <div class="w-16 h-16 rounded-full border-4 border-gray-700 flex items-center justify-center relative shrink-0">
+                <span id="daily-focus-text" class="text-sm font-bold">0%</span>
+                <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/>
+                    <path id="daily-focus-circle" class="text-[#20B271] transition-all duration-700 ease-out" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/>
+                </svg>
+            </div>
+        </div>
+        <div id="habit-list" class="space-y-4 pb-8"></div>
+    </main>
+
+    <main id="view-journal" class="tab-content px-6 mt-6 relative z-10">
+        <h2 class="text-2xl font-bold mb-4">Mijn Journal</h2>
+        <button onclick="openSmartModal()" class="w-full py-4 rounded-2xl bg-[#20B271]/10 text-[#20B271] font-bold border border-[#20B271]/20 hover:bg-[#20B271]/20 transition-colors mb-6 shadow-sm">
+            ✍️ Schrijf een notitie...
+        </button>
+        <div id="journal-list" class="space-y-4 pb-8"></div>
+    </main>
+
+    <main id="view-ontdek" class="tab-content px-6 mt-6 relative z-10">
+        <h2 class="text-2xl font-bold mb-2">Vind Nieuwe Gewoontes</h2>
+        <div class="relative mb-6">
+            <input type="text" id="search-discover" oninput="filterDiscover()" placeholder="Zoek een doel..." class="w-full p-4 pl-12 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 placeholder-gray-400 shadow-sm transition-all">
+            <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <div id="discover-list" class="grid grid-cols-2 gap-4 pb-8"></div>
+    </main>
+
+    <nav class="fixed bottom-6 left-6 right-6 bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] z-40 px-6 py-4 flex justify-between items-center border border-gray-100">
+        <button onclick="switchTab('vandaag')" id="nav-vandaag" class="nav-btn flex flex-col items-center text-[#20B271]">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <span class="text-[10px] font-bold">Taken</span>
+        </button>
+        <button onclick="switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271]">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span class="text-[10px] font-semibold">Doelen</span>
+        </button>
+        <div class="relative -top-6 flex justify-center w-16">
+            <button onclick="openSmartModal()" class="absolute w-16 h-16 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-full shadow-[0_10px_25px_rgba(32,178,113,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 border-[5px] border-[#F4F6F8]">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14m-7-7h14"></path></svg>
+            </button>
+        </div>
+        <button onclick="switchTab('journal')" id="nav-journal" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271]">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span class="text-[10px] font-semibold">Journal</span>
+        </button>
+        <button onclick="switchTab('ontdek')" id="nav-ontdek" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271]">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <span class="text-[10px] font-semibold">Ontdek</span>
+        </button>
+    </nav>
+
+    <div id="habit-input-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] flex items-center justify-center px-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-slide-up">
+            <h3 class="font-bold text-lg mb-2" id="habit-input-title">Waarde toevoegen</h3>
+            <p class="text-sm text-gray-500 mb-4" id="habit-input-desc">Hoeveel heb je er gedaan?</p>
+            <input type="number" id="habit-number-val" class="w-full bg-gray-100 p-4 rounded-xl font-bold text-xl text-center outline-none focus:ring-2 focus:ring-[#20B271] mb-4">
+            <div class="flex space-x-3">
+                <button onclick="closeHabitInput()" class="flex-1 py-3 bg-gray-100 font-bold rounded-xl text-gray-600 hover:bg-gray-200">Annuleren</button>
+                <button onclick="saveHabitInput()" class="flex-1 py-3 bg-[#20B271] text-white font-bold rounded-xl">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-end">
+        <div class="absolute inset-0" onclick="closeSmartModal()"></div>
+        <div class="relative bg-white w-full rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-900">Nieuw Item</h2>
+            <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271]">
+            <div id="modal-task-extra" class="flex items-center space-x-4 mb-8">
+                <input type="time" id="time-input" class="p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271]">
+                <span class="text-sm text-gray-500 font-medium">Tijd (optioneel)</span>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="closeSmartModal()" class="flex-1 p-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Annuleren</button>
+                <button onclick="saveSmartItem()" class="flex-1 p-4 bg-[#20B271] text-white rounded-2xl font-bold">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importeer de juiste CDN links voor gebruik direct in de browser
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Jouw specifieke Firebase configuratie
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1Pm8LrSl7LmuRdRP-pYl_N9RBiI9Ktv4",
+            authDomain: "todoplanner-965eb.firebaseapp.com",
+            projectId: "todoplanner-965eb",
+            storageBucket: "todoplanner-965eb.firebasestorage.app",
+            messagingSenderId: "288993132473",
+            appId: "1:288993132473:web:0ec5ba55d05267dcaec068",
+            measurementId: "G-R8BK7BJWMS"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Data variabelen
+        let currentUser = null;
+        let tasks = [];
+        let habits = [];
+        let journalNotes = [];
+        let currentTab = 'vandaag';
+
+        // --- AUTHENTICATIE LOGICA ---
+        window.loginWithGoogle = () => {
+            signInWithPopup(auth, provider).catch(error => {
+                console.error(error);
+                alert("Inloggen mislukt: Controleer of Google inlog aanstaat in Firebase Auth.");
+            });
+        };
+
+        window.logoutGoogle = () => {
+            if(confirm("Weet je zeker dat je wilt uitloggen?")) {
+                signOut(auth);
+            }
+        };
+
+        // Luister naar inlog-status veranderingen
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const loginScreen = document.getElementById('login-screen');
+                loginScreen.classList.add('animate-fade-out');
+                setTimeout(() => loginScreen.classList.add('hidden'), 500);
+
+                // Update UI met naam en foto
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'daar';
+                document.getElementById('user-greeting').innerHTML = `Hi ${firstName},<br>focus voor vandaag?`;
+                
+                // Fallback voor als foto niet laadt
+                const photo = user.photoURL ? user.photoURL : `https://ui-avatars.com/api/?name=${firstName}&background=20B271&color=fff`;
+                
+                document.getElementById('avatar-container').innerHTML = `
+                    <img src="${photo}" alt="Profiel" class="w-12 h-12 rounded-full shadow-sm border-2 border-white object-cover">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#20B271] border-2 border-white rounded-full"></div>
+                `;
+
+                // Haal data op uit de cloud
+                await loadCloudData();
+            } else {
+                currentUser = null;
+                const loginScreen = document.getElementById('login-screen');
+                loginScreen.classList.remove('hidden', 'animate-fade-out');
+            }
+        });
+
+        // --- DATABASE LOGICA (FIRESTORE) ---
+        async function loadCloudData() {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, "users", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    tasks = data.tasks || [];
+                    habits = data.habits || [];
+                    journalNotes = data.journalNotes || [];
+                } else {
+                    // Eerste keer ingelogd? Maak een schoon profiel
+                    await syncToCloud();
+                }
+                window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscover();
+            } catch(e) {
+                console.error("Fout bij laden data. Staat de database in Test Mode?", e);
+            }
+        }
+
+        async function syncToCloud() {
+            if (!currentUser) return;
+            try {
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    tasks: tasks,
+                    habits: habits,
+                    journalNotes: journalNotes
+                });
+            } catch(e) {
+                console.error("Fout bij opslaan data:", e);
+            }
+        }
+
+        // --- GLOBALE FUNCTIES (Nodig voor de HTML knoppen) ---
+        window.switchTab = (tab) => {
+            currentTab = tab;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tab}`).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-[#20B271]'); btn.classList.add('text-gray-400'); });
+            document.getElementById(`nav-${tab}`).classList.remove('text-gray-400');
+            document.getElementById(`nav-${tab}`).classList.add('text-[#20B271]');
+            document.getElementById('calendar-container').style.display = tab === 'vandaag' ? 'block' : 'none';
+        };
+
+        window.openSmartModal = () => {
+            document.getElementById('main-modal').classList.remove('hidden');
+            if(currentTab === 'vandaag' || currentTab === 'uitdaging' || currentTab === 'ontdek') {
+                document.getElementById('modal-title').innerText = 'Nieuwe Taak';
+                document.getElementById('modal-input').placeholder = 'Wat ga je doen?';
+                document.getElementById('modal-task-extra').classList.remove('hidden');
+            } else {
+                document.getElementById('modal-title').innerText = 'Nieuwe Notitie';
+                document.getElementById('modal-input').placeholder = 'Waar denk je aan?';
+                document.getElementById('modal-task-extra').classList.add('hidden');
+            }
+            setTimeout(() => document.getElementById('modal-input').focus(), 100);
+        };
+        window.closeSmartModal = () => { document.getElementById('main-modal').classList.add('hidden'); document.getElementById('modal-input').value = ""; document.getElementById('time-input').value = "";};
+        
+        window.saveSmartItem = () => {
+            const title = document.getElementById('modal-input').value;
+            if (title.trim() === "") return;
+            if (currentTab === 'journal') {
+                journalNotes.push({ id: Date.now(), text: title, date: new Date().toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }), emoji: '✨' });
+                window.renderJournal(); syncToCloud();
+            } else {
+                tasks.push({ id: Date.now(), title: title, time: document.getElementById('time-input').value || null, completed: false });
+                window.renderTasks(); syncToCloud();
+            }
+            window.closeSmartModal();
+        };
+
+        // Renders
+        window.renderTasks = () => {
+            const list = document.getElementById('task-list'); list.innerHTML = "";
+            if(tasks.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen taken. Geniet van je dag!</p>`;
+            tasks.forEach(t => {
+                const checkIcon = t.completed ? 'bg-[#20B271] border-[#20B271]' : 'border-gray-300';
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="relative overflow-hidden rounded-3xl w-full">
+                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                        <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center space-x-4 w-full">
+                            <div onclick="if(!window.isSwiping){tasks.find(x=>x.id===${t.id}).completed = !tasks.find(x=>x.id===${t.id}).completed; window.renderTasks(); syncToCloud();}" class="w-6 h-6 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 cursor-pointer">
+                                ${t.completed ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                            </div>
+                            <div class="pointer-events-none w-full">
+                                <h3 class="font-bold ${t.completed ? 'opacity-50 line-through text-gray-400' : 'text-gray-900'}">${t.title}</h3>
+                                ${t.time ? `<div class="flex items-center mt-1"><span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">${t.time}</span></div>` : ''}
+                            </div>
+                        </div>
+                    </div>`);
+            });
+        };
+
+        window.renderHabits = () => {
+            const list = document.getElementById('habit-list'); list.innerHTML = "";
+            let tp = 0;
+            if (habits.length > 0) {
+                habits.forEach(h => { tp += Math.min(h.current / h.target, 1); });
+                const avg = Math.round((tp / habits.length) * 100);
+                document.getElementById('daily-focus-text').innerText = avg + '%';
+                document.getElementById('daily-focus-circle').setAttribute('stroke-dasharray', `${avg}, 100`);
+            } else { document.getElementById('daily-focus-text').innerText = '0%'; document.getElementById('daily-focus-circle').setAttribute('stroke-dasharray', '0, 100'); }
+
+            habits.forEach(h => {
+                const prog = (h.current / h.target) * 100;
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="relative overflow-hidden rounded-3xl w-full">
+                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                        <div id="card-habit-${h.id}" ontouchstart="window.hTStart(event, ${h.id}, 'habit')" ontouchmove="window.hTMove(event, ${h.id}, 'habit')" ontouchend="window.hTEnd(event, ${h.id}, 'habit')" onclick="window.clickHabit(${h.id})" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full cursor-pointer">
+                            <div class="flex justify-between items-center mb-3 pointer-events-none"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-xl shrink-0">${h.icon}</div><h3 class="font-bold text-gray-900">${h.title}</h3></div><span class="text-sm font-bold text-gray-500 shrink-0">${h.current} <span class="text-xs font-medium">/ ${h.target}</span></span></div>
+                            <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none"><div class="bg-[#20B271] h-2 rounded-full transition-all" style="width: ${prog}%"></div></div>
+                        </div>
+                    </div>`);
+            });
+        };
+
+        window.renderJournal = () => {
+            const list = document.getElementById('journal-list'); list.innerHTML = "";
+            if(journalNotes.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Nog geen notities.</p>`;
+            [...journalNotes].reverse().forEach(n => {
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="relative overflow-hidden rounded-3xl w-full">
+                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                        <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full">
+                            <div class="flex justify-between items-center mb-2 pointer-events-none"><span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">${n.date}</span><span class="text-xl">${n.emoji}</span></div>
+                            <p class="text-sm text-gray-700 pointer-events-none">${n.text}</p>
+                        </div>
+                    </div>`);
+            });
+        };
+
+        // Swipe & Habit Click Logica
+        let startX=0, currX=0; window.isSwiping=false; let editHabitId=null;
+        window.hTStart = (e, id, t) => { startX=e.touches[0].clientX; currX=startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
+        window.hTMove = (e, id, t) => { currX=e.touches[0].clientX; const diff=currX-startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
+        window.hTEnd = (e, id, t) => {
+            const diff=currX-startX; const c=document.getElementById(`card-${t}-${id}`); if(!c) return; c.style.transition='transform 0.3s';
+            if(diff<-80) { c.style.transform=`translateX(-120%)`; setTimeout(()=>{ if(t==='task')tasks=tasks.filter(x=>x.id!==id); if(t==='habit')habits=habits.filter(x=>x.id!==id); if(t==='journal')journalNotes=journalNotes.filter(x=>x.id!==id); window.renderTasks(); window.renderHabits(); window.renderJournal(); syncToCloud(); }, 300); } else { c.style.transform=`translateX(0)`; }
+        };
+        
+        window.clickHabit = (id) => {
+            if(window.isSwiping) return; const h=habits.find(x=>x.id===id);
+            if(h.target>20){ editHabitId=id; document.getElementById('habit-input-title').innerText=h.title; document.getElementById('habit-number-val').value=h.current; document.getElementById('habit-input-modal').classList.remove('hidden');}
+            else { if(h.current<h.target){h.current+=1; window.renderHabits(); syncToCloud();} }
+        };
+        window.closeHabitInput = () => document.getElementById('habit-input-modal').classList.add('hidden');
+        window.saveHabitInput = () => { const v=parseInt(document.getElementById('habit-number-val').value); if(!isNaN(v)){habits.find(h=>h.id===editHabitId).current = v > habits.find(h=>h.id===editHabitId).target ? habits.find(h=>h.id===editHabitId).target : v; window.renderHabits(); syncToCloud();} window.closeHabitInput(); };
+
+        // Ontdek Helper
+        const rawC = [
+            { title: 'Mindfulness', target: 10, unit: 'min', icon: '🧘‍♀️' }, { title: 'Water drinken', target: 8, unit: 'glazen', icon: '💧' },
+            { title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️' }, { title: 'Lezen', target: 20, unit: 'pagina\'s', icon: '📚' },
+            { title: 'Digitale Detox', target: 1, unit: 'uur', icon: '📱' }, { title: 'Vroeg opstaan', target: 1, unit: 'keer', icon: '🌅' },
+            { title: 'Koud douchen', target: 1, unit: 'keer', icon: '🚿' }, { title: 'Gezond eten', target: 3, unit: 'maaltijden', icon: '🥗' },
+            { title: 'Sporten', target: 30, unit: 'min', icon: '🏋️‍♀️' }, { title: 'Natuurwandeling', target: 1, unit: 'keer', icon: '🌳' },
+            { title: 'Geen suiker', target: 1, unit: 'dag', icon: '🚫' }, { title: 'Journaling', target: 1, unit: 'notitie', icon: '✍️' },
+            { title: '8 uur slapen', target: 8, unit: 'uur', icon: '😴' }, { title: 'Stretchen', target: 15, unit: 'min', icon: '🤸‍♀️' },
+            { title: 'Podcast', target: 1, unit: 'afl.', icon: '🎧' }, { title: 'Nieuw woord', target: 1, unit: 'woord', icon: '🧠' },
+            { title: 'Compliment', target: 1, unit: 'keer', icon: '💬' }, { title: 'Geen cafeïne', target: 1, unit: 'dag', icon: '☕' },
+            { title: 'Schermvrije avond', target: 1, unit: 'keer', icon: '📵' }, { title: 'Ademhalen', target: 5, unit: 'keer', icon: '🌬️' },
+            { title: 'Creatief bezig', target: 30, unit: 'min', icon: '🎨' }, { title: 'Dankbaarheid', target: 3, unit: 'dingen', icon: '🙏' },
+            { title: 'Plank challenge', target: 1, unit: 'min', icon: '⏱️' }, { title: 'Social media limiet', target: 30, unit: 'min', icon: '⏳' },
+            { title: 'Bed opmaken', target: 1, unit: 'keer', icon: '🛏️' }, { title: 'Yoga', target: 15, unit: 'min', icon: '🧘‍♂️' },
+            { title: 'Hardlopen', target: 5, unit: 'km', icon: '🏃‍♀️' }, { title: 'Kort opruimen', target: 10, unit: 'min', icon: '🧹' },
+            { title: 'Geen alcohol', target: 1, unit: 'dag', icon: '🍷' }, { title: 'Geen nieuws', target: 1, unit: 'dag', icon: '📰' }
+        ]; 
+        
+        window.filterDiscover = () => {
+            const term = document.getElementById('search-discover').value.toLowerCase();
+            const filtered = rawC.filter(c => c.title.toLowerCase().includes(term));
+            window.renderDiscoverList(filtered);
+        };
+
+        window.renderDiscoverList = (listToRender) => {
+            const l = document.getElementById('discover-list'); l.innerHTML = "";
+            if(listToRender.length === 0) { l.innerHTML = `<p class="col-span-2 text-center text-gray-400 text-sm">Geen doelen gevonden.</p>`; return;}
+            listToRender.forEach((c) => l.insertAdjacentHTML('beforeend', `<div class="bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center text-center"><span class="text-3xl mb-2">${c.icon}</span><h3 class="font-bold text-gray-900 text-sm leading-tight">${c.title}</h3><p class="text-[10px] font-semibold text-gray-400 mt-1">${c.target} ${c.unit}</p><button onclick="window.addDisc('${c.title}', ${c.target}, '${c.unit}', '${c.icon}', this)" class="mt-3 w-full py-2 bg-gray-50 rounded-xl text-xs font-bold text-[#20B271] hover:bg-gray-100 transition-colors">+ Voeg toe</button></div>`));
+        };
+        window.renderDiscover = () => window.renderDiscoverList(rawC);
+
+        window.addDisc = (t, tg, u, i, btn) => { 
+            if(!habits.some(h=>h.title===t)){ habits.push({id:Date.now(), title:t, target:tg, current:0, unit:u, icon:i}); window.renderHabits(); syncToCloud(); } 
+            btn.innerHTML='✓ Toegevoegd'; btn.classList.replace('bg-gray-50','bg-[#20B271]'); btn.classList.replace('text-[#20B271]','text-white');
+            setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
+        };
+        
+        // Kalender init
+        let sDate=new Date(); sDate.setHours(0,0,0,0);
+        window.resetToToday = () => { sDate=new Date(); sDate.setHours(0,0,0,0); window.generateCalendar(); };
+        window.selectDate = (ts, el) => {
+            sDate=new Date(ts); document.getElementById('current-month-text').innerText=sDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
+            document.querySelectorAll('.calendar-item').forEach(x => {x.classList.remove('bg-[#20B271]','text-white','shadow-md','active-day'); x.classList.add('bg-transparent','text-gray-600');});
+            el.classList.remove('bg-transparent','text-gray-600'); el.classList.add('bg-[#20B271]','text-white','shadow-md','active-day'); el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+        };
+        window.generateCalendar = () => {
+            const s=document.getElementById('calendar-strip'); s.innerHTML=""; const t=new Date(); t.setHours(0,0,0,0);
+            document.getElementById('current-month-text').innerText=sDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
+            for(let i=-15; i<=15; i++){ let d=new Date(t); d.setDate(t.getDate()+i); const ac=d.getTime()===sDate.getTime()?'bg-[#20B271] text-white shadow-md active-day':'bg-transparent text-gray-600 hover:bg-gray-100';
+            s.insertAdjacentHTML('beforeend',`<div onclick="window.selectDate(${d.getTime()}, this)" class="calendar-item flex flex-col items-center justify-center w-12 h-16 rounded-full shrink-0 cursor-pointer transition-colors ${ac}"><span class="text-[10px] uppercase font-bold mb-1 pointer-events-none opacity-80">${d.toLocaleDateString('nl-NL',{weekday:'short'}).charAt(0)}</span><span class="font-bold text-lg pointer-events-none">${d.getDate()}</span></div>`); }
+            setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
+        }
+        
+        // Initialiseer lege tabbladen voordat data laadt
+        window.generateCalendar();
+        window.renderDiscover();
+
+    </script>
+</body>
+</html>
