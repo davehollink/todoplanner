@@ -57,9 +57,17 @@
         <div class="px-6" id="calendar-container">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="font-bold text-lg capitalize" id="current-month-text">Kalender</h2>
-                <button onclick="resetToToday()" class="bg-white px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-gray-200 flex items-center text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform">
-                    📅 Vandaag
-                </button>
+                
+                <div class="flex items-center space-x-2">
+                    <div class="relative w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 cursor-pointer overflow-hidden hover:bg-gray-50 transition-colors">
+                        <span class="text-sm pointer-events-none">📅</span>
+                        <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
+                    </div>
+                    <button onclick="window.resetToToday()" class="bg-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border border-gray-200 flex items-center text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform">
+                        Vandaag
+                    </button>
+                </div>
+
             </div>
             <div class="flex space-x-3 overflow-x-auto calendar-scroll pb-2" id="calendar-strip"></div>
         </div>
@@ -92,7 +100,7 @@
 
     <main id="view-journal" class="tab-content px-6 mt-6 relative z-10">
         <h2 class="text-2xl font-bold mb-4">Mijn journal</h2>
-        <button onclick="openSmartModal()" class="w-full py-4 rounded-2xl bg-[#20B271]/10 text-[#20B271] font-bold border border-[#20B271]/20 hover:bg-[#20B271]/20 transition-colors mb-6 shadow-sm flex justify-center items-center">
+        <button onclick="window.openSmartModal()" class="w-full py-4 rounded-2xl bg-[#20B271]/10 text-[#20B271] font-bold border border-[#20B271]/20 hover:bg-[#20B271]/20 transition-colors mb-6 shadow-sm flex justify-center items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
             Schrijf een notitie...
         </button>
@@ -102,13 +110,13 @@
     <main id="view-ontdek" class="tab-content px-6 mt-6 relative z-10">
         <h2 class="text-2xl font-bold mb-4">Vind nieuwe gewoontes</h2>
         
-        <button onclick="openCustomHabitModal()" class="w-full py-4 rounded-2xl bg-white text-[#20B271] font-bold border-2 border-dashed border-[#20B271]/40 hover:bg-gray-50 transition-colors mb-6 shadow-sm flex justify-center items-center">
+        <button onclick="window.openCustomHabitModal()" class="w-full py-4 rounded-2xl bg-white text-[#20B271] font-bold border-2 border-dashed border-[#20B271]/40 hover:bg-gray-50 transition-colors mb-6 shadow-sm flex justify-center items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Zelf een gewoonte bedenken
         </button>
 
         <div class="relative mb-6">
-            <input type="text" id="search-discover" oninput="filterDiscover()" placeholder="Zoek in de lijst..." class="w-full p-4 pl-12 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 placeholder-gray-400 shadow-sm transition-all">
+            <input type="text" id="search-discover" oninput="window.filterDiscover()" placeholder="Zoek in de lijst..." class="w-full p-4 pl-12 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 placeholder-gray-400 shadow-sm transition-all">
             <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <div id="discover-list" class="grid grid-cols-2 gap-4 pb-8"></div>
@@ -116,26 +124,26 @@
 
     <div class="fixed bottom-6 left-0 right-0 mx-auto w-full max-w-md px-6 z-40 pointer-events-none">
         <nav class="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-4 grid grid-cols-5 place-items-center border border-gray-100 pointer-events-auto relative">
-            <button onclick="switchTab('vandaag')" id="nav-vandaag" class="nav-btn flex flex-col items-center text-[#20B271] w-full">
+            <button onclick="window.switchTab('vandaag')" id="nav-vandaag" class="nav-btn flex flex-col items-center text-[#20B271] w-full">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 <span class="text-[10px] font-bold">Taken</span>
             </button>
-            <button onclick="switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
+            <button onclick="window.switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 <span class="text-[10px] font-semibold">Doelen</span>
             </button>
             
             <div class="w-full flex justify-center relative">
-                <button onclick="openSmartModal()" class="absolute -top-12 w-16 h-16 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-full shadow-[0_10px_25px_rgba(32,178,113,0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-300 border-[5px] border-[#F4F6F8]">
+                <button onclick="window.openSmartModal()" class="absolute -top-12 w-16 h-16 bg-gradient-to-tr from-[#20B271] to-[#34d399] text-white rounded-full shadow-[0_10px_25px_rgba(32,178,113,0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-300 border-[5px] border-[#F4F6F8]">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M12 5v14m-7-7h14"></path></svg>
                 </button>
             </div>
 
-            <button onclick="switchTab('journal')" id="nav-journal" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
+            <button onclick="window.switchTab('journal')" id="nav-journal" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 <span class="text-[10px] font-semibold">Journal</span>
             </button>
-            <button onclick="switchTab('ontdek')" id="nav-ontdek" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
+            <button onclick="window.switchTab('ontdek')" id="nav-ontdek" class="nav-btn flex flex-col items-center text-gray-400 hover:text-[#20B271] w-full">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 <span class="text-[10px] font-semibold">Ontdek</span>
             </button>
@@ -147,19 +155,19 @@
             <h3 class="font-bold text-xl mb-1 text-gray-900" id="habit-input-title">Waarde toevoegen</h3>
             <p class="text-sm text-gray-500 mb-6" id="habit-input-desc">Doel: -</p>
             <div class="flex items-center justify-center space-x-6 mb-8">
-                <button onclick="updateHabitVal(-1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">-</button>
+                <button onclick="window.updateHabitVal(-1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">-</button>
                 <input type="number" id="habit-number-val" class="w-24 bg-transparent text-4xl font-extrabold text-center outline-none text-[#20B271]">
-                <button onclick="updateHabitVal(1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">+</button>
+                <button onclick="window.updateHabitVal(1)" class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">+</button>
             </div>
             <div class="flex space-x-3">
-                <button onclick="closeHabitInput()" class="flex-1 py-4 bg-gray-100 font-bold rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">Annuleren</button>
-                <button onclick="saveHabitInput()" class="flex-1 py-4 bg-[#20B271] text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
+                <button onclick="window.closeHabitInput()" class="flex-1 py-4 bg-gray-100 font-bold rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">Annuleren</button>
+                <button onclick="window.saveHabitInput()" class="flex-1 py-4 bg-[#20B271] text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
             </div>
         </div>
     </div>
 
     <div id="main-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-end">
-        <div class="absolute inset-0" onclick="closeSmartModal()"></div>
+        <div class="absolute inset-0" onclick="window.closeSmartModal()"></div>
         <div class="relative bg-white w-full rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
             <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-900">Nieuw Item</h2>
             <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271]">
@@ -175,14 +183,14 @@
             </div>
 
             <div class="flex space-x-4">
-                <button onclick="closeSmartModal()" class="flex-1 p-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-colors">Annuleren</button>
-                <button onclick="saveSmartItem()" class="flex-1 p-4 bg-[#20B271] text-white rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
+                <button onclick="window.closeSmartModal()" class="flex-1 p-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-colors">Annuleren</button>
+                <button onclick="window.saveSmartItem()" class="flex-1 p-4 bg-[#20B271] text-white rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // --- 1. GLOBALE DATA & SETUP (Werkt altijd, offline of online) ---
+        // --- 1. GLOBALE DATA & SETUP ---
         window.tasks = JSON.parse(localStorage.getItem('cleanTasks')) || [];
         window.habits = JSON.parse(localStorage.getItem('cleanHabits')) || [];
         window.journalNotes = JSON.parse(localStorage.getItem('cleanJournal')) || [];
@@ -194,14 +202,59 @@
         window.selectedDate.setHours(0,0,0,0);
         window.getDateKey = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 
-        // Sync helper (Lokale backup is altijd stap 1)
         window.saveToLocal = () => {
             localStorage.setItem('cleanTasks', JSON.stringify(window.tasks));
             localStorage.setItem('cleanHabits', JSON.stringify(window.habits));
             localStorage.setItem('cleanJournal', JSON.stringify(window.journalNotes));
         };
 
-        // --- 2. UI FUNCTIES ---
+        // --- 2. KALENDER LOGICA (INCL. DATEPICKER) ---
+        window.resetToToday = () => { 
+            window.selectedDate = new Date(); window.selectedDate.setHours(0,0,0,0); 
+            window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal();
+        };
+
+        window.selectDateFromPicker = (dateStr) => {
+            if(!dateStr) return;
+            // Native datepicker geeft 'YYYY-MM-DD'
+            const [year, month, day] = dateStr.split('-');
+            window.selectedDate = new Date(year, month - 1, day);
+            window.selectedDate.setHours(0,0,0,0);
+            window.generateCalendar();
+            window.renderTasks(); window.renderHabits(); window.renderJournal();
+        };
+
+        window.selectDate = (ts) => {
+            window.selectedDate = new Date(ts); 
+            window.generateCalendar();
+            window.renderTasks(); window.renderHabits(); window.renderJournal();
+        };
+
+        window.generateCalendar = () => {
+            const s = document.getElementById('calendar-strip'); s.innerHTML=""; 
+            
+            // Centreer de strip rondom de geselecteerde datum (ipv rondom 'vandaag')
+            const centerDate = new Date(window.selectedDate);
+            centerDate.setHours(0,0,0,0);
+            const actualToday = new Date(); actualToday.setHours(0,0,0,0);
+
+            document.getElementById('current-month-text').innerText = centerDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
+            
+            for(let i=-15; i<=15; i++){ 
+                let d = new Date(centerDate); d.setDate(centerDate.getDate()+i); 
+                const isSelected = d.getTime() === window.selectedDate.getTime();
+                const isActualToday = d.getTime() === actualToday.getTime();
+                
+                let stylingClass = 'bg-transparent text-gray-600 hover:bg-gray-100';
+                if (isSelected) { stylingClass = 'bg-[#20B271] text-white shadow-md active-day'; } 
+                else if (isActualToday) { stylingClass = 'border-2 border-[#20B271] text-[#20B271] hover:bg-green-50'; }
+
+                s.insertAdjacentHTML('beforeend',`<div data-ts="${d.getTime()}" onclick="window.selectDate(${d.getTime()})" class="calendar-item flex flex-col items-center justify-center w-12 h-16 rounded-full shrink-0 cursor-pointer transition-all ${stylingClass}"><span class="text-[10px] uppercase font-bold mb-1 pointer-events-none opacity-80">${d.toLocaleDateString('nl-NL',{weekday:'short'}).charAt(0)}</span><span class="font-bold text-lg pointer-events-none">${d.getDate()}</span></div>`); 
+            }
+            setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
+        }
+
+        // --- 3. UI FUNCTIES ---
         window.getHabitProgress = (habit, dateKey) => {
             if (!habit.history) habit.history = {};
             if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
@@ -214,48 +267,6 @@
             if (val > habit.target) val = habit.target;
             habit.history[dateKey] = val;
         };
-
-        window.resetToToday = () => { 
-            window.selectedDate = new Date(); window.selectedDate.setHours(0,0,0,0); 
-            window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal();
-        };
-
-        window.selectDate = (ts, el) => {
-            window.selectedDate = new Date(ts); 
-            document.getElementById('current-month-text').innerText = window.selectedDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
-            
-            document.querySelectorAll('.calendar-item').forEach(x => {
-                x.classList.remove('bg-[#20B271]','text-white','shadow-md','active-day'); 
-                const isActualToday = (parseInt(x.dataset.ts) === new Date().setHours(0,0,0,0));
-                if (isActualToday) { x.classList.add('border-2', 'border-[#20B271]', 'text-[#20B271]'); } 
-                else { x.classList.add('bg-transparent','text-gray-600'); }
-            });
-
-            el.classList.remove('bg-transparent','text-gray-600', 'border-2', 'border-[#20B271]', 'text-[#20B271]'); 
-            el.classList.add('bg-[#20B271]','text-white','shadow-md','active-day'); 
-            el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-            
-            window.renderTasks(); window.renderHabits(); window.renderJournal();
-        };
-
-        window.generateCalendar = () => {
-            const s = document.getElementById('calendar-strip'); s.innerHTML=""; 
-            const today = new Date(); today.setHours(0,0,0,0);
-            document.getElementById('current-month-text').innerText = window.selectedDate.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
-            
-            for(let i=-15; i<=15; i++){ 
-                let d = new Date(today); d.setDate(today.getDate()+i); 
-                const isSelected = d.getTime() === window.selectedDate.getTime();
-                const isActualToday = d.getTime() === today.getTime();
-                
-                let stylingClass = 'bg-transparent text-gray-600 hover:bg-gray-100';
-                if (isSelected) { stylingClass = 'bg-[#20B271] text-white shadow-md active-day'; } 
-                else if (isActualToday) { stylingClass = 'border-2 border-[#20B271] text-[#20B271] hover:bg-green-50'; }
-
-                s.insertAdjacentHTML('beforeend',`<div data-ts="${d.getTime()}" onclick="window.selectDate(${d.getTime()}, this)" class="calendar-item flex flex-col items-center justify-center w-12 h-16 rounded-full shrink-0 cursor-pointer transition-all ${stylingClass}"><span class="text-[10px] uppercase font-bold mb-1 pointer-events-none opacity-80">${d.toLocaleDateString('nl-NL',{weekday:'short'}).charAt(0)}</span><span class="font-bold text-lg pointer-events-none">${d.getDate()}</span></div>`); 
-            }
-            setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
-        }
 
         window.switchTab = (tab) => {
             window.currentTab = tab;
@@ -305,7 +316,7 @@
         };
 
         window.openCustomizeDiscover = (id) => {
-            const challenge = discoverChallenges.find(c => c.id === id);
+            const challenge = window.discoverChallenges.find(c => c.id === id);
             if(!challenge) return;
             window.modalMode = 'custom_habit';
             window.customizingIcon = challenge.icon;
@@ -343,7 +354,7 @@
             window.closeSmartModal();
         };
 
-        // --- RENDERS ---
+        // --- 4. RENDERS ---
         window.toggleTask = (id) => {
             if(window.isSwiping) return;
             const task = window.tasks.find(t => t.id === id);
@@ -484,8 +495,8 @@
                                     </div>
                                     <span class="text-sm font-bold text-gray-500 shrink-0">${currentVal} <span class="text-xs font-medium">/ ${h.target}</span></span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none">
-                                    <div class="bg-[#20B271] h-2 rounded-full transition-all duration-300" style="width: ${progressPercentage}%"></div>
+                                <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none overflow-hidden">
+                                    <div class="bg-[#20B271] h-full rounded-full transition-all" style="width: ${progressPercentage}%"></div>
                                 </div>
                             </div>
 
@@ -498,7 +509,7 @@
             });
         };
 
-        // --- SWIPE LOGICA ---
+        // --- 5. SWIPE LOGICA ---
         window.hTStart = (e, id, t) => { window.startX=e.touches[0].clientX; window.currX=window.startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
         window.hTMove = (e, id, t) => { window.currX=e.touches[0].clientX; const diff=window.currX-window.startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
         window.hTEnd = (e, id, t) => {
@@ -506,7 +517,7 @@
             if(diff<-80) { c.style.transform=`translateX(-120%)`; setTimeout(()=>{ if(t==='task')window.tasks=window.tasks.filter(x=>x.id!==id); if(t==='habit')window.habits=window.habits.filter(x=>x.id!==id); if(t==='journal')window.journalNotes=window.journalNotes.filter(x=>x.id!==id); window.saveToLocal(); window.renderTasks(); window.renderHabits(); window.renderJournal(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); }, 300); } else { c.style.transform=`translateX(0)`; }
         };
 
-        // --- ONTDEK LIJST ---
+        // --- 6. ONTDEK LIJST ---
         const rawC = [
             {title: 'Water drinken', target: 8, unit: 'glazen', icon: '💧'}, {title: 'Mindfulness', target: 10, unit: 'min', icon: '🧘‍♀️'},
             {title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️'}, {title: 'Boek lezen', target: 20, unit: 'pagina\'s', icon: '📚'},
@@ -546,11 +557,11 @@
             {title: 'Huisdier knuffelen', target: 1, unit: 'keer', icon: '🐶'}, {title: 'Planten water geven', target: 1, unit: 'keer', icon: '🪴'},
             {title: 'Vloggen', target: 1, unit: 'video', icon: '🎥'}, {title: 'Meditatiewandeling', target: 20, unit: 'min', icon: '🚶‍♀️'}
         ]; 
-        const discoverChallenges = rawC.map((c, index) => ({ ...c, id: 'disc_' + index }));
+        window.discoverChallenges = rawC.map((c, index) => ({ ...c, id: 'disc_' + index }));
         
         window.filterDiscover = () => {
             const term = document.getElementById('search-discover').value.toLowerCase();
-            const filtered = discoverChallenges.filter(c => c.title.toLowerCase().includes(term));
+            const filtered = window.discoverChallenges.filter(c => c.title.toLowerCase().includes(term));
             window.renderDiscoverList(filtered);
         };
 
@@ -581,17 +592,14 @@
             setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
         };
 
-        // --- 3. INITIELE RENDER (Gegarandeerd dat het scherm NOOIT leeg is) ---
+        // --- 7. EERSTE RENDER (Gegarandeerd dat lijsten vol zijn op Start) ---
         window.generateCalendar();
         window.renderDiscover();
         window.renderTasks();
         window.renderHabits();
         window.renderJournal();
-        window.switchTab('vandaag');
 
-    </script>
-
-    <script type="module">
+        // --- 8. FIREBASE (Laadt de rest op de achtergrond in) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -636,7 +644,7 @@
                             window.tasks = data.tasks || [];
                             window.habits = data.habits || [];
                             window.journalNotes = data.journalNotes || [];
-                            window.saveToLocal(); // Synchroniseer data van Google naar de telefoon
+                            window.saveToLocal();
                         }
                         
                         window.syncToCloud = async () => {
@@ -644,7 +652,6 @@
                             catch(e) { console.error("Save error:", e); }
                         };
 
-                        // Ververs de UI met de zojuist ingeladen data
                         window.renderTasks(); window.renderHabits(); window.renderJournal();
                     } catch(e) { console.error("Leesfout Firebase:", e); }
 
