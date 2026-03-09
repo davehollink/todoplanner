@@ -255,7 +255,6 @@
                         window.habits = data.habits || [];
                         window.journalNotes = data.journalNotes || [];
                         
-                        // Achterwaartse compatibiliteit voor oude taken (Zodat ze niet verdwijnen)
                         window.tasks.forEach(t => {
                             if(t.completedHistory === undefined) {
                                 t.completedHistory = {};
@@ -328,18 +327,16 @@
             }
         };
 
-        // Bepaalt of een taak/doel op de geselecteerde dag zichtbaar moet zijn
         window.shouldShowItem = (item, isHabit) => {
             const currentDKey = window.getDateKey(window.selectedDate);
             
-            // Oude items zonder repeat settings
-            if(!item.repeat) {
-                if(isHabit) return true; // Oude doelen staan altijd aan
-                return item.dateKey === currentDKey; // Oude taken alleen op hun eigen dag
-            }
+            if (item.endDate && currentDKey >= item.endDate) return false;
+            if (currentDKey < item.dateKey) return false; 
             
-            // Als de datum in het verleden ligt t.o.v. de startdatum van het doel, verberg hem
-            if(currentDKey < item.dateKey) return false; 
+            if(!item.repeat) {
+                if(isHabit) return true; 
+                return item.dateKey === currentDKey; 
+            }
             
             if(item.repeat === 'none') return item.dateKey === currentDKey;
             if(item.repeat === 'daily') return true;
@@ -425,7 +422,7 @@
                 document.getElementById('modal-input').placeholder = 'Wat ga je doen?';
                 document.getElementById('modal-task-extra').classList.remove('hidden');
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
-                window.setRecurrence('none'); // Taken standaard eenmalig
+                window.setRecurrence('none'); 
             } else if (window.currentTab === 'journal') {
                 document.getElementById('modal-title').innerText = 'Nieuwe notitie';
                 document.getElementById('modal-input').placeholder = 'Waar denk je aan?';
@@ -444,7 +441,7 @@
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
-            window.setRecurrence('daily'); // Doelen standaard dagelijks
+            window.setRecurrence('daily'); 
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
@@ -475,7 +472,7 @@
 
             let finalRepeat = window.currentRecurrence;
             if(finalRepeat === 'custom') {
-                if(window.customDays.length === 0) finalRepeat = 'daily'; // fallback als ze niets kiezen
+                if(window.customDays.length === 0) finalRepeat = 'daily'; 
                 else finalRepeat = [...window.customDays];
             }
 
@@ -486,7 +483,6 @@
             } else if (window.modalMode === 'custom_habit') {
                 const target = document.getElementById('custom-habit-target').value || 1;
                 const unit = document.getElementById('custom-habit-unit').value || 'keer';
-                // Genereer unieke ID's ipv naam check, zo mag je 2x zelfde doen
                 window.habits.push({ id: Date.now(), title: title, history: {}, target: parseInt(target), unit: unit, icon: window.customizingIcon, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
                 window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else {
@@ -521,8 +517,6 @@
                 const checkedCard = isCompleted ? 'opacity-60 bg-gray-50' : 'bg-white';
                 const checkedText = isCompleted ? 'line-through text-gray-400' : 'text-gray-900';
                 const checkIcon = isCompleted ? 'bg-[#20B271] border-[#20B271]' : 'border-gray-300';
-                
-                // Show repeat icon if recurring
                 const repIcon = (t.repeat && t.repeat !== 'none') ? `<svg class="w-3 h-3 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>` : '';
 
                 list.insertAdjacentHTML('beforeend', `
@@ -562,20 +556,6 @@
                         </div>
                     </div>`);
             });
-        };
-
-        // HABIT FUNCTIES
-        window.getHabitProgress = (habit, dateKey) => {
-            if (!habit.history) habit.history = {};
-            if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
-            return habit.history[dateKey] || 0;
-        };
-
-        window.setHabitProgress = (habit, dateKey, val) => {
-            if (!habit.history) habit.history = {};
-            if (val < 0) val = 0;
-            if (val > habit.target) val = habit.target;
-            habit.history[dateKey] = val;
         };
 
         window.clickHabit = (id) => {
@@ -653,7 +633,8 @@
             habitsToRender.forEach(h => {
                 const currentVal = window.getHabitProgress(h, currentSelectedDateKey);
                 const progressPercentage = Math.min((currentVal / h.target) * 100, 100);
-                
+                const repIcon = (h.repeat && h.repeat !== 'none' && h.repeat !== 'daily') ? `<svg class="w-3 h-3 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>` : '';
+
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-3xl w-full">
                         <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
@@ -663,7 +644,10 @@
                                 <div class="flex justify-between items-center mb-3 pointer-events-none">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-xl shrink-0">${h.icon}</div>
-                                        <h3 class="font-bold text-gray-900">${h.title}</h3>
+                                        <div class="flex items-center">
+                                            <h3 class="font-bold text-gray-900">${h.title}</h3>
+                                            ${repIcon}
+                                        </div>
                                     </div>
                                     <span class="text-sm font-bold text-gray-500 shrink-0">${currentVal} <span class="text-xs font-medium">/ ${h.target}</span></span>
                                 </div>
@@ -681,15 +665,49 @@
             });
         };
 
-        // SWIPE
+        // --- SWIPE LOGICA (AANGEPAST VOOR ARCHIVEREN) ---
         window.hTStart = (e, id, t) => { window.startX=e.touches[0].clientX; window.currX=window.startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
         window.hTMove = (e, id, t) => { window.currX=e.touches[0].clientX; const diff=window.currX-window.startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
         window.hTEnd = (e, id, t) => {
             const diff=window.currX-window.startX; const c=document.getElementById(`card-${t}-${id}`); if(!c) return; c.style.transition='transform 0.3s';
-            if(diff<-80) { c.style.transform=`translateX(-120%)`; setTimeout(()=>{ if(t==='task')window.tasks=window.tasks.filter(x=>x.id!==id); if(t==='habit')window.habits=window.habits.filter(x=>x.id!==id); if(t==='journal')window.journalNotes=window.journalNotes.filter(x=>x.id!==id); window.saveToLocal(); window.renderTasks(); window.renderHabits(); window.renderJournal(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); }, 300); } else { c.style.transform=`translateX(0)`; }
+            if(diff<-80) { 
+                c.style.transform=`translateX(-120%)`; 
+                setTimeout(()=>{ 
+                    const currentDKey = window.getDateKey(window.selectedDate);
+                    
+                    if(t==='task') {
+                        const idx = window.tasks.findIndex(x=>x.id===id);
+                        if(idx > -1) {
+                            if (window.tasks[idx].repeat && window.tasks[idx].repeat !== 'none') {
+                                window.tasks[idx].endDate = currentDKey; 
+                            } else {
+                                window.tasks.splice(idx, 1); 
+                            }
+                        }
+                    }
+                    if(t==='habit') {
+                        const idx = window.habits.findIndex(x=>x.id===id);
+                        if(idx > -1) {
+                            if (window.habits[idx].repeat && window.habits[idx].repeat !== 'none') {
+                                window.habits[idx].endDate = currentDKey; 
+                            } else {
+                                window.habits.splice(idx, 1); 
+                            }
+                        }
+                    }
+                    if(t==='journal') {
+                        window.journalNotes=window.journalNotes.filter(x=>x.id!==id); 
+                    }
+                    
+                    window.saveToLocal(); window.renderTasks(); window.renderHabits(); window.renderJournal(); 
+                    if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
+                }, 300); 
+            } else { 
+                c.style.transform=`translateX(0)`; 
+            }
         };
 
-        // ONTDEK LIJST
+        // --- ONTDEK LIJST ---
         const rawC = [
             {title: 'Water drinken', target: 8, unit: 'glazen', icon: '💧'}, {title: 'Mindfulness', target: 10, unit: 'min', icon: '🧘‍♀️'},
             {title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️'}, {title: 'Boek lezen', target: 20, unit: 'pagina\'s', icon: '📚'},
