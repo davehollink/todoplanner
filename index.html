@@ -232,6 +232,20 @@
         window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(error => console.error(error));
         window.logoutGoogle = () => { if(confirm("Weet je zeker dat je wilt uitloggen?")) signOut(auth); };
 
+        // Globale Firebase Opslag Functie (Werkt altijd, wacht niet op auth load!)
+        window.syncToCloud = async () => {
+            if(!window.currentUser) return;
+            try { 
+                const timestamp = parseInt(localStorage.getItem('lastUpdated')) || Date.now();
+                await setDoc(doc(db, "users", window.currentUser.uid), { 
+                    tasks: window.tasks, 
+                    habits: window.habits, 
+                    journalNotes: window.journalNotes,
+                    lastUpdated: timestamp
+                }); 
+            } catch(e) { console.error("Save error:", e); }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 window.currentUser = user;
@@ -251,25 +265,39 @@
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        window.tasks = data.tasks || [];
-                        window.habits = data.habits || [];
-                        window.journalNotes = data.journalNotes || [];
-                        
-                        window.tasks.forEach(t => {
-                            if(t.completedHistory === undefined) {
-                                t.completedHistory = {};
-                                if(t.completed !== undefined) { t.completedHistory[t.dateKey] = t.completed; }
-                            }
-                        });
+                        const localTime = parseInt(localStorage.getItem('lastUpdated')) || 0;
+                        const cloudTime = data.lastUpdated || 0;
 
-                        window.saveToLocal(); 
+                        // SMART MERGE: Alleen de cloud data inladen als deze nieuwer is dan je telefoon!
+                        if (cloudTime > localTime) {
+                            window.tasks = data.tasks || [];
+                            window.habits = data.habits || [];
+                            window.journalNotes = data.journalNotes || [];
+                            
+                            // Veiligheid voor hele oude taken zonder history
+                            window.tasks.forEach(t => {
+                                if(t.completedHistory === undefined) {
+                                    t.completedHistory = {};
+                                    if(t.completed !== undefined) { t.completedHistory[t.dateKey] = t.completed; }
+                                }
+                            });
+
+                            // Synchroniseer naar telefoon
+                            localStorage.setItem('cleanTasks', JSON.stringify(window.tasks));
+                            localStorage.setItem('cleanHabits', JSON.stringify(window.habits));
+                            localStorage.setItem('cleanJournal', JSON.stringify(window.journalNotes));
+                            localStorage.setItem('lastUpdated', cloudTime.toString());
+                        } else if (localTime > cloudTime) {
+                            // Telefoon heeft nieuwe data (bijv offline gewerkt of toegevoegd voor laden). 
+                            // Stuur direct naar Firebase!
+                            await window.syncToCloud();
+                        }
+                    } else {
+                        // Allereerste keer inloggen ooit! Stuur lokale data naar de cloud.
+                        await window.syncToCloud();
                     }
-                    
-                    window.syncToCloud = async () => {
-                        try { await setDoc(doc(db, "users", user.uid), { tasks: window.tasks, habits: window.habits, journalNotes: window.journalNotes }); } 
-                        catch(e) { console.error("Save error:", e); }
-                    };
 
+                    // Rendert alles opnieuw met eventueel vers ingeladen cloud data
                     window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscoverList(window.discoverChallenges);
                 } catch(e) { console.error("Leesfout Firebase:", e); }
 
@@ -293,10 +321,12 @@
         window.selectedDate.setHours(0,0,0,0);
         window.getDateKey = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 
+        // De nieuwe Save Functie die een Timestamp toevoegt voor de Smart Merge
         window.saveToLocal = () => {
             localStorage.setItem('cleanTasks', JSON.stringify(window.tasks));
             localStorage.setItem('cleanHabits', JSON.stringify(window.habits));
             localStorage.setItem('cleanJournal', JSON.stringify(window.journalNotes));
+            localStorage.setItem('lastUpdated', Date.now().toString());
         };
 
         // --- HERHALING LOGICA ---
@@ -327,6 +357,7 @@
             }
         };
 
+        // Bepaalt of een item op de GESELECTEERDE dag zichtbaar moet zijn
         window.shouldShowItem = (item, isHabit) => {
             const currentDKey = window.getDateKey(window.selectedDate);
             
@@ -492,7 +523,7 @@
             window.closeSmartModal();
         };
 
-        // --- RENDERS ---
+        // --- RENDERS & PROGRESSIE ---
         window.toggleTask = (id) => {
             if(window.isSwiping) return;
             const task = window.tasks.find(t => t.id === id);
@@ -503,6 +534,70 @@
                 window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
             }
         }
+
+        window.getHabitProgress = (habit, dateKey) => {
+            if (!habit.history) habit.history = {};
+            if (habit.current !== undefined && typeof habit.current === 'number') { habit.history[window.getDateKey(new Date())] = habit.current; delete habit.current; }
+            return habit.history[dateKey] || 0;
+        };
+
+        window.setHabitProgress = (habit, dateKey, val) => {
+            if (!habit.history) habit.history = {};
+            if (val < 0) val = 0;
+            if (val > habit.target) val = habit.target;
+            habit.history[dateKey] = val;
+        };
+
+        window.clickHabit = (id) => {
+            if(window.isSwiping) return; 
+            const h = window.habits.find(x => x.id === id);
+            window.editHabitId = id; 
+            const dKey = window.getDateKey(window.selectedDate);
+            const currentProgress = window.getHabitProgress(h, dKey);
+
+            document.getElementById('habit-input-title').innerText = h.title; 
+            document.getElementById('habit-input-desc').innerText = `Doel: ${h.target} ${h.unit}`; 
+            document.getElementById('habit-number-val').value = currentProgress; 
+            document.getElementById('habit-input-modal').classList.remove('hidden');
+        };
+
+        window.quickAddHabit = (e, id) => {
+            e.stopPropagation(); 
+            if(window.isSwiping) return;
+            const h = window.habits.find(x => x.id === id);
+            const dKey = window.getDateKey(window.selectedDate);
+            let currentProgress = window.getHabitProgress(h, dKey);
+
+            if(currentProgress < h.target) {
+                window.setHabitProgress(h, dKey, currentProgress + 1);
+                window.saveToLocal(); window.renderHabits();
+                if(typeof window.syncToCloud === 'function') window.syncToCloud();
+            }
+        };
+
+        window.updateHabitVal = (amount) => {
+            const input = document.getElementById('habit-number-val');
+            let val = parseInt(input.value) || 0;
+            const h = window.habits.find(x => x.id === window.editHabitId);
+            val += amount;
+            if (val < 0) val = 0; 
+            if (val > h.target) val = h.target; 
+            input.value = val;
+        };
+
+        window.closeHabitInput = () => document.getElementById('habit-input-modal').classList.add('hidden');
+        
+        window.saveHabitInput = () => { 
+            const v = parseInt(document.getElementById('habit-number-val').value); 
+            if(!isNaN(v)){
+                const h = window.habits.find(x => x.id === window.editHabitId);
+                const dKey = window.getDateKey(window.selectedDate);
+                window.setHabitProgress(h, dKey, v); 
+                window.saveToLocal(); window.renderHabits(); 
+                if(typeof window.syncToCloud === 'function') window.syncToCloud();
+            } 
+            window.closeHabitInput(); 
+        };
 
         window.renderTasks = () => {
             const list = document.getElementById('task-list'); list.innerHTML = "";
@@ -558,57 +653,6 @@
             });
         };
 
-        window.clickHabit = (id) => {
-            if(window.isSwiping) return; 
-            const h = window.habits.find(x => x.id === id);
-            window.editHabitId = id; 
-            const dKey = window.getDateKey(window.selectedDate);
-            const currentProgress = window.getHabitProgress(h, dKey);
-
-            document.getElementById('habit-input-title').innerText = h.title; 
-            document.getElementById('habit-input-desc').innerText = `Doel: ${h.target} ${h.unit}`; 
-            document.getElementById('habit-number-val').value = currentProgress; 
-            document.getElementById('habit-input-modal').classList.remove('hidden');
-        };
-
-        window.quickAddHabit = (e, id) => {
-            e.stopPropagation(); 
-            if(window.isSwiping) return;
-            const h = window.habits.find(x => x.id === id);
-            const dKey = window.getDateKey(window.selectedDate);
-            let currentProgress = window.getHabitProgress(h, dKey);
-
-            if(currentProgress < h.target) {
-                window.setHabitProgress(h, dKey, currentProgress + 1);
-                window.saveToLocal(); window.renderHabits();
-                if(typeof window.syncToCloud === 'function') window.syncToCloud();
-            }
-        };
-
-        window.updateHabitVal = (amount) => {
-            const input = document.getElementById('habit-number-val');
-            let val = parseInt(input.value) || 0;
-            const h = window.habits.find(x => x.id === window.editHabitId);
-            val += amount;
-            if (val < 0) val = 0; 
-            if (val > h.target) val = h.target; 
-            input.value = val;
-        };
-
-        window.closeHabitInput = () => document.getElementById('habit-input-modal').classList.add('hidden');
-        
-        window.saveHabitInput = () => { 
-            const v = parseInt(document.getElementById('habit-number-val').value); 
-            if(!isNaN(v)){
-                const h = window.habits.find(x => x.id === window.editHabitId);
-                const dKey = window.getDateKey(window.selectedDate);
-                window.setHabitProgress(h, dKey, v); 
-                window.saveToLocal(); window.renderHabits(); 
-                if(typeof window.syncToCloud === 'function') window.syncToCloud();
-            } 
-            window.closeHabitInput(); 
-        };
-
         window.renderHabits = () => {
             const list = document.getElementById('habit-list'); list.innerHTML = "";
             const currentSelectedDateKey = window.getDateKey(window.selectedDate);
@@ -652,7 +696,7 @@
                                     <span class="text-sm font-bold text-gray-500 shrink-0">${currentVal} <span class="text-xs font-medium">/ ${h.target}</span></span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2 pointer-events-none overflow-hidden">
-                                    <div class="bg-[#20B271] h-full rounded-full transition-all" style="width: ${progressPercentage}%"></div>
+                                    <div class="bg-[#20B271] h-full rounded-full transition-all duration-300" style="width: ${progressPercentage}%"></div>
                                 </div>
                             </div>
 
@@ -665,7 +709,7 @@
             });
         };
 
-        // --- SWIPE LOGICA (AANGEPAST VOOR ARCHIVEREN) ---
+        // --- SWIPE ARCHIVEER LOGICA ---
         window.hTStart = (e, id, t) => { window.startX=e.touches[0].clientX; window.currX=window.startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
         window.hTMove = (e, id, t) => { window.currX=e.touches[0].clientX; const diff=window.currX-window.startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
         window.hTEnd = (e, id, t) => {
@@ -707,10 +751,10 @@
             }
         };
 
-        // --- ONTDEK LIJST ---
+        // --- ONTDEK LIJST (Typo gefixt) ---
         const rawC = [
             {title: 'Water drinken', target: 8, unit: 'glazen', icon: '💧'}, {title: 'Mindfulness', target: 10, unit: 'min', icon: '🧘‍♀️'},
-            {title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️'}, {title: 'Boek lezen', target: 20, unit: 'pagina\'s', icon: '📚'},
+            {title: 'Stappen zetten', target: 10000, unit: 'stappen', icon: '🚶‍♂️'}, {title: 'Boek lezen', target: 20, unit: 'bladzijdes', icon: '📚'},
             {title: 'Digitale detox', target: 1, unit: 'uur', icon: '📱'}, {title: 'Vroeg opstaan', target: 1, unit: 'keer', icon: '🌅'},
             {title: 'Koud douchen', target: 1, unit: 'keer', icon: '🚿'}, {title: 'Gezond eten', target: 3, unit: 'maaltijden', icon: '🥗'},
             {title: 'Sporten', target: 30, unit: 'min', icon: '🏋️‍♀️'}, {title: 'Wandelen in de natuur', target: 1, unit: 'keer', icon: '🌳'},
@@ -782,7 +826,7 @@
             setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
         };
 
-        // START RENDER
+        // ALTIJD DIRECT TEKENEN (Voorkomt lege schermen)
         window.generateCalendar();
         window.renderDiscoverList(window.discoverChallenges); 
         window.renderTasks();
