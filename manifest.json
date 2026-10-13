@@ -1,0 +1,24 @@
+{
+  "name": "FocusPlanner",
+  "short_name": "FocusPlanner",
+  "description": "Jouw persoonlijke doelen en taken, overal gesynchroniseerd.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F6F8",
+  "theme_color": "#F4F6F8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/focusplanner-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/focusplanner-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
