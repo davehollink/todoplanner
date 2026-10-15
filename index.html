@@ -106,10 +106,16 @@
     </main>
 
     <main id="view-journal" class="tab-content px-6 mt-6 relative z-10">
-        <h2 class="text-2xl font-bold mb-4">Mijn journal</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Mijn journal</h2>
+            <button onclick="window.openWorkoutHistory()" class="bg-gray-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center space-x-1.5 hover:bg-gray-800 active:scale-95 transition-all">
+                <span>🏋️‍♂️</span>
+                <span>Workout overzicht</span>
+            </button>
+        </div>
         <button onclick="window.openSmartModal()" class="w-full py-4 rounded-2xl bg-[#20B271]/10 text-[#20B271] font-bold border border-[#20B271]/20 hover:bg-[#20B271]/20 transition-colors mb-6 shadow-sm flex justify-center items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-            Schrijf een notitie...
+            Schrijf een notitie of workout...
         </button>
         <div id="journal-list" class="space-y-4 pb-8"></div>
     </main>
@@ -173,7 +179,7 @@
         </div>
     </div>
 
-    <!-- HOOFD MODAL (Taken, Doelen, Notities & Workouts) -->
+    <!-- HOOFD MODAL (Taken, Doelen, Notities & Workouts - Nieuw én Bewerken) -->
     <div id="main-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-end">
         <div class="absolute inset-0" onclick="window.closeSmartModal()"></div>
         <div class="relative bg-white w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
@@ -187,9 +193,18 @@
 
             <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-bold">
             
-            <div id="modal-task-extra" class="flex items-center space-x-4 mb-4">
-                <input type="time" id="time-input" class="p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
-                <span class="text-sm text-gray-500 font-medium">Tijd (optioneel)</span>
+            <!-- Uitgebreide tekst voor Journal Notities -->
+            <div id="modal-note-body-extra" class="hidden mb-4">
+                <textarea id="journal-note-body" rows="4" placeholder="Schrijf je notitie hier..." class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium text-sm resize-none"></textarea>
+            </div>
+
+            <!-- Extra velden voor Taken (Aantekeningen + Tijd) -->
+            <div id="modal-task-extra" class="space-y-4 mb-4">
+                <textarea id="task-notes-input" rows="3" placeholder="Extra aantekeningen of details (optioneel)..." class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium text-sm resize-none"></textarea>
+                <div class="flex items-center space-x-4">
+                    <input type="time" id="time-input" class="p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
+                    <span class="text-sm text-gray-500 font-medium">Tijd (optioneel)</span>
+                </div>
             </div>
 
             <div id="modal-custom-habit-extra" class="hidden flex space-x-4 mb-4">
@@ -242,17 +257,47 @@
                 <button onclick="window.closeExercisePicker()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold hover:bg-gray-200">✕</button>
             </div>
 
-            <!-- Zoekbalk voor oefeningen -->
             <div class="relative mb-3">
                 <input type="text" id="exercise-search" oninput="window.renderExercisePickerList()" placeholder="Zoek of typ eigen oefening..." class="w-full p-3.5 pl-10 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-sm font-medium text-gray-900">
                 <svg class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
 
-            <!-- Spiergroep Tabs -->
             <div id="muscle-group-tabs" class="flex space-x-2 overflow-x-auto pb-3 mb-2 shrink-0"></div>
-
-            <!-- Lijst met oefeningen -->
             <div id="exercise-picker-list" class="overflow-y-auto space-y-2 flex-1 pr-1"></div>
+        </div>
+    </div>
+
+    <!-- POPUP VENSTER: COMPLEET WORKOUT OVERZICHT (HISTORIE) -->
+    <div id="workout-history-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[75] flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0" onclick="window.closeWorkoutHistory()"></div>
+        <div class="relative bg-[#F4F6F8] w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 pb-10 max-h-[90vh] flex flex-col animate-slide-up shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-2xl font-extrabold text-gray-900">Workout Historie</h3>
+                    <p class="text-xs text-gray-500 font-medium">Al jouw trainingen in één overzicht</p>
+                </div>
+                <button onclick="window.closeWorkoutHistory()" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 font-bold hover:bg-gray-100">✕</button>
+            </div>
+
+            <!-- Statistieken samenvatting -->
+            <div class="grid grid-cols-2 gap-3 mb-4 shrink-0">
+                <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Workouts</span>
+                    <span id="stat-total-workouts" class="text-2xl font-extrabold text-gray-900">0</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Totaal Sets</span>
+                    <span id="stat-total-sets" class="text-2xl font-extrabold text-[#20B271]">0</span>
+                </div>
+            </div>
+
+            <!-- Zoekbalk voor workouts / oefeningen -->
+            <div class="relative mb-4 shrink-0">
+                <input type="text" id="workout-history-search" oninput="window.renderWorkoutHistoryList()" placeholder="Zoek op workout of oefening (bijv. Squat)..." class="w-full p-3.5 pl-10 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-sm font-medium text-gray-900 shadow-sm">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+
+            <div id="workout-history-list" class="overflow-y-auto space-y-3 flex-1 pr-1"></div>
         </div>
     </div>
 
@@ -353,6 +398,7 @@
         window.currentTab = 'vandaag';
         window.modalMode = 'vandaag';
         window.customizingIcon = '✨';
+        window.editingItemId = null; // Houdt bij welk item we aan het bewerken zijn
         
         window.selectedDate = new Date();
         window.selectedDate.setHours(0,0,0,0);
@@ -378,13 +424,14 @@
         window.journalEntryMode = 'note'; // 'note' of 'workout'
         window.currentWorkoutExercises = [];
 
-        // Zoekt in de geschiedenis naar de laatste keer dat een specifieke oefening is gedaan
+        // Zoekt in de geschiedenis naar de laatste keer dat een specifieke oefening is gedaan (negeert het item dat we nu bewerken)
         window.getLastExercisePerformance = (exerciseName) => {
             const sortedNotes = [...window.journalNotes].sort((a, b) => {
-                if (a.dateKey !== b.dateKey) return b.dateKey.localeCompare(a.dateKey);
+                if (a.dateKey !== b.dateKey) return (b.dateKey || '').localeCompare(a.dateKey || '');
                 return b.id - a.id;
             });
             for (const note of sortedNotes) {
+                if (window.editingItemId && note.id === window.editingItemId) continue;
                 if (note.type === 'workout' && Array.isArray(note.exercises)) {
                     const found = note.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
                     if (found && found.sets && found.sets.length > 0) {
@@ -398,24 +445,103 @@
             return null;
         };
 
+        // --- WORKOUT OVERZICHT (HISTORIE MODAL) ---
+        window.openWorkoutHistory = () => {
+            document.getElementById('workout-history-search').value = '';
+            window.renderWorkoutHistoryList();
+            document.getElementById('workout-history-modal').classList.remove('hidden');
+        };
+
+        window.closeWorkoutHistory = () => {
+            document.getElementById('workout-history-modal').classList.add('hidden');
+        };
+
+        window.renderWorkoutHistoryList = () => {
+            const list = document.getElementById('workout-history-list');
+            const search = document.getElementById('workout-history-search').value.trim().toLowerCase();
+            list.innerHTML = '';
+
+            const allWorkouts = window.journalNotes
+                .filter(n => n.type === 'workout' && Array.isArray(n.exercises))
+                .sort((a, b) => {
+                    if (a.dateKey !== b.dateKey) return (b.dateKey || '').localeCompare(a.dateKey || '');
+                    return b.id - a.id;
+                });
+
+            // Bereken totalen voor statistieken
+            let totalSets = 0;
+            allWorkouts.forEach(w => {
+                w.exercises.forEach(ex => { totalSets += (ex.sets ? ex.sets.length : 0); });
+            });
+            document.getElementById('stat-total-workouts').innerText = allWorkouts.length;
+            document.getElementById('stat-total-sets').innerText = totalSets;
+
+            const filtered = allWorkouts.filter(w => {
+                if (!search) return true;
+                const titleMatch = (w.text || '').toLowerCase().includes(search);
+                const dateMatch = (w.displayDate || '').toLowerCase().includes(search);
+                const exMatch = w.exercises.some(ex => ex.name.toLowerCase().includes(search) || (ex.muscle || '').toLowerCase().includes(search));
+                return titleMatch || dateMatch || exMatch;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="bg-white p-6 rounded-3xl text-center text-gray-400 text-sm font-medium border border-gray-100">Geen workouts gevonden.</div>`;
+                return;
+            }
+
+            filtered.forEach(w => {
+                const exercisesHTML = w.exercises.map(ex => {
+                    const isHighlighted = search && ex.name.toLowerCase().includes(search);
+                    const nameClass = isHighlighted ? 'text-[#20B271] underline' : 'text-gray-900';
+                    const setsPills = ex.sets.map((s, idx) => 
+                        `<span class="inline-block bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded-lg mr-1.5 mb-1.5"><span class="text-gray-400 mr-1">#${idx+1}</span>${s.weight || 0}kg × ${s.reps || 0}</span>`
+                    ).join('');
+                    return `
+                        <div class="mt-2.5 pt-2.5 border-t border-gray-100">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-sm ${nameClass}">${ex.name}</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#20B271] bg-[#20B271]/10 px-2 py-0.5 rounded-md">${ex.muscle || ''}</span>
+                            </div>
+                            <div class="flex flex-wrap">${setsPills}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div onclick="window.closeWorkoutHistory(); window.editJournalItem(${w.id});" class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 cursor-pointer hover:border-[#20B271] transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-[#20B271] bg-[#20B271]/10 px-3 py-1 rounded-lg">${w.displayDate || w.dateKey}</span>
+                            <span class="text-xs font-bold text-gray-400 flex items-center">✎ Bewerken</span>
+                        </div>
+                        <h4 class="font-extrabold text-gray-900 text-lg mt-2">${w.text}</h4>
+                        <div>${exercisesHTML}</div>
+                    </div>
+                `);
+            });
+        };
+
         window.setJournalMode = (mode) => {
             window.journalEntryMode = mode;
             const btnNote = document.getElementById('j-mode-note');
             const btnWorkout = document.getElementById('j-mode-workout');
             const workoutExtra = document.getElementById('modal-workout-extra');
+            const noteBodyExtra = document.getElementById('modal-note-body-extra');
             const modalInput = document.getElementById('modal-input');
 
             if (mode === 'workout') {
                 btnWorkout.className = "flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-900 shadow-sm transition-all";
                 btnNote.className = "flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-500 transition-all";
                 workoutExtra.classList.remove('hidden');
+                noteBodyExtra.classList.add('hidden');
+                modalInput.classList.remove('hidden');
                 modalInput.placeholder = "Naam training (bijv. Push Day / Upperbody)...";
                 window.renderWorkoutBuilder();
             } else {
                 btnNote.className = "flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-900 shadow-sm transition-all";
                 btnWorkout.className = "flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-500 transition-all";
                 workoutExtra.classList.add('hidden');
-                modalInput.placeholder = "Waar denk je aan?";
+                noteBodyExtra.classList.remove('hidden');
+                modalInput.classList.add('hidden');
             }
         };
 
@@ -501,7 +627,6 @@
 
         window.selectExerciseFromPicker = (name, muscle) => {
             const lastPerf = window.getLastExercisePerformance(name);
-            // Vul direct de 1e set slim in op basis van de vorige keer (indien beschikbaar)
             const initialSet = (lastPerf && lastPerf.sets[0]) 
                 ? { weight: lastPerf.sets[0].weight, reps: lastPerf.sets[0].reps } 
                 : { weight: '', reps: '' };
@@ -522,7 +647,6 @@
             let defaultWeight = '';
             let defaultReps = '';
 
-            // Kijk eerst of deze set bij de vorige training bestond, neem anders de vorige set van vandaag over
             if (lastPerf && lastPerf.sets[nextSetIndex]) {
                 defaultWeight = lastPerf.sets[nextSetIndex].weight;
                 defaultReps = lastPerf.sets[nextSetIndex].reps;
@@ -725,7 +849,11 @@
         };
 
         window.resetModalState = () => {
+            window.editingItemId = null;
             document.getElementById('modal-input').value = "";
+            document.getElementById('modal-input').classList.remove('hidden');
+            document.getElementById('journal-note-body').value = "";
+            document.getElementById('task-notes-input').value = "";
             document.getElementById('time-input').value = "";
             document.getElementById('custom-habit-target').value = "";
             document.getElementById('custom-habit-unit').value = "";
@@ -747,6 +875,7 @@
             document.getElementById('modal-recurrence-extra').classList.add('hidden');
             document.getElementById('modal-journal-type-switch').classList.add('hidden');
             document.getElementById('modal-workout-extra').classList.add('hidden');
+            document.getElementById('modal-note-body-extra').classList.add('hidden');
 
             if(window.currentTab === 'vandaag') {
                 document.getElementById('modal-title').innerText = 'Nieuwe taak';
@@ -754,12 +883,83 @@
                 document.getElementById('modal-task-extra').classList.remove('hidden');
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
                 window.setRecurrence('none'); 
+                setTimeout(() => document.getElementById('modal-input').focus(), 100);
             } else if (window.currentTab === 'journal') {
                 document.getElementById('modal-title').innerText = 'Nieuw logboek item';
                 document.getElementById('modal-journal-type-switch').classList.remove('hidden');
                 window.setJournalMode('note');
+                setTimeout(() => document.getElementById('journal-note-body').focus(), 100);
             }
-            setTimeout(() => document.getElementById('modal-input').focus(), 100);
+        };
+
+        // Bestaande taak openen om te bewerken
+        window.editTaskItem = (e, id) => {
+            e.stopPropagation();
+            if (window.isSwiping) return;
+            const task = window.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            window.modalMode = 'vandaag';
+            window.resetModalState();
+            window.editingItemId = id;
+
+            document.getElementById('main-modal').classList.remove('hidden');
+            document.getElementById('modal-title').innerText = 'Taak aanpassen';
+            document.getElementById('modal-input').value = task.title || '';
+            document.getElementById('task-notes-input').value = task.notes || '';
+            document.getElementById('time-input').value = task.time || '';
+
+            document.getElementById('modal-task-extra').classList.remove('hidden');
+            document.getElementById('modal-recurrence-extra').classList.remove('hidden');
+            document.getElementById('modal-custom-habit-extra').classList.add('hidden');
+            document.getElementById('modal-journal-type-switch').classList.add('hidden');
+            document.getElementById('modal-workout-extra').classList.add('hidden');
+            document.getElementById('modal-note-body-extra').classList.add('hidden');
+
+            if (!task.repeat || task.repeat === 'none') {
+                window.setRecurrence('none');
+            } else if (task.repeat === 'daily') {
+                window.setRecurrence('daily');
+            } else if (Array.isArray(task.repeat)) {
+                window.setRecurrence('custom');
+                window.customDays = [...task.repeat];
+                const dayMap = [1, 2, 3, 4, 5, 6, 0];
+                const btns = document.querySelectorAll('#custom-days-wrapper button');
+                btns.forEach((btn, idx) => {
+                    if (window.customDays.includes(dayMap[idx])) {
+                        btn.classList.replace('bg-gray-100', 'bg-[#20B271]');
+                        btn.classList.replace('text-gray-600', 'text-white');
+                    }
+                });
+            }
+        };
+
+        // Bestaande notitie of workout openen om te bewerken
+        window.editJournalItem = (id) => {
+            if (window.isSwiping) return;
+            const note = window.journalNotes.find(n => n.id === id);
+            if (!note) return;
+
+            window.modalMode = 'journal';
+            window.resetModalState();
+            window.editingItemId = id;
+
+            document.getElementById('main-modal').classList.remove('hidden');
+            document.getElementById('modal-task-extra').classList.add('hidden');
+            document.getElementById('modal-custom-habit-extra').classList.add('hidden');
+            document.getElementById('modal-recurrence-extra').classList.add('hidden');
+            document.getElementById('modal-journal-type-switch').classList.remove('hidden');
+
+            if (note.type === 'workout') {
+                document.getElementById('modal-title').innerText = 'Workout aanpassen';
+                window.currentWorkoutExercises = JSON.parse(JSON.stringify(note.exercises || []));
+                window.setJournalMode('workout');
+                document.getElementById('modal-input').value = note.text || '';
+            } else {
+                document.getElementById('modal-title').innerText = 'Notitie aanpassen';
+                window.setJournalMode('note');
+                document.getElementById('journal-note-body').value = note.text || '';
+            }
         };
 
         window.openCustomHabitModal = () => {
@@ -772,6 +972,7 @@
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-journal-type-switch').classList.add('hidden');
             document.getElementById('modal-workout-extra').classList.add('hidden');
+            document.getElementById('modal-note-body-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
@@ -793,6 +994,7 @@
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-journal-type-switch').classList.add('hidden');
             document.getElementById('modal-workout-extra').classList.add('hidden');
+            document.getElementById('modal-note-body-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
@@ -800,7 +1002,10 @@
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
 
-        window.closeSmartModal = () => document.getElementById('main-modal').classList.add('hidden');
+        window.closeSmartModal = () => {
+            window.editingItemId = null;
+            document.getElementById('main-modal').classList.add('hidden');
+        };
 
         window.saveSmartItem = () => {
             const title = document.getElementById('modal-input').value.trim();
@@ -815,26 +1020,49 @@
                 if (window.journalEntryMode === 'workout') {
                     if (window.currentWorkoutExercises.length === 0 && title === "") return;
                     const workoutTitle = title || 'Krachttraining';
-                    window.journalNotes.push({
-                        id: Date.now(),
-                        type: 'workout',
-                        text: workoutTitle,
-                        exercises: JSON.parse(JSON.stringify(window.currentWorkoutExercises)),
-                        dateKey: window.getDateKey(window.selectedDate),
-                        displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
-                        emoji: '🏋️‍♂️'
-                    });
+
+                    if (window.editingItemId) {
+                        const existing = window.journalNotes.find(n => n.id === window.editingItemId);
+                        if (existing) {
+                            existing.type = 'workout';
+                            existing.text = workoutTitle;
+                            existing.exercises = JSON.parse(JSON.stringify(window.currentWorkoutExercises));
+                            existing.emoji = '🏋️‍♂️';
+                        }
+                    } else {
+                        window.journalNotes.push({
+                            id: Date.now(),
+                            type: 'workout',
+                            text: workoutTitle,
+                            exercises: JSON.parse(JSON.stringify(window.currentWorkoutExercises)),
+                            dateKey: window.getDateKey(window.selectedDate),
+                            displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+                            emoji: '🏋️‍♂️'
+                        });
+                    }
                 } else {
-                    if (title === "") return;
-                    const emojis = ['🌊', '🌿', '✨', '🧘‍♀️', '☕', '☀️', '💡'];
-                    window.journalNotes.push({
-                        id: Date.now(),
-                        type: 'note',
-                        text: title,
-                        dateKey: window.getDateKey(window.selectedDate),
-                        displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
-                        emoji: emojis[Math.floor(Math.random() * emojis.length)]
-                    });
+                    const noteBody = document.getElementById('journal-note-body').value.trim();
+                    if (noteBody === "") return;
+
+                    if (window.editingItemId) {
+                        const existing = window.journalNotes.find(n => n.id === window.editingItemId);
+                        if (existing) {
+                            existing.type = 'note';
+                            existing.text = noteBody;
+                            delete existing.exercises;
+                            if (existing.emoji === '🏋️‍♂️') existing.emoji = '📝';
+                        }
+                    } else {
+                        const emojis = ['🌊', '🌿', '✨', '🧘‍♀️', '☕', '☀️', '💡'];
+                        window.journalNotes.push({
+                            id: Date.now(),
+                            type: 'note',
+                            text: noteBody,
+                            dateKey: window.getDateKey(window.selectedDate),
+                            displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+                            emoji: emojis[Math.floor(Math.random() * emojis.length)]
+                        });
+                    }
                 }
                 window.saveToLocal(); window.renderJournal(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else if (window.modalMode === 'custom_habit') {
@@ -845,7 +1073,28 @@
                 window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else {
                 if (title === "") return;
-                window.tasks.push({ id: Date.now(), title: title, time: document.getElementById('time-input').value || null, completedHistory: {}, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
+                const taskNotes = document.getElementById('task-notes-input').value.trim();
+                const taskTime = document.getElementById('time-input').value || null;
+
+                if (window.editingItemId) {
+                    const existingTask = window.tasks.find(t => t.id === window.editingItemId);
+                    if (existingTask) {
+                        existingTask.title = title;
+                        existingTask.notes = taskNotes;
+                        existingTask.time = taskTime;
+                        existingTask.repeat = finalRepeat;
+                    }
+                } else {
+                    window.tasks.push({ 
+                        id: Date.now(), 
+                        title: title, 
+                        notes: taskNotes,
+                        time: taskTime, 
+                        completedHistory: {}, 
+                        dateKey: window.getDateKey(window.selectedDate), 
+                        repeat: finalRepeat 
+                    });
+                }
                 window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             }
             window.closeSmartModal();
@@ -876,22 +1125,26 @@
                 const checkedCard = isCompleted ? 'opacity-60 bg-gray-50' : 'bg-white';
                 const checkedText = isCompleted ? 'line-through text-gray-400' : 'text-gray-900';
                 const checkIcon = isCompleted ? 'bg-[#20B271] border-[#20B271]' : 'border-gray-300';
-                const repIcon = (t.repeat && t.repeat !== 'none') ? `<svg class="w-3 h-3 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>` : '';
+                const repIcon = (t.repeat && t.repeat !== 'none') ? `<svg class="w-3 h-3 text-gray-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>` : '';
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-3xl w-full">
                         <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                        <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id})" class="relative z-10 ${checkedCard} p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center space-x-4 w-full cursor-pointer transition-all duration-300">
-                            <div class="w-6 h-6 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 transition-colors">
+                        <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id})" class="relative z-10 ${checkedCard} p-5 rounded-3xl shadow-sm border border-gray-100 flex items-start space-x-4 w-full cursor-pointer transition-all duration-300">
+                            <div class="w-6 h-6 mt-0.5 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 transition-colors">
                                 ${isCompleted ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
                             </div>
-                            <div class="pointer-events-none w-full transition-all">
+                            <div class="pointer-events-none flex-1 min-w-0 transition-all">
                                 <div class="flex items-center">
-                                    <h3 class="font-bold ${checkedText} transition-all">${t.title}</h3>
+                                    <h3 class="font-bold ${checkedText} transition-all truncate">${t.title}</h3>
                                     ${repIcon}
                                 </div>
-                                ${t.time ? `<div class="flex items-center mt-1"><span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">${t.time}</span></div>` : ''}
+                                ${t.notes ? `<p class="text-xs text-gray-500 mt-1 whitespace-pre-line leading-relaxed">${t.notes}</p>` : ''}
+                                ${t.time ? `<div class="flex items-center mt-2"><span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">${t.time}</span></div>` : ''}
                             </div>
+                            <button onclick="window.editTaskItem(event, ${t.id})" class="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-700 flex items-center justify-center shrink-0 transition-colors z-20" title="Taak bewerken">
+                                ✎
+                            </button>
                         </div>
                     </div>`);
             });
@@ -926,12 +1179,15 @@
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-3xl w-full">
                             <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                            <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border-2 border-[#20B271]/20 w-full">
+                            <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border-2 border-[#20B271]/20 w-full cursor-pointer hover:border-[#20B271] transition-colors">
                                 <div class="flex justify-between items-center pointer-events-none">
                                     <div class="flex items-center space-x-2">
                                         <span class="text-xs font-bold text-[#20B271] bg-[#20B271]/10 px-3 py-1.5 rounded-lg">${displayDate} • Workout</span>
                                     </div>
-                                    <span class="text-xl">${n.emoji || '🏋️‍♂️'}</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs font-bold text-gray-400">✎</span>
+                                        <span class="text-xl">${n.emoji || '🏋️‍♂️'}</span>
+                                    </div>
                                 </div>
                                 <h3 class="font-extrabold text-gray-900 text-lg mt-2 pointer-events-none">${n.text}</h3>
                                 <div class="pointer-events-none">${exercisesHTML}</div>
@@ -942,9 +1198,15 @@
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-3xl w-full">
                             <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                            <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full">
-                                <div class="flex justify-between items-center mb-2 pointer-events-none"><span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">${displayDate}</span><span class="text-xl">${n.emoji}</span></div>
-                                <p class="text-sm text-gray-700 pointer-events-none">${n.text}</p>
+                            <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full cursor-pointer hover:border-[#20B271] transition-colors">
+                                <div class="flex justify-between items-center mb-2 pointer-events-none">
+                                    <span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">${displayDate}</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs font-bold text-gray-400">✎</span>
+                                        <span class="text-xl">${n.emoji}</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-700 whitespace-pre-line pointer-events-none">${n.text}</p>
                             </div>
                         </div>`);
                 }
