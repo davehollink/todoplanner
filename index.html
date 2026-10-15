@@ -173,11 +173,18 @@
         </div>
     </div>
 
+    <!-- HOOFD MODAL (Taken, Doelen, Notities & Workouts) -->
     <div id="main-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-end">
         <div class="absolute inset-0" onclick="window.closeSmartModal()"></div>
-        <div class="relative bg-white w-full max-h-[90vh] overflow-y-auto rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
+        <div class="relative bg-white w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto rounded-t-[2.5rem] p-8 pb-12 animate-slide-up shadow-2xl">
             <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-900">Nieuw Item</h2>
             
+            <!-- Schakelaar voor Journal: Notitie vs Workout -->
+            <div id="modal-journal-type-switch" class="hidden flex bg-gray-100 p-1.5 rounded-2xl mb-5">
+                <button type="button" onclick="window.setJournalMode('note')" id="j-mode-note" class="flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-900 shadow-sm transition-all">📝 Notitie</button>
+                <button type="button" onclick="window.setJournalMode('workout')" id="j-mode-workout" class="flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-500 transition-all">🏋️‍♂️ Workout</button>
+            </div>
+
             <input type="text" id="modal-input" placeholder="Titel..." class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-bold">
             
             <div id="modal-task-extra" class="flex items-center space-x-4 mb-4">
@@ -188,6 +195,16 @@
             <div id="modal-custom-habit-extra" class="hidden flex space-x-4 mb-4">
                 <input type="number" id="custom-habit-target" placeholder="Doel (bijv. 10)" class="w-1/2 p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
                 <input type="text" id="custom-habit-unit" placeholder="Eenheid (bijv. min)" class="w-1/2 p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-gray-900 font-medium">
+            </div>
+
+            <!-- WORKOUT BUILDER SECTIE -->
+            <div id="modal-workout-extra" class="hidden mb-6 space-y-4">
+                <div id="workout-exercises-container" class="space-y-4"></div>
+                
+                <button type="button" onclick="window.openExercisePicker()" class="w-full py-4 rounded-2xl bg-[#20B271]/10 text-[#20B271] font-bold border-2 border-dashed border-[#20B271]/40 hover:bg-[#20B271]/20 transition-colors flex justify-center items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    Oefening kiezen
+                </button>
             </div>
 
             <div id="modal-recurrence-extra" class="mb-8">
@@ -213,6 +230,29 @@
                 <button onclick="window.closeSmartModal()" class="flex-1 p-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-colors">Annuleren</button>
                 <button onclick="window.saveSmartItem()" class="flex-1 p-4 bg-[#20B271] text-white rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-[#1b9a62] transition-colors">Opslaan</button>
             </div>
+        </div>
+    </div>
+
+    <!-- POPUP VENSTER: OEFENING KIEZEN PER SPIERGROEP -->
+    <div id="exercise-picker-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[80] flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0" onclick="window.closeExercisePicker()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 pb-10 max-h-[85vh] flex flex-col animate-slide-up shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Kies een oefening</h3>
+                <button onclick="window.closeExercisePicker()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold hover:bg-gray-200">✕</button>
+            </div>
+
+            <!-- Zoekbalk voor oefeningen -->
+            <div class="relative mb-3">
+                <input type="text" id="exercise-search" oninput="window.renderExercisePickerList()" placeholder="Zoek of typ eigen oefening..." class="w-full p-3.5 pl-10 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#20B271] text-sm font-medium text-gray-900">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+
+            <!-- Spiergroep Tabs -->
+            <div id="muscle-group-tabs" class="flex space-x-2 overflow-x-auto pb-3 mb-2 shrink-0"></div>
+
+            <!-- Lijst met oefeningen -->
+            <div id="exercise-picker-list" class="overflow-y-auto space-y-2 flex-1 pr-1"></div>
         </div>
     </div>
 
@@ -325,6 +365,255 @@
             localStorage.setItem('lastUpdated', Date.now().toString());
         };
 
+        // --- FITNESS & WORKOUT DATABASE ---
+        window.exerciseDB = {
+            'Borst': ['Bench Press (Barbell)', 'Incline Dumbbell Press', 'Chest Fly (Machine / Cable)', 'Push-ups', 'Chest Press Machine', 'Dips (Borst)'],
+            'Rug': ['Lat Pulldown', 'Seated Cable Row', 'Barbell Row', 'Pull-ups', 'Deadlift', 'Single Arm Dumbbell Row', 'Face Pulls', 'Hyperextensions'],
+            'Benen': ['Squat (Barbell)', 'Leg Press', 'Romanian Deadlift (RDL)', 'Lunges', 'Leg Extension', 'Seated Leg Curl', 'Hip Thrust', 'Calf Raises'],
+            'Schouders': ['Overhead Press (OHP)', 'Dumbbell Shoulder Press', 'Lateral Raises', 'Front Raises', 'Rear Delt Fly', 'Shrugs'],
+            'Armen': ['Barbell Bicep Curl', 'Dumbbell Hammer Curl', 'Preacher Curl', 'Tricep Rope Pushdown', 'Skullcrushers', 'Overhead Tricep Extension'],
+            'Core': ['Plank', 'Cable Crunch', 'Hanging Leg Raises', 'Russian Twist', 'Ab Wheel Rollout', 'Sit-ups']
+        };
+        window.selectedMuscleGroup = 'Alle';
+        window.journalEntryMode = 'note'; // 'note' of 'workout'
+        window.currentWorkoutExercises = [];
+
+        // Zoekt in de geschiedenis naar de laatste keer dat een specifieke oefening is gedaan
+        window.getLastExercisePerformance = (exerciseName) => {
+            const sortedNotes = [...window.journalNotes].sort((a, b) => {
+                if (a.dateKey !== b.dateKey) return b.dateKey.localeCompare(a.dateKey);
+                return b.id - a.id;
+            });
+            for (const note of sortedNotes) {
+                if (note.type === 'workout' && Array.isArray(note.exercises)) {
+                    const found = note.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
+                    if (found && found.sets && found.sets.length > 0) {
+                        return {
+                            displayDate: note.displayDate || note.dateKey,
+                            sets: found.sets
+                        };
+                    }
+                }
+            }
+            return null;
+        };
+
+        window.setJournalMode = (mode) => {
+            window.journalEntryMode = mode;
+            const btnNote = document.getElementById('j-mode-note');
+            const btnWorkout = document.getElementById('j-mode-workout');
+            const workoutExtra = document.getElementById('modal-workout-extra');
+            const modalInput = document.getElementById('modal-input');
+
+            if (mode === 'workout') {
+                btnWorkout.className = "flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-900 shadow-sm transition-all";
+                btnNote.className = "flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-500 transition-all";
+                workoutExtra.classList.remove('hidden');
+                modalInput.placeholder = "Naam training (bijv. Push Day / Upperbody)...";
+                window.renderWorkoutBuilder();
+            } else {
+                btnNote.className = "flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-900 shadow-sm transition-all";
+                btnWorkout.className = "flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-500 transition-all";
+                workoutExtra.classList.add('hidden');
+                modalInput.placeholder = "Waar denk je aan?";
+            }
+        };
+
+        window.openExercisePicker = () => {
+            document.getElementById('exercise-search').value = '';
+            window.selectedMuscleGroup = 'Alle';
+            window.renderMuscleGroupTabs();
+            window.renderExercisePickerList();
+            document.getElementById('exercise-picker-modal').classList.remove('hidden');
+        };
+
+        window.closeExercisePicker = () => {
+            document.getElementById('exercise-picker-modal').classList.add('hidden');
+        };
+
+        window.selectMuscleGroup = (group) => {
+            window.selectedMuscleGroup = group;
+            window.renderMuscleGroupTabs();
+            window.renderExercisePickerList();
+        };
+
+        window.renderMuscleGroupTabs = () => {
+            const container = document.getElementById('muscle-group-tabs');
+            const groups = ['Alle', ...Object.keys(window.exerciseDB)];
+            container.innerHTML = groups.map(g => {
+                const active = g === window.selectedMuscleGroup;
+                const cls = active ? 'bg-[#20B271] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
+                return `<button type="button" onclick="window.selectMuscleGroup('${g}')" class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors ${cls}">${g}</button>`;
+            }).join('');
+        };
+
+        window.renderExercisePickerList = () => {
+            const list = document.getElementById('exercise-picker-list');
+            const search = document.getElementById('exercise-search').value.trim().toLowerCase();
+            list.innerHTML = '';
+
+            let items = [];
+            Object.entries(window.exerciseDB).forEach(([muscle, exercises]) => {
+                if (window.selectedMuscleGroup === 'Alle' || window.selectedMuscleGroup === muscle) {
+                    exercises.forEach(ex => {
+                        if (!search || ex.toLowerCase().includes(search) || muscle.toLowerCase().includes(search)) {
+                            items.push({ name: ex, muscle: muscle });
+                        }
+                    });
+                }
+            });
+
+            if (search.length > 0 && !items.some(i => i.name.toLowerCase() === search)) {
+                const rawSearch = document.getElementById('exercise-search').value.trim();
+                const safeCustom = rawSearch.replace(/'/g, "\\'");
+                list.insertAdjacentHTML('beforeend', `
+                    <div onclick="window.selectExerciseFromPicker('${safeCustom}', 'Eigen oefening')" class="p-3.5 rounded-2xl bg-[#20B271]/10 border border-[#20B271]/30 flex justify-between items-center cursor-pointer hover:bg-[#20B271]/20 transition-colors">
+                        <div>
+                            <p class="font-bold text-sm text-[#20B271]">+ "${rawSearch}" toevoegen</p>
+                            <p class="text-[11px] text-gray-500 font-medium">Eigen oefening</p>
+                        </div>
+                        <span class="text-[#20B271] font-bold text-lg">→</span>
+                    </div>
+                `);
+            }
+
+            items.forEach(item => {
+                const lastPerf = window.getLastExercisePerformance(item.name);
+                const lastBadge = lastPerf 
+                    ? `<span class="text-[10px] font-bold text-[#20B271] bg-[#20B271]/10 px-2 py-0.5 rounded-md">Laatst: ${lastPerf.sets[0].weight || 0}kg × ${lastPerf.sets[0].reps || 0}</span>` 
+                    : '';
+                const safeName = item.name.replace(/'/g, "\\'");
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div onclick="window.selectExerciseFromPicker('${safeName}', '${item.muscle}')" class="p-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-100 flex justify-between items-center cursor-pointer transition-colors">
+                        <div>
+                            <p class="font-bold text-sm text-gray-900">${item.name}</p>
+                            <div class="flex items-center space-x-2 mt-0.5">
+                                <span class="text-[11px] font-semibold text-gray-400">${item.muscle}</span>
+                                ${lastBadge}
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-[#20B271] font-bold">+</div>
+                    </div>
+                `);
+            });
+        };
+
+        window.selectExerciseFromPicker = (name, muscle) => {
+            const lastPerf = window.getLastExercisePerformance(name);
+            // Vul direct de 1e set slim in op basis van de vorige keer (indien beschikbaar)
+            const initialSet = (lastPerf && lastPerf.sets[0]) 
+                ? { weight: lastPerf.sets[0].weight, reps: lastPerf.sets[0].reps } 
+                : { weight: '', reps: '' };
+
+            window.currentWorkoutExercises.push({
+                name: name,
+                muscle: muscle,
+                sets: [initialSet]
+            });
+            window.closeExercisePicker();
+            window.renderWorkoutBuilder();
+        };
+
+        window.addWorkoutSet = (exIdx) => {
+            const ex = window.currentWorkoutExercises[exIdx];
+            const lastPerf = window.getLastExercisePerformance(ex.name);
+            const nextSetIndex = ex.sets.length;
+            let defaultWeight = '';
+            let defaultReps = '';
+
+            // Kijk eerst of deze set bij de vorige training bestond, neem anders de vorige set van vandaag over
+            if (lastPerf && lastPerf.sets[nextSetIndex]) {
+                defaultWeight = lastPerf.sets[nextSetIndex].weight;
+                defaultReps = lastPerf.sets[nextSetIndex].reps;
+            } else if (ex.sets.length > 0) {
+                defaultWeight = ex.sets[ex.sets.length - 1].weight;
+                defaultReps = ex.sets[ex.sets.length - 1].reps;
+            }
+            ex.sets.push({ weight: defaultWeight, reps: defaultReps });
+            window.renderWorkoutBuilder();
+        };
+
+        window.removeWorkoutSet = (exIdx, setIdx) => {
+            window.currentWorkoutExercises[exIdx].sets.splice(setIdx, 1);
+            if (window.currentWorkoutExercises[exIdx].sets.length === 0) {
+                window.currentWorkoutExercises.splice(exIdx, 1);
+            }
+            window.renderWorkoutBuilder();
+        };
+
+        window.removeWorkoutExercise = (exIdx) => {
+            window.currentWorkoutExercises.splice(exIdx, 1);
+            window.renderWorkoutBuilder();
+        };
+
+        window.updateSetData = (exIdx, setIdx, field, val) => {
+            window.currentWorkoutExercises[exIdx].sets[setIdx][field] = val;
+        };
+
+        window.renderWorkoutBuilder = () => {
+            const container = document.getElementById('workout-exercises-container');
+            container.innerHTML = '';
+
+            if (window.currentWorkoutExercises.length === 0) {
+                container.innerHTML = `<div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center text-xs text-gray-400 font-medium">Nog geen oefeningen toegevoegd aan deze workout.</div>`;
+                return;
+            }
+
+            window.currentWorkoutExercises.forEach((ex, exIdx) => {
+                const lastPerf = window.getLastExercisePerformance(ex.name);
+                let lastPerfHTML = `<div class="text-[11px] text-gray-400 font-medium mb-3">🆕 Eerste keer dat je deze oefening logt!</div>`;
+                
+                if (lastPerf) {
+                    const setsSummary = lastPerf.sets.map(s => `${s.weight || 0}kg × ${s.reps || 0}`).join('  •  ');
+                    lastPerfHTML = `
+                        <div class="bg-[#20B271]/10 border border-[#20B271]/20 rounded-xl px-3 py-2 mb-3 flex items-start space-x-2">
+                            <span class="text-xs">⏮️</span>
+                            <div class="text-[11px] leading-tight">
+                                <span class="font-bold text-[#20B271] block">Vorige keer (${lastPerf.displayDate}):</span>
+                                <span class="font-semibold text-gray-700">${setsSummary}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const setsHTML = ex.sets.map((s, setIdx) => `
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-7 text-xs font-extrabold text-gray-400 text-center">#${setIdx + 1}</span>
+                        <div class="flex-1 relative">
+                            <input type="number" step="0.5" value="${s.weight}" oninput="window.updateSetData(${exIdx}, ${setIdx}, 'weight', this.value)" placeholder="0" class="w-full p-2.5 pr-8 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#20B271] text-center">
+                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">kg</span>
+                        </div>
+                        <span class="text-gray-300 font-bold">×</span>
+                        <div class="flex-1 relative">
+                            <input type="number" value="${s.reps}" oninput="window.updateSetData(${exIdx}, ${setIdx}, 'reps', this.value)" placeholder="0" class="w-full p-2.5 pr-10 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 outline-none focus:border-[#20B271] text-center">
+                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">reps</span>
+                        </div>
+                        <button type="button" onclick="window.removeWorkoutSet(${exIdx}, ${setIdx})" class="w-8 h-8 rounded-xl bg-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center font-bold text-xs transition-colors">✕</button>
+                    </div>
+                `).join('');
+
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#20B271] bg-[#20B271]/10 px-2 py-0.5 rounded-md">${ex.muscle}</span>
+                                <h4 class="font-extrabold text-gray-900 text-base mt-1">${ex.name}</h4>
+                            </div>
+                            <button type="button" onclick="window.removeWorkoutExercise(${exIdx})" class="text-xs text-gray-400 hover:text-red-500 font-bold px-2 py-1">Verwijder</button>
+                        </div>
+                        ${lastPerfHTML}
+                        <div class="mt-2">
+                            ${setsHTML}
+                        </div>
+                        <button type="button" onclick="window.addWorkoutSet(${exIdx})" class="mt-2 w-full py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:border-[#20B271] hover:text-[#20B271] transition-colors">
+                            + Set toevoegen
+                        </button>
+                    </div>
+                `);
+            });
+        };
+
         // --- HERHALING LOGICA ---
         window.currentRecurrence = 'none';
         window.customDays = [];
@@ -353,14 +642,12 @@
             }
         };
 
-        // Bepaalt of een item op de GESELECTEERDE dag zichtbaar moet zijn
         window.shouldShowItem = (item, isHabit) => {
             const currentDKey = window.getDateKey(window.selectedDate);
             const todayDKey = window.getDateKey(new Date());
             
             if (item.endDate && currentDKey >= item.endDate) return false;
             
-            // --- DOELEN (HABITS) ---
             if (isHabit) {
                 if (currentDKey < item.dateKey) return false; 
                 if (!item.repeat || item.repeat === 'daily') return true;
@@ -368,26 +655,17 @@
                 return false;
             }
 
-            // --- TAKEN ---
-            // 1. Toon altijd op de originele aanmaakdatum
             if (item.dateKey === currentDKey) return true;
 
-            // 2. Eenmalige taken (Rollover logica)
             if (!item.repeat || item.repeat === 'none') {
-                // Als de taak op DEZE dag is afgevinkt, tonen we hem (doorgestreept)
                 if (item.completedHistory && item.completedHistory[currentDKey] === true) return true;
-
-                // Rollover: Als de datum ná de aanmaakdatum ligt, én het is uiterlijk 'vandaag'
                 if (currentDKey > item.dateKey && currentDKey <= todayDKey) {
-                    // Check of hij ooit is voltooid
                     const isEverCompleted = item.completedHistory && Object.values(item.completedHistory).some(val => val === true);
-                    // Als hij nooit is voltooid, schuift hij door en wordt hij getoond
                     if (!isEverCompleted) return true;
                 }
                 return false;
             }
 
-            // 3. Herhalende taken
             if (currentDKey < item.dateKey) return false; 
             if (item.repeat === 'daily') return true;
             if (Array.isArray(item.repeat)) return item.repeat.includes(window.selectedDate.getDay());
@@ -452,6 +730,7 @@
             document.getElementById('custom-habit-target').value = "";
             document.getElementById('custom-habit-unit').value = "";
             window.customDays = [];
+            window.currentWorkoutExercises = [];
             document.querySelectorAll('#custom-days-wrapper button').forEach(el => {
                 el.classList.replace('bg-[#20B271]', 'bg-gray-100'); el.classList.replace('text-white', 'text-gray-600');
             });
@@ -466,6 +745,8 @@
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
             document.getElementById('modal-recurrence-extra').classList.add('hidden');
+            document.getElementById('modal-journal-type-switch').classList.add('hidden');
+            document.getElementById('modal-workout-extra').classList.add('hidden');
 
             if(window.currentTab === 'vandaag') {
                 document.getElementById('modal-title').innerText = 'Nieuwe taak';
@@ -474,8 +755,9 @@
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
                 window.setRecurrence('none'); 
             } else if (window.currentTab === 'journal') {
-                document.getElementById('modal-title').innerText = 'Nieuwe notitie';
-                document.getElementById('modal-input').placeholder = 'Waar denk je aan?';
+                document.getElementById('modal-title').innerText = 'Nieuw logboek item';
+                document.getElementById('modal-journal-type-switch').classList.remove('hidden');
+                window.setJournalMode('note');
             }
             setTimeout(() => document.getElementById('modal-input').focus(), 100);
         };
@@ -488,6 +770,8 @@
             document.getElementById('modal-title').innerText = 'Nieuw doel';
             document.getElementById('modal-input').placeholder = 'Naam (bijv. Gitaar spelen)';
             document.getElementById('modal-task-extra').classList.add('hidden');
+            document.getElementById('modal-journal-type-switch').classList.add('hidden');
+            document.getElementById('modal-workout-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
@@ -507,6 +791,8 @@
             document.getElementById('custom-habit-target').value = challenge.target;
             document.getElementById('custom-habit-unit').value = challenge.unit;
             document.getElementById('modal-task-extra').classList.add('hidden');
+            document.getElementById('modal-journal-type-switch').classList.add('hidden');
+            document.getElementById('modal-workout-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
@@ -517,8 +803,7 @@
         window.closeSmartModal = () => document.getElementById('main-modal').classList.add('hidden');
 
         window.saveSmartItem = () => {
-            const title = document.getElementById('modal-input').value;
-            if (title.trim() === "") return;
+            const title = document.getElementById('modal-input').value.trim();
 
             let finalRepeat = window.currentRecurrence;
             if(finalRepeat === 'custom') {
@@ -527,15 +812,39 @@
             }
 
             if (window.modalMode === 'journal') {
-                const emojis = ['🌊', '🌿', '✨', '🧘‍♀️', '☕', '☀️', '💡'];
-                window.journalNotes.push({ id: Date.now(), text: title, dateKey: window.getDateKey(window.selectedDate), displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }), emoji: emojis[Math.floor(Math.random() * emojis.length)] });
+                if (window.journalEntryMode === 'workout') {
+                    if (window.currentWorkoutExercises.length === 0 && title === "") return;
+                    const workoutTitle = title || 'Krachttraining';
+                    window.journalNotes.push({
+                        id: Date.now(),
+                        type: 'workout',
+                        text: workoutTitle,
+                        exercises: JSON.parse(JSON.stringify(window.currentWorkoutExercises)),
+                        dateKey: window.getDateKey(window.selectedDate),
+                        displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+                        emoji: '🏋️‍♂️'
+                    });
+                } else {
+                    if (title === "") return;
+                    const emojis = ['🌊', '🌿', '✨', '🧘‍♀️', '☕', '☀️', '💡'];
+                    window.journalNotes.push({
+                        id: Date.now(),
+                        type: 'note',
+                        text: title,
+                        dateKey: window.getDateKey(window.selectedDate),
+                        displayDate: window.selectedDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }),
+                        emoji: emojis[Math.floor(Math.random() * emojis.length)]
+                    });
+                }
                 window.saveToLocal(); window.renderJournal(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else if (window.modalMode === 'custom_habit') {
+                if (title === "") return;
                 const target = document.getElementById('custom-habit-target').value || 1;
                 const unit = document.getElementById('custom-habit-unit').value || 'keer';
                 window.habits.push({ id: Date.now(), title: title, history: {}, target: parseInt(target), unit: unit, icon: window.customizingIcon, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
                 window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else {
+                if (title === "") return;
                 window.tasks.push({ id: Date.now(), title: title, time: document.getElementById('time-input').value || null, completedHistory: {}, dateKey: window.getDateKey(window.selectedDate), repeat: finalRepeat });
                 window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             }
@@ -593,18 +902,52 @@
             const currentSelectedDateKey = window.getDateKey(window.selectedDate);
             const notesToRender = window.journalNotes.filter(n => n.dateKey === currentSelectedDateKey || (!n.dateKey && currentSelectedDateKey === window.getDateKey(new Date())));
 
-            if(notesToRender.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen notities voor deze dag.</p>`;
+            if(notesToRender.length === 0) list.innerHTML = `<p class="text-gray-400 text-sm">Geen notities of workouts voor deze dag.</p>`;
 
             [...notesToRender].reverse().forEach(n => {
                 const displayDate = n.displayDate || n.date;
-                list.insertAdjacentHTML('beforeend', `
-                    <div class="relative overflow-hidden rounded-3xl w-full">
-                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                        <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full">
-                            <div class="flex justify-between items-center mb-2 pointer-events-none"><span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">${displayDate}</span><span class="text-xl">${n.emoji}</span></div>
-                            <p class="text-sm text-gray-700 pointer-events-none">${n.text}</p>
+
+                if (n.type === 'workout' && Array.isArray(n.exercises)) {
+                    const exercisesHTML = n.exercises.map(ex => {
+                        const setsPills = ex.sets.map((s, idx) => 
+                            `<span class="inline-block bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded-lg mr-1.5 mb-1.5"><span class="text-gray-400 mr-1">#${idx+1}</span>${s.weight || 0}kg × ${s.reps || 0}</span>`
+                        ).join('');
+                        return `
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="font-bold text-sm text-gray-900">${ex.name}</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#20B271] bg-[#20B271]/10 px-2 py-0.5 rounded-md">${ex.muscle || ''}</span>
+                                </div>
+                                <div class="flex flex-wrap">${setsPills}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="relative overflow-hidden rounded-3xl w-full">
+                            <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border-2 border-[#20B271]/20 w-full">
+                                <div class="flex justify-between items-center pointer-events-none">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs font-bold text-[#20B271] bg-[#20B271]/10 px-3 py-1.5 rounded-lg">${displayDate} • Workout</span>
+                                    </div>
+                                    <span class="text-xl">${n.emoji || '🏋️‍♂️'}</span>
+                                </div>
+                                <h3 class="font-extrabold text-gray-900 text-lg mt-2 pointer-events-none">${n.text}</h3>
+                                <div class="pointer-events-none">${exercisesHTML}</div>
+                            </div>
                         </div>
-                    </div>`);
+                    `);
+                } else {
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="relative overflow-hidden rounded-3xl w-full">
+                            <div class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="card-journal-${n.id}" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 bg-white p-5 rounded-3xl shadow-sm border border-gray-100 w-full">
+                                <div class="flex justify-between items-center mb-2 pointer-events-none"><span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">${displayDate}</span><span class="text-xl">${n.emoji}</span></div>
+                                <p class="text-sm text-gray-700 pointer-events-none">${n.text}</p>
+                            </div>
+                        </div>`);
+                }
             });
         };
 
@@ -845,7 +1188,7 @@
             setTimeout(()=>{btn.innerHTML='+ Voeg toe'; btn.classList.replace('bg-[#20B271]','bg-gray-50'); btn.classList.replace('text-white','text-[#20B271]');}, 1500);
         };
 
-        // ALTIJD DIRECT TEKENEN (Voorkomt lege schermen)
+        // ALTIJD DIRECT TEKENEN
         window.generateCalendar();
         window.renderDiscoverList(window.discoverChallenges); 
         window.renderTasks();
