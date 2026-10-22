@@ -78,13 +78,18 @@
             pointer-events: none;
         }
 
-        /* Soft modern card */
+        /* Volledig dekkende moderne kaart (zodat achterliggende lagen nooit doorschijnen) */
         .soft-card {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: #FFFFFF;
             box-shadow: 0 6px 24px -6px rgba(24, 24, 27, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.85);
+            border: 1px solid #FFFFFF;
+        }
+
+        /* Voltooide taak kaart: rustig en heel licht grijs */
+        .completed-task-card {
+            background: #F2F2F0;
+            border: 1px solid #E6E5E2;
+            box-shadow: none;
         }
 
         /* Modal dreamy gradient surface */
@@ -137,7 +142,7 @@
         <div class="flex justify-between items-center mb-3.5">
             <div class="flex items-center space-x-3 min-w-0">
                 <div id="avatar-container" onclick="window.logoutGoogle()" class="relative cursor-pointer hover:opacity-85 transition-opacity shrink-0" title="Uitloggen">
-                    <div class="w-11 h-11 rounded-full bg-white/90 border-2 border-white shadow-sm flex items-center justify-center text-base">👤</div>
+                    <div class="w-11 h-11 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center text-base">👤</div>
                 </div>
                 <div class="min-w-0">
                     <p id="user-time-greeting" class="text-[11px] font-semibold text-gray-500 leading-tight">Goedemorgen</p>
@@ -150,7 +155,7 @@
                 <button onclick="window.openSmartModal()" class="w-10 h-10 rounded-full bg-[#161618] text-white shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all" title="Nieuw item toevoegen">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"></path></svg>
                 </button>
-                <div class="relative w-10 h-10 rounded-full bg-white/95 shadow-sm border border-white flex items-center justify-center cursor-pointer hover:bg-white transition-all overflow-hidden" title="Kies een datum">
+                <div class="relative w-10 h-10 rounded-full bg-white shadow-sm border border-white flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-all overflow-hidden" title="Kies een datum">
                     <svg class="w-4 h-4 text-[#161618] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
                         <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -167,13 +172,13 @@
             <h1 id="hero-headline" class="text-[24px] leading-[1.16] font-extrabold tracking-tight text-[#161618]">
                 Laten we vandaag<br>productief maken
             </h1>
-            <button onclick="window.resetToToday()" id="today-pill-btn" class="bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs border border-white flex items-center space-x-1.5 text-[#161618] hover:bg-white active:scale-95 transition-all shrink-0">
+            <button onclick="window.resetToToday()" id="today-pill-btn" class="bg-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs border border-white flex items-center space-x-1.5 text-[#161618] hover:bg-gray-50 active:scale-95 transition-all shrink-0">
                 <span class="w-2 h-2 rounded-full bg-[#CBE86B] ring-2 ring-[#A5C838]/30"></span>
                 <span id="current-month-text" class="capitalize">Vandaag</span>
             </button>
         </div>
 
-        <!-- Kalender Strip: 7 dagen passen nu precies in beeld op iPhone 17 Pro Max -->
+        <!-- Kalender Strip: 7 dagen passen precies in beeld op iPhone 17 Pro Max -->
         <div id="calendar-container">
             <div class="flex space-x-2 overflow-x-auto calendar-scroll py-1" id="calendar-strip"></div>
         </div>
@@ -268,7 +273,7 @@
                 <h2 class="text-lg font-extrabold mt-2">Goede voortgang! ✨</h2>
                 <p class="text-xs text-white/60 mt-0.5 font-medium">Blijf bouwen aan je gewoontes</p>
             </div>
-            <div class="w-18 h-18 w-[72px] h-[72px] rounded-full flex items-center justify-center relative shrink-0">
+            <div class="w-[72px] h-[72px] rounded-full flex items-center justify-center relative shrink-0">
                 <span id="daily-focus-text" class="text-sm font-extrabold text-white">0%</span>
                 <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <path class="text-white/10" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"/>
@@ -293,7 +298,7 @@
                 <span>Workout historie</span>
             </button>
         </div>
-        <button onclick="window.openSmartModal()" class="w-full py-3.5 px-4 rounded-[1.5rem] soft-card text-[#161618] font-bold hover:bg-white transition-all mb-4 flex justify-between items-center group">
+        <button onclick="window.openSmartModal()" class="w-full py-3.5 px-4 rounded-[1.5rem] soft-card text-[#161618] font-bold hover:bg-gray-50 transition-all mb-4 flex justify-between items-center group">
             <div class="flex items-center space-x-3">
                 <div class="w-9 h-9 rounded-full bg-[#CBE86B] text-[#161618] flex items-center justify-center font-bold shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -316,7 +321,7 @@
         </button>
 
         <div class="relative mb-4">
-            <input type="text" id="search-discover" oninput="window.filterDiscover()" placeholder="Zoek uit 70+ gezonde gewoontes..." class="w-full py-3.5 px-4 pl-11 bg-white/95 border border-white rounded-full outline-none focus:ring-2 focus:ring-[#161618] text-[#161618] placeholder-gray-400 font-medium shadow-xs transition-all">
+            <input type="text" id="search-discover" oninput="window.filterDiscover()" placeholder="Zoek uit 70+ gezonde gewoontes..." class="w-full py-3.5 px-4 pl-11 bg-white border border-white rounded-full outline-none focus:ring-2 focus:ring-[#161618] text-[#161618] placeholder-gray-400 font-medium shadow-xs transition-all">
             <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <div id="discover-list" class="grid grid-cols-2 gap-3 pb-6"></div>
@@ -386,7 +391,7 @@
             <!-- Titel veld -->
             <div id="modal-title-group" class="mb-4">
                 <label id="modal-input-label" class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Titel</label>
-                <input type="text" id="modal-input" placeholder="Bijv. Landing page ontwerpen..." class="w-full px-4 py-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-semibold placeholder-gray-400 shadow-xs border border-white">
+                <input type="text" id="modal-input" placeholder="Bijv. Camera spullen klaarleggen..." class="w-full px-4 py-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-semibold placeholder-gray-400 shadow-xs border border-white">
             </div>
             
             <!-- Uitgebreide tekst voor Journal Notities -->
@@ -395,10 +400,39 @@
                 <textarea id="journal-note-body" rows="5" placeholder="Schrijf je gedachten of notitie hier..." class="w-full p-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none shadow-xs border border-white"></textarea>
             </div>
 
-            <!-- Extra velden voor Taken -->
+            <!-- Extra velden voor Taken (Subtaken, Kleur, Beschrijving, Tijd & Prioriteit) -->
             <div id="modal-task-extra" class="space-y-4 mb-4">
+                
+                <!-- SUBTAKEN / CHECKLIST SECTIE -->
                 <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Beschrijving</label>
+                    <div class="flex items-center justify-between mb-1.5 px-1">
+                        <label class="text-xs font-bold text-[#161618]">Subtaken (optioneel)</label>
+                        <span class="text-[11px] font-medium text-gray-400">Bijv. Batterij opladen, Rekenen...</span>
+                    </div>
+                    <div id="modal-subtasks-list" class="space-y-2 mb-2"></div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="subtask-input" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addSubtaskFromModal();}" placeholder="Voeg een subtaak toe..." class="flex-1 px-4 py-3 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium placeholder-gray-400 shadow-xs border border-white">
+                        <button type="button" onclick="window.addSubtaskFromModal()" class="w-11 h-11 rounded-2xl bg-[#161618] text-white font-bold text-lg flex items-center justify-center shrink-0 hover:bg-black active:scale-95 transition-all shadow-xs" title="Subtaak toevoegen">+</button>
+                    </div>
+                </div>
+
+                <!-- TAAK KLEUR KIEZER -->
+                <div>
+                    <label class="block text-xs font-bold text-[#161618] mb-2 px-1">Kleur van de taak</label>
+                    <div id="task-color-picker" class="flex items-center justify-between bg-white p-2.5 rounded-2xl shadow-xs border border-white">
+                        <button type="button" onclick="window.setTaskColor('white')" id="color-btn-white" class="w-8 h-8 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center transition-all" title="Standaard Wit"></button>
+                        <button type="button" onclick="window.setTaskColor('purple')" id="color-btn-purple" class="w-8 h-8 rounded-full bg-[#EDE9FE] border-2 border-[#C4B5FD] flex items-center justify-center transition-all" title="Lila / Paars"></button>
+                        <button type="button" onclick="window.setTaskColor('blue')" id="color-btn-blue" class="w-8 h-8 rounded-full bg-[#E0F2FE] border-2 border-[#7DD3FC] flex items-center justify-center transition-all" title="Blauw"></button>
+                        <button type="button" onclick="window.setTaskColor('green')" id="color-btn-green" class="w-8 h-8 rounded-full bg-[#DCFCE7] border-2 border-[#86EFAC] flex items-center justify-center transition-all" title="Mintgroen"></button>
+                        <button type="button" onclick="window.setTaskColor('yellow')" id="color-btn-yellow" class="w-8 h-8 rounded-full bg-[#FEF3C7] border-2 border-[#FCD34D] flex items-center justify-center transition-all" title="Zachtgeel"></button>
+                        <button type="button" onclick="window.setTaskColor('orange')" id="color-btn-orange" class="w-8 h-8 rounded-full bg-[#FFEDD5] border-2 border-[#FDBA74] flex items-center justify-center transition-all" title="Perzik / Oranje"></button>
+                        <button type="button" onclick="window.setTaskColor('pink')" id="color-btn-pink" class="w-8 h-8 rounded-full bg-[#FCE7F3] border-2 border-[#F9A8D4] flex items-center justify-center transition-all" title="Roze"></button>
+                        <button type="button" onclick="window.setTaskColor('teal')" id="color-btn-teal" class="w-8 h-8 rounded-full bg-[#CCFBF1] border-2 border-[#5EEAD4] flex items-center justify-center transition-all" title="Turquoise"></button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Beschrijving / Notitie</label>
                     <textarea id="task-notes-input" rows="2" placeholder="Extra aantekeningen of details (optioneel)..." class="w-full p-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none placeholder-gray-400 shadow-xs border border-white"></textarea>
                 </div>
 
@@ -680,6 +714,8 @@
         window.editingItemId = null;
         window.currentTaskFilter = 'all';
         window.currentTaskPriority = 'medium';
+        window.currentTaskColor = 'white';
+        window.currentModalSubtasks = [];
         
         window.selectedDate = new Date();
         window.selectedDate.setHours(0,0,0,0);
@@ -698,6 +734,119 @@
             localStorage.setItem('cleanHabits', JSON.stringify(window.habits));
             localStorage.setItem('cleanJournal', JSON.stringify(window.journalNotes));
             localStorage.setItem('lastUpdated', Date.now().toString());
+        };
+
+        // --- KLEUREN PALET VOOR TAKEN ---
+        window.taskColorThemes = {
+            white:  { bg: '#FFFFFF', border: '#FFFFFF', accent: '#161618', subBg: '#F6F4F2', swatchBorder: '#D1D5DB', swatchBg: '#FFFFFF' },
+            purple: { bg: '#F5F3FF', border: '#DDD6FE', accent: '#7C3AED', subBg: '#EDE9FE', swatchBorder: '#C4B5FD', swatchBg: '#EDE9FE' },
+            blue:   { bg: '#F0F9FF', border: '#BAE6FD', accent: '#0284C7', subBg: '#E0F2FE', swatchBorder: '#7DD3FC', swatchBg: '#E0F2FE' },
+            green:  { bg: '#F0FDF4', border: '#BBF7D0', accent: '#16A34A', subBg: '#DCFCE7', swatchBorder: '#86EFAC', swatchBg: '#DCFCE7' },
+            yellow: { bg: '#FFFBEB', border: '#FDE68A', accent: '#D97706', subBg: '#FEF3C7', swatchBorder: '#FCD34D', swatchBg: '#FEF3C7' },
+            orange: { bg: '#FFF7ED', border: '#FED7AA', accent: '#EA580C', subBg: '#FFEDD5', swatchBorder: '#FDBA74', swatchBg: '#FFEDD5' },
+            pink:   { bg: '#FDF2F8', border: '#FBCFE8', accent: '#DB2777', subBg: '#FCE7F3', swatchBorder: '#F9A8D4', swatchBg: '#FCE7F3' },
+            teal:   { bg: '#F0FDFA', border: '#99F6E4', accent: '#0D9488', subBg: '#CCFBF1', swatchBorder: '#5EEAD4', swatchBg: '#CCFBF1' }
+        };
+
+        window.setTaskColor = (colorKey) => {
+            if (!window.taskColorThemes[colorKey]) colorKey = 'white';
+            window.currentTaskColor = colorKey;
+            Object.keys(window.taskColorThemes).forEach(k => {
+                const btn = document.getElementById(`color-btn-${k}`);
+                if (!btn) return;
+                if (k === colorKey) {
+                    btn.classList.add('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
+                    btn.innerHTML = `<svg class="w-3.5 h-3.5 text-[#161618]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                } else {
+                    btn.classList.remove('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
+                    btn.innerHTML = '';
+                }
+            });
+        };
+
+        // --- SUBTAKEN LOGICA IN MODAL EN OP TAAKKAART ---
+        window.renderModalSubtasks = () => {
+            const container = document.getElementById('modal-subtasks-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            window.currentModalSubtasks.forEach((st, idx) => {
+                const safeTitle = (st.title || '').replace(/"/g, '&quot;');
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center space-x-2 bg-white px-3.5 py-2.5 rounded-2xl border border-white shadow-xs">
+                        <span class="w-4 h-4 rounded-md border-2 border-gray-300 shrink-0"></span>
+                        <input type="text" value="${safeTitle}" oninput="window.updateModalSubtaskTitle(${idx}, this.value)" class="flex-1 bg-transparent outline-none text-[#161618] font-semibold text-sm" placeholder="Subtaak...">
+                        <button type="button" onclick="window.removeModalSubtask(${idx})" class="w-7 h-7 rounded-full bg-[#F6F4F2] text-gray-400 hover:text-red-500 flex items-center justify-center text-xs font-bold shrink-0">✕</button>
+                    </div>
+                `);
+            });
+        };
+
+        window.addSubtaskFromModal = () => {
+            const input = document.getElementById('subtask-input');
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) return;
+            window.currentModalSubtasks.push({
+                id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                title: val,
+                completed: false,
+                completedHistory: {}
+            });
+            input.value = '';
+            window.renderModalSubtasks();
+            input.focus();
+        };
+
+        window.updateModalSubtaskTitle = (idx, val) => {
+            if (window.currentModalSubtasks[idx]) {
+                window.currentModalSubtasks[idx].title = val;
+            }
+        };
+
+        window.removeModalSubtask = (idx) => {
+            window.currentModalSubtasks.splice(idx, 1);
+            window.renderModalSubtasks();
+        };
+
+        window.isSubtaskDone = (task, subtask, dateKey) => {
+            const isRepeating = task.repeat && task.repeat !== 'none';
+            if (isRepeating) {
+                return !!(subtask.completedHistory && subtask.completedHistory[dateKey]);
+            }
+            if (subtask.completedHistory && subtask.completedHistory[dateKey] !== undefined) {
+                return !!subtask.completedHistory[dateKey];
+            }
+            return !!subtask.completed;
+        };
+
+        window.toggleSubtask = (e, taskId, subtaskId) => {
+            if (e) e.stopPropagation();
+            if (window.isSwiping) return;
+            const task = window.tasks.find(t => t.id === taskId);
+            if (!task || !Array.isArray(task.subtasks)) return;
+
+            const st = task.subtasks.find(s => String(s.id) === String(subtaskId));
+            if (!st) return;
+
+            const dKey = window.getDateKey(window.selectedDate);
+            if (!st.completedHistory) st.completedHistory = {};
+            const currentStatus = window.isSubtaskDone(task, st, dKey);
+            const nextStatus = !currentStatus;
+
+            st.completedHistory[dKey] = nextStatus;
+            st.completed = nextStatus;
+
+            // Als alle subtaken zijn afgevinkt, vink de hoofdtaak automatisch mee aan (en andersom als er eentje open gezet wordt)
+            if (task.subtasks.length > 0) {
+                const allSubtasksDone = task.subtasks.every(s => window.isSubtaskDone(task, s, dKey));
+                if (!task.completedHistory) task.completedHistory = {};
+                task.completedHistory[dKey] = allSubtasksDone;
+            }
+
+            window.saveToLocal();
+            window.renderTasks();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
         };
 
         // --- TAAK PRIORITEIT & FILTER LOGICA ---
@@ -750,7 +899,6 @@
             'Core': ['Plank', 'Cable Crunch', 'Hanging Leg Raises', 'Russian Twist', 'Ab Wheel Rollout', 'Sit-ups']
         };
 
-        // SVG Illustratie generator per bewegingspatroon (scherp op Retina, werkt altijd offline & online)
         window.getExerciseSVG = (svgType) => {
             const svgs = {
                 bench: `<svg viewBox="0 0 64 64" class="w-full h-full" fill="none">
@@ -877,7 +1025,6 @@
             return svgs[svgType] || svgs.bench;
         };
 
-        // Gedetailleerde instructies & metadata voor alle oefeningen
         window.exerciseGuideDB = {
             'Bench Press (Barbell)': {
                 svg: 'bench',
@@ -1283,7 +1430,6 @@
 
         window.getExerciseInfo = (name, muscle) => {
             if (window.exerciseGuideDB[name]) return window.exerciseGuideDB[name];
-            // Slimme fallback voor eigen toegevoegde oefeningen
             const mMap = { 'Borst': 'bench', 'Rug': 'row', 'Benen': 'squat', 'Schouders': 'shoulder', 'Armen': 'curl', 'Core': 'core' };
             return {
                 svg: mMap[muscle] || 'bench',
@@ -1381,7 +1527,7 @@
             });
 
             if (filtered.length === 0) {
-                list.innerHTML = `<div class="bg-white/80 p-6 rounded-3xl text-center text-gray-400 text-sm font-medium border border-white">Geen workouts gevonden.</div>`;
+                list.innerHTML = `<div class="bg-white p-6 rounded-3xl text-center text-gray-400 text-sm font-medium border border-white">Geen workouts gevonden.</div>`;
                 return;
             }
 
@@ -1412,7 +1558,7 @@
                 }).join('');
 
                 list.insertAdjacentHTML('beforeend', `
-                    <div onclick="window.closeWorkoutHistory(); window.editJournalItem(${w.id});" class="bg-white p-4.5 p-5 rounded-[1.75rem] shadow-xs border border-white cursor-pointer hover:border-[#161618]/20 transition-all">
+                    <div onclick="window.closeWorkoutHistory(); window.editJournalItem(${w.id});" class="bg-white p-5 rounded-[1.75rem] shadow-xs border border-white cursor-pointer hover:border-[#161618]/20 transition-all">
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold text-[#161618] bg-[#CBE86B] px-3 py-1 rounded-full">${w.displayDate || w.dateKey}</span>
                             <span class="text-xs font-bold text-gray-400 flex items-center">✎ Bewerken</span>
@@ -1521,7 +1667,6 @@
 
                 list.insertAdjacentHTML('beforeend', `
                     <div onclick="window.selectExerciseFromPicker('${safeName}', '${safeMuscle}')" class="p-3 rounded-2xl bg-white hover:bg-gray-50 border border-white shadow-xs flex items-center space-x-3 cursor-pointer transition-colors">
-                        <!-- Mini workout afbeelding / illustratie -->
                         <div onclick="window.openExerciseInfo(event, '${safeName}', '${safeMuscle}')" class="w-14 h-14 rounded-2xl bg-[#F6F4F2] p-2 shrink-0 flex items-center justify-center relative group" title="Bekijk uitvoering">
                             ${window.getExerciseSVG(info.svg)}
                             <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#161618] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">i</span>
@@ -1598,7 +1743,7 @@
             container.innerHTML = '';
 
             if (window.currentWorkoutExercises.length === 0) {
-                container.innerHTML = `<div class="p-4 rounded-2xl bg-white/70 border border-white text-center text-xs text-gray-400 font-medium">Nog geen oefeningen toegevoegd aan deze workout.</div>`;
+                container.innerHTML = `<div class="p-4 rounded-2xl bg-white border border-white text-center text-xs text-gray-400 font-medium">Nog geen oefeningen toegevoegd aan deze workout.</div>`;
                 return;
             }
 
@@ -1642,7 +1787,6 @@
                 container.insertAdjacentHTML('beforeend', `
                     <div class="p-4 rounded-[1.5rem] bg-white border border-white shadow-xs">
                         <div class="flex items-start space-x-3 mb-2.5">
-                            <!-- Workout illustratie links -->
                             <div onclick="window.openExerciseInfo(event, '${safeName}', '${safeMuscle}')" class="w-14 h-14 rounded-2xl bg-[#F6F4F2] p-2 shrink-0 flex items-center justify-center cursor-pointer relative" title="Tik voor uitvoering & instructie">
                                 ${window.getExerciseSVG(info.svg)}
                                 <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#161618] text-white text-[10px] font-bold flex items-center justify-center">i</span>
@@ -1732,7 +1876,7 @@
             return false;
         };
 
-        // --- KALENDER (Verticale capsule pills exact passend op iPhone 17 Pro Max) ---
+        // --- KALENDER ---
         window.resetToToday = () => { 
             window.selectedDate = new Date(); window.selectedDate.setHours(0,0,0,0); 
             window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal();
@@ -1774,7 +1918,7 @@
                 const isActualToday = d.getTime() === actualToday.getTime();
                 const dayLabel = d.toLocaleDateString('nl-NL',{weekday:'short'}).replace('.', '');
                 
-                let pillClass = 'bg-white/85 text-gray-500 hover:bg-white shadow-xs border border-white';
+                let pillClass = 'bg-white text-gray-500 hover:bg-gray-50 shadow-xs border border-white';
                 let circleClass = 'bg-transparent text-[#161618]';
 
                 if (isSelected) {
@@ -1833,9 +1977,14 @@
             document.getElementById('time-input').value = "";
             document.getElementById('custom-habit-target').value = "";
             document.getElementById('custom-habit-unit').value = "";
+            const stInput = document.getElementById('subtask-input');
+            if (stInput) stInput.value = "";
             window.customDays = [];
             window.currentWorkoutExercises = [];
+            window.currentModalSubtasks = [];
+            window.renderModalSubtasks();
             window.setTaskPriority('medium');
+            window.setTaskColor('white');
             const modalDateDisplay = document.getElementById('modal-date-display');
             if (modalDateDisplay) {
                 modalDateDisplay.innerText = window.selectedDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1861,7 +2010,7 @@
             if(window.currentTab === 'vandaag') {
                 document.getElementById('modal-title').innerText = 'Nieuwe taak toevoegen';
                 document.getElementById('modal-input-label').innerText = 'Taak Titel';
-                document.getElementById('modal-input').placeholder = 'Wat ga je doen?';
+                document.getElementById('modal-input').placeholder = 'Bijv. Camera spullen of IEP Toetsen...';
                 document.getElementById('modal-submit-btn').innerText = 'Taak Aanmaken';
                 document.getElementById('modal-task-extra').classList.remove('hidden');
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
@@ -1892,6 +2041,11 @@
             document.getElementById('task-notes-input').value = task.notes || '';
             document.getElementById('time-input').value = task.time || '';
             window.setTaskPriority(task.priority || 'medium');
+            window.setTaskColor(task.color || 'white');
+            window.currentModalSubtasks = Array.isArray(task.subtasks)
+                ? JSON.parse(JSON.stringify(task.subtasks))
+                : [];
+            window.renderModalSubtasks();
 
             document.getElementById('modal-task-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
@@ -2058,9 +2212,20 @@
                 window.saveToLocal(); window.renderHabits(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
             } else {
                 if (title === "") return;
+                // Als de gebruiker nog tekst in het subtaakveld had staan zonder op + te drukken, voeg die direct mee toe!
+                const pendingSubtaskInput = document.getElementById('subtask-input');
+                if (pendingSubtaskInput && pendingSubtaskInput.value.trim() !== '') {
+                    window.addSubtaskFromModal();
+                }
+
+                const cleanedSubtasks = window.currentModalSubtasks
+                    .map(s => ({ ...s, title: (s.title || '').trim() }))
+                    .filter(s => s.title !== '');
+
                 const taskNotes = document.getElementById('task-notes-input').value.trim();
                 const taskTime = document.getElementById('time-input').value || null;
                 const taskPriority = window.currentTaskPriority || 'medium';
+                const taskColor = window.currentTaskColor || 'white';
 
                 if (window.editingItemId) {
                     const existingTask = window.tasks.find(t => t.id === window.editingItemId);
@@ -2070,6 +2235,8 @@
                         existingTask.time = taskTime;
                         existingTask.repeat = finalRepeat;
                         existingTask.priority = taskPriority;
+                        existingTask.color = taskColor;
+                        existingTask.subtasks = cleanedSubtasks;
                     }
                 } else {
                     window.tasks.push({ 
@@ -2078,6 +2245,8 @@
                         notes: taskNotes,
                         time: taskTime, 
                         priority: taskPriority,
+                        color: taskColor,
+                        subtasks: cleanedSubtasks,
                         completedHistory: {}, 
                         dateKey: window.getDateKey(window.selectedDate), 
                         repeat: finalRepeat 
@@ -2095,7 +2264,18 @@
             if(task) { 
                 const dKey = window.getDateKey(window.selectedDate);
                 if(!task.completedHistory) task.completedHistory = {};
-                task.completedHistory[dKey] = !task.completedHistory[dKey]; 
+                const newStatus = !task.completedHistory[dKey];
+                task.completedHistory[dKey] = newStatus;
+
+                // Als de hoofdtaak wordt aangevinkt/uitgevinkt, zet alle subtaken voor deze dag netjes mee
+                if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+                    task.subtasks.forEach(st => {
+                        if (!st.completedHistory) st.completedHistory = {};
+                        st.completedHistory[dKey] = newStatus;
+                        st.completed = newStatus;
+                    });
+                }
+
                 window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
             }
         };
@@ -2154,37 +2334,99 @@
             };
 
             tasksToRender.forEach(t => {
-                const isCompleted = t.completedHistory ? t.completedHistory[currentSelectedDateKey] : t.completed;
-                const checkedCard = isCompleted ? 'opacity-65 bg-white/60' : 'soft-card';
+                const isCompleted = !!(t.completedHistory ? t.completedHistory[currentSelectedDateKey] : t.completed);
+                const colorKey = t.color || 'white';
+                const theme = window.taskColorThemes[colorKey] || window.taskColorThemes.white;
+
+                // Wanneer een taak voldaan is: heel licht grijs (#F2F2F0) zonder enige rode schijn!
+                // Wanneer een taak nog open staat: de door de gebruiker gekozen kleur!
+                const cardStyle = isCompleted
+                    ? `background-color: #F2F2F0; border: 1px solid #E5E5E2;`
+                    : `background-color: ${theme.bg}; border: 1.5px solid ${theme.border}; box-shadow: 0 6px 24px -6px rgba(24,24,27,0.05);`;
+
                 const checkedText = isCompleted ? 'line-through text-gray-400' : 'text-[#161618]';
-                const checkIcon = isCompleted ? 'bg-[#161618] border-[#161618] text-[#CBE86B]' : 'border-gray-300 bg-white hover:border-[#161618]';
+                const checkIcon = isCompleted
+                    ? 'bg-gray-300 border-gray-300 text-white'
+                    : 'border-gray-300 bg-white hover:border-[#161618]';
                 
                 const pKey = t.priority || 'medium';
                 const pInfo = prioMeta[pKey] || prioMeta.medium;
 
+                // Als taak voldaan is, maak ook de prioriteitsbadge rustig lichtgrijs i.p.v. rood/oranje
+                const prioBadgeHTML = isCompleted
+                    ? `<span class="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gray-200/70 text-gray-500 border border-gray-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                        <span>Voltooid</span>
+                       </span>`
+                    : `<span class="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${pInfo.badge}">
+                        <span class="w-1.5 h-1.5 rounded-full ${pInfo.dot}"></span>
+                        <span>${pInfo.label}</span>
+                       </span>`;
+
                 const repBadge = (t.repeat && t.repeat !== 'none')
-                    ? `<span class="inline-flex items-center space-x-1 text-[10px] font-bold text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full">
+                    ? `<span class="inline-flex items-center space-x-1 text-[10px] font-bold ${isCompleted ? 'text-gray-400 bg-gray-200/60' : 'text-purple-700 bg-purple-100/80'} px-2.5 py-0.5 rounded-full">
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         Herhalend
                        </span>`
                     : '';
 
+                // Subtaken opbouwen indien aanwezig
+                const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
+                let subtasksHTML = '';
+                let subtaskCountBadge = '';
+
+                if (subtasks.length > 0) {
+                    const doneSubCount = subtasks.filter(st => window.isSubtaskDone(t, st, currentSelectedDateKey)).length;
+                    subtaskCountBadge = `
+                        <span class="inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isCompleted ? 'bg-gray-200/70 text-gray-500' : 'bg-white/90 text-gray-700 border border-black/5'}">
+                            ✓ ${doneSubCount}/${subtasks.length}
+                        </span>
+                    `;
+
+                    const itemsHTML = subtasks.map(st => {
+                        const stDone = window.isSubtaskDone(t, st, currentSelectedDateKey);
+                        const stBoxClass = stDone
+                            ? 'bg-gray-300 border-gray-300 text-white'
+                            : 'bg-white border-gray-300';
+                        const stTextClass = stDone
+                            ? 'line-through text-gray-400'
+                            : 'text-gray-800';
+                        const stRowBg = stDone
+                            ? 'bg-gray-200/40'
+                            : 'bg-white/80 hover:bg-white';
+
+                        return `
+                            <div onclick="window.toggleSubtask(event, ${t.id}, '${st.id}')" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl ${stRowBg} border border-black/[0.03] cursor-pointer transition-all">
+                                <div class="w-4 h-4 rounded-md border ${stBoxClass} flex items-center justify-center shrink-0 transition-all">
+                                    ${stDone ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                                </div>
+                                <span class="text-xs font-semibold ${stTextClass} leading-snug select-none">${st.title}</span>
+                            </div>
+                        `;
+                    }).join('');
+
+                    subtasksHTML = `
+                        <div class="mt-3 pl-8 space-y-1.5 z-20 relative">
+                            ${itemsHTML}
+                        </div>
+                    `;
+                }
+
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0">
+                        <!-- Swipe-verwijder achtergrond: standaard onzichtbaar (opacity: 0) zodat rood NOOIT doorschijnt -->
+                        <div id="delete-bg-task-${t.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </div>
-                        <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id})" class="relative z-10 ${checkedCard} p-4 rounded-[1.5rem] flex flex-col justify-between w-full cursor-pointer transition-all duration-300">
+                        <div id="card-task-${t.id}" style="${cardStyle}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id})" class="relative z-10 p-4 rounded-[1.5rem] flex flex-col justify-between w-full cursor-pointer transition-all duration-300">
                             
                             <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-2 flex-wrap gap-y-1 pointer-events-none">
-                                    <span class="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${pInfo.badge}">
-                                        <span class="w-1.5 h-1.5 rounded-full ${pInfo.dot}"></span>
-                                        <span>${pInfo.label}</span>
-                                    </span>
+                                <div class="flex items-center space-x-1.5 flex-wrap gap-y-1 pointer-events-none">
+                                    ${prioBadgeHTML}
+                                    ${subtaskCountBadge}
                                     ${repBadge}
                                 </div>
-                                <button onclick="window.editTaskItem(event, ${t.id})" class="w-7 h-7 rounded-full bg-[#F6F4F2] hover:bg-gray-200/70 text-[#161618] flex items-center justify-center shrink-0 transition-colors z-20 text-xs font-bold" title="Taak bewerken">
+                                <button onclick="window.editTaskItem(event, ${t.id})" class="w-7 h-7 rounded-full bg-white/80 hover:bg-white text-[#161618] flex items-center justify-center shrink-0 transition-colors z-20 text-xs font-bold shadow-2xs" title="Taak bewerken">
                                     ↗
                                 </button>
                             </div>
@@ -2195,18 +2437,20 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-extrabold text-[15px] ${checkedText} leading-snug transition-all">${t.title}</h3>
-                                    ${t.notes ? `<p class="text-xs text-gray-500 mt-1 whitespace-pre-line leading-relaxed">${t.notes}</p>` : ''}
+                                    ${t.notes ? `<p class="text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-600'} mt-1 whitespace-pre-line leading-relaxed">${t.notes}</p>` : ''}
                                 </div>
                             </div>
 
+                            ${subtasksHTML}
+
                             ${t.time ? `
-                            <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100/80 pointer-events-none">
-                                <div class="flex items-center space-x-1.5 text-xs font-semibold text-gray-500">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+                            <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-black/5 pointer-events-none">
+                                <div class="flex items-center space-x-1.5 text-xs font-semibold ${isCompleted ? 'text-gray-400' : 'text-gray-600'}">
+                                    <svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
                                     <span>${t.time}</span>
                                 </div>
-                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isCompleted ? 'bg-[#CBE86B]/40 text-[#161618]' : 'bg-gray-100 text-gray-500'}">
-                                    ${isCompleted ? 'Voltooid' : 'Gepland'}
+                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isCompleted ? 'bg-gray-200/80 text-gray-500' : 'bg-white/80 text-gray-700'}">
+                                    ${isCompleted ? 'Voldaan' : 'Gepland'}
                                 </span>
                             </div>` : ''}
                         </div>
@@ -2240,7 +2484,6 @@
                         ).join('');
                         return `
                             <div class="mt-3 pt-3 border-t border-gray-100 flex items-start space-x-3">
-                                <!-- Kleine afbeelding van de oefening (tikbaar voor uitleg) -->
                                 <div onclick="window.openExerciseInfo(event, '${safeName}', '${safeMuscle}')" class="w-12 h-12 rounded-2xl bg-[#F6F4F2] p-1.5 shrink-0 flex items-center justify-center relative cursor-pointer" title="Bekijk uitvoering">
                                     ${window.getExerciseSVG(info.svg)}
                                     <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#161618] text-white text-[9px] font-bold flex items-center justify-center">i</span>
@@ -2259,7 +2502,7 @@
 
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                            <div class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                             <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20 transition-all">
                                 <div class="flex justify-between items-center pointer-events-none">
                                     <span class="text-xs font-bold text-[#161618] bg-[#CBE86B] px-3 py-1 rounded-full">${displayDate} • Workout</span>
@@ -2275,7 +2518,7 @@
                 } else {
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                            <div class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                             <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20 transition-all">
                                 <div class="flex justify-between items-center mb-2 pointer-events-none">
                                     <span class="text-xs font-bold text-gray-600 bg-[#F6F4F2] px-3 py-1 rounded-full">${displayDate}</span>
@@ -2387,7 +2630,7 @@
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                        <div class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                        <div id="delete-bg-habit-${h.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                         <div id="card-habit-${h.id}" ontouchstart="window.hTStart(event, ${h.id}, 'habit')" ontouchmove="window.hTMove(event, ${h.id}, 'habit')" ontouchend="window.hTEnd(event, ${h.id}, 'habit')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full flex items-center">
                             
                             <div class="flex-1 cursor-pointer pr-3.5" onclick="window.clickHabit(${h.id})">
@@ -2418,14 +2661,34 @@
             });
         };
 
-        // --- SWIPE ARCHIVEER LOGICA ---
-        window.hTStart = (e, id, t) => { window.startX=e.touches[0].clientX; window.currX=window.startX; window.isSwiping=false; const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transition='none'; };
-        window.hTMove = (e, id, t) => { window.currX=e.touches[0].clientX; const diff=window.currX-window.startX; if(Math.abs(diff)>10) window.isSwiping=true; if(diff<0) {const c=document.getElementById(`card-${t}-${id}`); if(c) c.style.transform=`translateX(${diff}px)`;} };
+        // --- SWIPE ARCHIVEER LOGICA (Achtergrond alleen zichtbaar tijdens daadwerkelijk swipen) ---
+        window.hTStart = (e, id, t) => {
+            window.startX = e.touches[0].clientX;
+            window.currX = window.startX;
+            window.isSwiping = false;
+            const c = document.getElementById(`card-${t}-${id}`);
+            if (c) c.style.transition = 'none';
+        };
+        window.hTMove = (e, id, t) => {
+            window.currX = e.touches[0].clientX;
+            const diff = window.currX - window.startX;
+            if (Math.abs(diff) > 10) window.isSwiping = true;
+            if (diff < 0) {
+                const c = document.getElementById(`card-${t}-${id}`);
+                const bg = document.getElementById(`delete-bg-${t}-${id}`);
+                if (c) c.style.transform = `translateX(${diff}px)`;
+                if (bg) bg.style.opacity = diff < -8 ? '1' : '0';
+            }
+        };
         window.hTEnd = (e, id, t) => {
-            const diff=window.currX-window.startX; const c=document.getElementById(`card-${t}-${id}`); if(!c) return; c.style.transition='transform 0.3s';
-            if(diff<-80) { 
-                c.style.transform=`translateX(-120%)`; 
-                setTimeout(()=>{ 
+            const diff = window.currX - window.startX;
+            const c = document.getElementById(`card-${t}-${id}`);
+            const bg = document.getElementById(`delete-bg-${t}-${id}`);
+            if (!c) return;
+            c.style.transition = 'transform 0.3s';
+            if (diff < -80) { 
+                c.style.transform = `translateX(-120%)`; 
+                setTimeout(() => { 
                     const currentDKey = window.getDateKey(window.selectedDate);
                     
                     if(t==='task') {
@@ -2456,7 +2719,8 @@
                     if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
                 }, 300); 
             } else { 
-                c.style.transform=`translateX(0)`; 
+                c.style.transform = `translateX(0)`;
+                if (bg) bg.style.opacity = '0';
             }
         };
 
