@@ -1042,14 +1042,14 @@
         </div>
     </div>
 
-    <!-- POPUP VENSTER: KOOKBOEK RECEPT DETAILS -->
+    <!-- POPUP VENSTER: GERECHT & RECEPT DETAILS (KOOKBOEK + DAGSCHEMA BEWERKEN) -->
     <div id="recipe-detail-modal" class="hidden fixed inset-0 bg-[#161618]/60 backdrop-blur-sm z-[90] flex items-end sm:items-center justify-center">
         <div class="absolute inset-0" onclick="window.closeRecipeDetailModal()"></div>
-        <div class="relative modal-pastel-surface w-full max-w-[440px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-6 safe-bottom-sheet max-h-[88dvh] overflow-y-auto animate-slide-up shadow-2xl border-t border-white">
+        <div class="relative modal-pastel-surface w-full max-w-[440px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-6 safe-bottom-sheet max-h-[90dvh] overflow-y-auto animate-slide-up shadow-2xl border-t border-white">
             <div class="flex justify-between items-start mb-4">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 min-w-0 pr-2">
                     <div id="recipe-modal-icon" class="w-12 h-12 rounded-2xl bg-white shadow-xs flex items-center justify-center text-2xl shrink-0">🥗</div>
-                    <div>
+                    <div class="min-w-0">
                         <span id="recipe-modal-type" class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#CBE86B] text-[#161618]">Ontbijt</span>
                         <h3 id="recipe-modal-title" class="text-lg font-extrabold text-[#161618] leading-tight mt-1">Recept</h3>
                     </div>
@@ -1060,19 +1060,54 @@
             <!-- Macro balk -->
             <div id="recipe-modal-macros" class="grid grid-cols-5 gap-1.5 mb-4"></div>
 
-            <!-- Coach tip bij recept -->
+            <!-- AI Voedingsassistent tip bij gerecht -->
             <div id="recipe-modal-tip" class="bg-[#161618] text-white rounded-3xl p-3.5 mb-4 text-xs leading-relaxed"></div>
 
-            <!-- Ingrediënten -->
+            <!-- Ingrediënten / Wat heb je nodig -->
             <div class="bg-white rounded-3xl p-4 shadow-xs border border-white mb-3.5">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block mb-2">🛒 Ingrediënten (1 persoon)</span>
+                <div class="flex items-center justify-between mb-2">
+                    <span id="recipe-modal-ing-header" class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">🛒 Wat heb je nodig (Ingrediënten)</span>
+                </div>
                 <ul id="recipe-modal-ingredients" class="space-y-1.5 text-xs font-semibold text-[#161618]"></ul>
+
+                <!-- Extra ingrediënt toevoegen (zichtbaar vanuit Dagschema) -->
+                <div id="recipe-modal-edit-ing-box" class="hidden mt-3 pt-3 border-t border-gray-100">
+                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1.5">Extra ingrediënt of aanpassing toevoegen</label>
+                    <div class="flex items-center space-x-1.5">
+                        <input type="text" id="recipe-modal-new-ing" placeholder="Bijv. + 15g walnoten, kaneel of extra groente..." onkeydown="if(event.key==='Enter'){event.preventDefault();window.addIngredientToLoggedMeal();}" class="flex-1 px-3 py-2 bg-[#F6F4F2] rounded-xl text-xs font-semibold text-[#161618] outline-none">
+                        <button type="button" onclick="window.addIngredientToLoggedMeal()" class="px-3.5 py-2 rounded-xl bg-[#161618] text-white text-xs font-extrabold shrink-0 hover:bg-black transition-all">+ Voeg toe</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Bereidingswijze -->
-            <div class="bg-white rounded-3xl p-4 shadow-xs border border-white mb-5">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block mb-2.5">👩‍🍳 Bereiding</span>
+            <!-- Bereidingswijze / Hoe maak je het -->
+            <div class="bg-white rounded-3xl p-4 shadow-xs border border-white mb-4">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block mb-2.5">👩‍🍳 Hoe maak je het (Bereiding)</span>
                 <div id="recipe-modal-steps" class="space-y-2.5 text-xs text-gray-700 leading-relaxed"></div>
+            </div>
+
+            <!-- Acties vanuit Dagschema (Portie aanpassen, Extra product zoeken, Gerecht wisselen) -->
+            <div id="recipe-modal-dagschema-actions" class="hidden bg-white rounded-3xl p-4 shadow-xs border border-white mb-4 space-y-3">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block">⚙️ Gerecht aanpassen in jouw dagschema</span>
+                <div class="flex items-center justify-between bg-[#F6F4F2] rounded-2xl px-3.5 py-2.5">
+                    <div>
+                        <span class="text-xs font-extrabold text-[#161618] block">Portiegrootte aanpassen</span>
+                        <span id="recipe-modal-portion-label" class="text-[11px] text-gray-500 font-medium">1 portie</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="window.adjustLoggedMealModalQty(-0.25)" class="w-8 h-8 rounded-full bg-white text-[#161618] font-extrabold text-sm shadow-2xs flex items-center justify-center hover:bg-gray-100">−</button>
+                        <span id="recipe-modal-qty-val" class="text-sm font-extrabold text-[#161618] w-10 text-center">1×</span>
+                        <button type="button" onclick="window.adjustLoggedMealModalQty(0.25)" class="w-8 h-8 rounded-full bg-white text-[#161618] font-extrabold text-sm shadow-2xs flex items-center justify-center hover:bg-gray-100">+</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="recipe-modal-add-extra-product-btn" class="py-2.5 px-3 rounded-2xl bg-[#F6F4F2] text-[#161618] font-extrabold text-xs hover:bg-gray-200 transition-all text-center">
+                        + Product erbij kiezen
+                    </button>
+                    <button type="button" id="recipe-modal-swap-recipe-btn" class="py-2.5 px-3 rounded-2xl bg-[#CBE86B]/60 text-[#161618] font-extrabold text-xs hover:bg-[#CBE86B] transition-all text-center">
+                        🔄 Wissel gerecht
+                    </button>
+                </div>
             </div>
 
             <button id="recipe-modal-add-btn" type="button" class="w-full py-4 bg-[#161618] text-white font-extrabold rounded-full text-sm shadow-lg hover:bg-black transition-all">
@@ -5204,33 +5239,9 @@
         };
 
         window.getNutritionCoachAvatarSVG = () => `
-            <svg viewBox="0 0 64 64" class="w-12 h-12 shrink-0 rounded-2xl shadow-xs border border-white" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="64" height="64" rx="16" fill="#161618"/>
-                <circle cx="32" cy="34" r="22" fill="#CBE86B" fill-opacity="0.14"/>
-                <!-- Schouders / Professionele Coach Jas -->
-                <path d="M14 58C14 47.5 21.8 42 32 42C42.2 42 50 47.5 50 58" fill="#FFFFFF"/>
-                <path d="M25 42L32 53L39 42" fill="#CBE86B"/>
-                <path d="M22 43.5L27 56M42 43.5L37 56" stroke="#E5E7EB" stroke-width="1.5" stroke-linecap="round"/>
-                <!-- Stethoscoop / Coach detail -->
-                <path d="M24 44C24 49 27.5 51.5 32 51.5C36.5 51.5 40 49 40 44" stroke="#161618" stroke-width="1.8" stroke-linecap="round"/>
-                <circle cx="38" cy="50" r="2.3" fill="#CBE86B" stroke="#161618" stroke-width="1.4"/>
-                <!-- Hals & Hoofd -->
-                <rect x="28" y="35" width="8" height="9" rx="4" fill="#F4C7A5"/>
-                <path d="M21 25C21 18.9249 25.9249 14 32 14C38.0751 14 43 18.9249 43 25V28C43 34.0751 38.0751 39 32 39C25.9249 39 21 34.0751 21 28V25Z" fill="#FAD6B8"/>
-                <!--Verzorgd Kapsel -->
-                <path d="M19.5 25C19.5 17.5 24.8 12 32 12C39.2 12 44.5 17.5 44.5 25C44.5 22 41.5 18.5 36 18.5C30.5 18.5 26 20.5 21 24.5L19.5 25Z" fill="#2C221E"/>
-                <!-- Bril & Vriendelijke blik -->
-                <rect x="24" y="23.5" width="6.5" height="4.8" rx="2" stroke="#161618" stroke-width="1.5" fill="#FFFFFF" fill-opacity="0.35"/>
-                <rect x="33.5" y="23.5" width="6.5" height="4.8" rx="2" stroke="#161618" stroke-width="1.5" fill="#FFFFFF" fill-opacity="0.35"/>
-                <path d="M30.5 25.5H33.5" stroke="#161618" stroke-width="1.4"/>
-                <circle cx="27.2" cy="25.9" r="1.1" fill="#161618"/>
-                <circle cx="36.8" cy="25.9" r="1.1" fill="#161618"/>
-                <!-- Glimlach -->
-                <path d="M28.5 32.2C29.6 33.6 31 34.2 32 34.2C33 34.2 34.4 33.6 35.5 32.2" stroke="#161618" stroke-width="1.7" stroke-linecap="round"/>
-                <!-- Groene Coach Badge -->
-                <circle cx="50" cy="14" r="6" fill="#CBE86B"/>
-                <path d="M47.5 14L49.3 15.8L52.8 12.3" stroke="#161618" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <div class="w-12 h-12 shrink-0 rounded-2xl overflow-hidden shadow-xs border border-white bg-white">
+                <img src="./ai-voedingsassistent.png" alt="AI Voedingsassistent" class="w-full h-full object-cover object-top" />
+            </div>
         `;
 
         window.getEffectiveProfile = () => {
@@ -5451,6 +5462,7 @@
             const toLogEntry = (rec, qty = 1) => ({
                 id: rec.id,
                 name: rec.title,
+                icon: rec.icon || '🍽️',
                 portion: '1 portie (op maat)',
                 kcal: rec.kcal,
                 p: rec.p,
@@ -5460,6 +5472,9 @@
                 fib: rec.fib || 4.5,
                 schijf5: true,
                 allergens: rec.allergens || [],
+                ingredients: Array.isArray(rec.ingredients) ? [...rec.ingredients] : [],
+                steps: Array.isArray(rec.steps) ? [...rec.steps] : [],
+                coachTip: rec.coachTip || '',
                 qty: qty
             });
 
@@ -5495,7 +5510,7 @@
                 gain: 'gezond aankomen'
             };
 
-            window.aiCoachLastAnswer = `✨ <strong>Kant-en-klaar dagschema opgesteld!</strong> Ik heb een compleet dagmenu klaargezet voor <strong>${goalLabels[prof.goal] || 'jouw doel'}</strong> (${targets.targetKcal} kcal & ${targets.targetProtein}g eiwit), volledig afgestemd op je voorkeuren. Je kunt elk gerecht hieronder direct aanpassen of wisselen.`;
+            window.aiCoachLastAnswer = `✨ <strong>Kant-en-klaar dagschema opgesteld!</strong> Ik heb een compleet dagmenu klaargezet voor <strong>${goalLabels[prof.goal] || 'jouw doel'}</strong> (${targets.targetKcal} kcal & ${targets.targetProtein}g eiwit). <strong>Tip:</strong> Tik hieronder op een gerecht om de benodigdheden en bereiding te bekijken of aan te passen!`;
 
             window.saveToLocal();
             if (typeof window.syncToCloud === 'function') window.syncToCloud();
@@ -5522,7 +5537,7 @@
 
             if (topic === 'protein') {
                 window.aiCoachLastAnswer = remP > 0
-                    ? `💪 <strong>Eiwit-advies van je coach:</strong> Je hebt vandaag nog <strong>${remP} gram eiwit</strong> nodig om je doel van ${targets.targetProtein}g te halen. Topkeuzes: 250g magere kwark of Skyr (+26g eiwit), een blikje tonijn op water (+25g), 150g gegrilde kipreepjes (+34g) of een whey eiwitshake (+24g).`
+                    ? `💪 <strong>Eiwit-advies van je AI Voedingsassistent:</strong> Je hebt vandaag nog <strong>${remP} gram eiwit</strong> nodig om je doel van ${targets.targetProtein}g te halen. Topkeuzes: 250g magere kwark of Skyr (+26g eiwit), een blikje tonijn op water (+25g), 150g gegrilde kipreepjes (+34g) of een whey eiwitshake (+24g).`
                     : `💪 <strong>Top gedaan!</strong> Je zit vandaag al op <strong>${eatenP}g eiwit</strong> (doel: ${targets.targetProtein}g). Je spieren hebben optimaal bouwstoffen voor herstel en groei.`;
             } else if (topic === 'snack_evening') {
                 window.aiCoachLastAnswer = remKcal > 200
@@ -5536,7 +5551,7 @@
             window.renderNutrition();
         };
 
-        // --- DAGSCHEMA & VOEDINGSCOACH RENDER ---
+        // --- DAGSCHEMA & AI VOEDINGSASSISTENT RENDER ---
         window.getDayNutritionLog = (dateKey) => {
             if (!window.nutritionLogs) window.nutritionLogs = {};
             if (!window.nutritionLogs[dateKey]) {
@@ -5657,7 +5672,7 @@
             setMacroBar('fat', totF, targets.targetFat);
             setMacroBar('fib', totFib, targets.targetFiber);
 
-            // Render Voedingscoach & AI Voedingsassistent Kaart (#nutrition-coach-card)
+            // Render AI Voedingsassistent Kaart (#nutrition-coach-card)
             window.renderNutritionCoach({
                 prof, targets, totKcal, totP, totC, totF, totSat, totFib,
                 totalItems, schijf5Items, waterLiters: parseFloat(waterLiters) || 0, sugaryDrinks,
@@ -5672,11 +5687,11 @@
 
             const snacksTarget = Math.max(0, (prof.mealsPerDay || 5) - 3);
             const slotDefs = [
-                { key: 'ontbijt', title: 'Ontbijt', icon: '🌅', sub: 'Goede start van de dag' },
-                { key: 'lunch', title: 'Lunch', icon: '🥪', sub: 'Middagmaaltijd' },
-                { key: 'avondeten', title: 'Avondeten', icon: '🍽️', sub: 'Warme hoofdmaaltijd' },
-                { key: 'tussendoor', title: `Tussendoortjes & Snacks${snacksTarget > 0 ? ` (${snacksTarget}x per dag)` : ''}`, icon: '🍎', sub: 'Fruit, noten of eiwitsnack' },
-                { key: 'drinken', title: 'Drinken & Hydratatie', icon: '🥤', sub: 'Water, thee, koffie & dranken' }
+                { key: 'ontbijt', title: 'Ontbijt', icon: '🌅', subNote: '' },
+                { key: 'lunch', title: 'Lunch', icon: '🥪', subNote: '' },
+                { key: 'avondeten', title: 'Avondeten', icon: '🍽️', subNote: '' },
+                { key: 'tussendoor', title: 'Tussendoortjes & Snacks', icon: '🍎', subNote: snacksTarget > 0 ? `${snacksTarget}× p/d` : '' },
+                { key: 'drinken', title: 'Drinken & Hydratatie', icon: '🥤', subNote: '' }
             ];
 
             slotDefs.forEach(slot => {
@@ -5692,21 +5707,24 @@
                         const itemC = +((it.c || 0) * (it.qty || 1)).toFixed(1);
                         const itemF = +((it.f || 0) * (it.qty || 1)).toFixed(1);
                         const s5Badge = it.schijf5
-                            ? `<span class="text-[9px] font-extrabold bg-[#CBE86B]/70 text-[#161618] px-1.5 py-0.5 rounded-md">Schijf v. 5</span>`
-                            : `<span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md">Buiten Schijf</span>`;
+                            ? `<span class="text-[9px] font-extrabold bg-[#CBE86B]/70 text-[#161618] px-1.5 py-0.5 rounded-md shrink-0">Schijf v. 5</span>`
+                            : `<span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md shrink-0">Buiten Schijf</span>`;
 
                         return `
-                            <div class="flex items-center justify-between py-2.5 border-t border-gray-100 first:border-t-0">
+                            <div onclick="window.openLoggedMealItemModal('${slot.key}', ${idx})" class="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-2xl border-t border-gray-100 first:border-t-0 cursor-pointer hover:bg-[#F6F4F2]/70 active:scale-[0.99] transition-all group">
                                 <div class="flex-1 min-w-0 pr-2">
                                     <div class="flex items-center space-x-1.5">
-                                        <span class="font-bold text-xs text-[#161618] truncate">${it.name}</span>
+                                        <span class="font-bold text-xs text-[#161618] truncate group-hover:underline">${it.name}</span>
                                         ${s5Badge}
                                     </div>
                                     <div class="text-[11px] text-gray-400 font-medium mt-0.5">
                                         ${it.qty !== 1 ? `<strong class="text-[#161618]">${it.qty}×</strong> ` : ''}${it.portion} • <span class="text-[#161618] font-bold">${itemKcal} kcal</span> (E: ${itemP}g | K: ${itemC}g | V: ${itemF}g)
                                     </div>
+                                    <div class="text-[10px] font-bold text-emerald-700 mt-0.5 flex items-center space-x-1">
+                                        <span>📖 Tik voor recept, benodigdheden & aanpassen</span>
+                                    </div>
                                 </div>
-                                <div class="flex items-center space-x-1 shrink-0">
+                                <div class="flex items-center space-x-1 shrink-0" onclick="event.stopPropagation()">
                                     <button type="button" onclick="window.changeFoodLogQty('${slot.key}', ${idx}, -0.5)" class="w-6 h-6 rounded-full bg-[#F6F4F2] text-[#161618] font-bold text-xs flex items-center justify-center hover:bg-gray-200">−</button>
                                     <span class="text-xs font-extrabold w-6 text-center text-[#161618]">${it.qty || 1}</span>
                                     <button type="button" onclick="window.changeFoodLogQty('${slot.key}', ${idx}, 0.5)" class="w-6 h-6 rounded-full bg-[#F6F4F2] text-[#161618] font-bold text-xs flex items-center justify-center hover:bg-gray-200">+</button>
@@ -5718,15 +5736,15 @@
 
                 slotsContainer.insertAdjacentHTML('beforeend', `
                     <div class="soft-card rounded-[1.5rem] p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-9 h-9 rounded-2xl bg-[#F6F4F2] flex items-center justify-center text-lg">${slot.icon}</div>
-                                <div>
-                                    <h4 class="font-extrabold text-sm text-[#161618] leading-tight">${slot.title}</h4>
-                                    <span class="text-[10px] font-semibold text-gray-400">${slotKcal} kcal • ${slotP}g eiwit</span>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-2xl bg-[#F6F4F2] flex items-center justify-center text-lg shrink-0">${slot.icon}</div>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="font-extrabold text-sm text-[#161618] leading-tight truncate">${slot.title}</h4>
+                                    <span class="text-[10px] font-semibold text-gray-400 block truncate">${slotKcal} kcal • ${slotP}g eiwit${slot.subNote ? ` • ${slot.subNote}` : ''}</span>
                                 </div>
                             </div>
-                            <button type="button" onclick="window.openFoodPickerModal('${slot.key}')" class="px-3 py-1.5 rounded-full bg-[#161618] text-white text-[11px] font-extrabold hover:bg-black transition-all shadow-2xs">
+                            <button type="button" onclick="window.openFoodPickerModal('${slot.key}')" class="w-24 h-8 rounded-full bg-[#161618] text-white text-[11px] font-extrabold hover:bg-black transition-all shadow-2xs shrink-0 whitespace-nowrap flex items-center justify-center">
                                 + Voeg toe
                             </button>
                         </div>
@@ -5750,7 +5768,7 @@
                 maintain: 'Doel: Balans',
                 gain: 'Doel: Aankomen'
             };
-            const goalBadge = goalBadgeMap[prof.goal] || 'Persoonlijke Coach';
+            const goalBadge = goalBadgeMap[prof.goal] || 'Op maat';
 
             const aiAnswerBlock = window.aiCoachLastAnswer ? `
                 <div class="bg-[#F6F4F2] rounded-2xl p-3 mb-3 text-xs text-[#161618] leading-relaxed border border-gray-200/60">
@@ -5783,7 +5801,7 @@
                         <div class="flex items-center space-x-3">
                             ${window.getNutritionCoachAvatarSVG()}
                             <div>
-                                <h3 class="text-sm font-extrabold text-[#161618] leading-tight">Jouw AI Voedingscoach</h3>
+                                <h3 class="text-sm font-extrabold text-[#161618] leading-tight">AI Voedingsassistent</h3>
                                 <p class="text-[11px] text-gray-500 font-medium">Persoonlijke begeleiding & schema op maat</p>
                             </div>
                         </div>
@@ -5840,7 +5858,7 @@
                     <div class="flex items-center space-x-3">
                         ${window.getNutritionCoachAvatarSVG()}
                         <div>
-                            <h3 class="text-sm font-extrabold text-[#161618] leading-tight">Jouw AI Voedingscoach</h3>
+                            <h3 class="text-sm font-extrabold text-[#161618] leading-tight">AI Voedingsassistent</h3>
                             <p class="text-[11px] text-gray-500 font-medium">${s5Ratio}% Schijf van Vijf • Verz. vet ${totSat}/${targets.maxSatFat}g</p>
                         </div>
                     </div>
@@ -6148,9 +6166,232 @@
             });
         };
 
+        window.activeLoggedMealRef = null; // { slot, idx }
+
+        window.ensureMealItemRecipeDetails = (item, slot) => {
+            const matchRec = window.cookbookDB.find(r => r.id === item.id || r.title.toLowerCase() === (item.name || '').toLowerCase());
+            if (matchRec) {
+                if (!item.icon) item.icon = matchRec.icon || '🍽️';
+                if (!Array.isArray(item.ingredients) || item.ingredients.length === 0) item.ingredients = [...matchRec.ingredients];
+                if (!Array.isArray(item.steps) || item.steps.length === 0) item.steps = [...matchRec.steps];
+                if (!item.coachTip) item.coachTip = matchRec.coachTip || '';
+                return item;
+            }
+            const slotIconMap = { ontbijt: '🌅', lunch: '🥪', avondeten: '🍽️', tussendoor: '🍎', drinken: '🥤' };
+            if (!item.icon) item.icon = slotIconMap[slot] || '🥗';
+            if (!Array.isArray(item.ingredients) || item.ingredients.length === 0) {
+                item.ingredients = [
+                    `${item.portion || '1 portie'} ${item.name}`
+                ];
+            }
+            if (!Array.isArray(item.steps) || item.steps.length === 0) {
+                if (slot === 'drinken') {
+                    item.steps = [
+                        `Schenk ${item.portion || '1 glas'} ${item.name.toLowerCase()} in en drink verspreid over het dagdeel.`
+                    ];
+                } else {
+                    item.steps = [
+                        `Weeg of neem ${item.portion || 'de gewenste portie'} van ${item.name}.`,
+                        `Voeg hierboven bij 'Wat heb je nodig' eventueel extra toppings, kruiden of ingrediënten toe om je maaltijd compleet te maken.`
+                    ];
+                }
+            }
+            if (!item.coachTip) {
+                item.coachTip = item.schijf5
+                    ? `Past binnen de Schijf van Vijf en levert ${Math.round((item.kcal || 0) * (item.qty || 1))} kcal en ${+((item.p || 0) * (item.qty || 1)).toFixed(1)}g eiwit.`
+                    : `Dit product levert ${Math.round((item.kcal || 0) * (item.qty || 1))} kcal en ${+((item.p || 0) * (item.qty || 1)).toFixed(1)}g eiwit. Combineer met groente, fruit of volkoren voor extra vezels.`;
+            }
+            return item;
+        };
+
+        window.openLoggedMealItemModal = (slot, idx) => {
+            const dateKey = window.getDateKey(window.selectedDate);
+            const dayLog = window.getDayNutritionLog(dateKey);
+            if (!dayLog[slot] || !dayLog[slot][idx]) return;
+
+            window.activeLoggedMealRef = { slot, idx };
+            const item = window.ensureMealItemRecipeDetails(dayLog[slot][idx], slot);
+            const qty = parseFloat(item.qty) || 1;
+            const slotLabels = { ontbijt: 'Ontbijt', lunch: 'Lunch', avondeten: 'Avondeten', tussendoor: 'Tussendoor', drinken: 'Drinken' };
+
+            const totKcal = Math.round((item.kcal || 0) * qty);
+            const totP = +((item.p || 0) * qty).toFixed(1);
+            const totC = +((item.c || 0) * qty).toFixed(1);
+            const totF = +((item.f || 0) * qty).toFixed(1);
+            const totFib = +((item.fib || 0) * qty).toFixed(1);
+
+            document.getElementById('recipe-modal-icon').innerText = item.icon || '🍽️';
+            document.getElementById('recipe-modal-type').innerText = `${slotLabels[slot] || slot} • In jouw schema`;
+            document.getElementById('recipe-modal-title').innerText = item.name;
+            document.getElementById('recipe-modal-macros').innerHTML = `
+                <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">KCAL</span><span class="text-xs font-extrabold text-[#161618]">${totKcal}</span></div>
+                <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">EIWIT</span><span class="text-xs font-extrabold text-[#161618]">${totP}g</span></div>
+                <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">KOOLH</span><span class="text-xs font-extrabold text-[#161618]">${totC}g</span></div>
+                <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">VET</span><span class="text-xs font-extrabold text-[#161618]">${totF}g</span></div>
+                <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">VEZEL</span><span class="text-xs font-extrabold text-[#161618]">${totFib}g</span></div>
+            `;
+            document.getElementById('recipe-modal-tip').innerHTML = `<span class="text-[#CBE86B] font-extrabold">AI Voedingsassistent:</span> ${item.coachTip}`;
+
+            const ingHeader = document.getElementById('recipe-modal-ing-header');
+            if (ingHeader) {
+                ingHeader.innerText = qty !== 1
+                    ? `🛒 Wat heb je nodig (${qty}× portie)`
+                    : `🛒 Wat heb je nodig (Ingrediënten)`;
+            }
+
+            document.getElementById('recipe-modal-ingredients').innerHTML = (item.ingredients || []).map((ing, iIdx) => `
+                <li class="flex items-center justify-between gap-2 py-1 border-b border-gray-50 last:border-b-0">
+                    <div class="flex items-center space-x-2 min-w-0">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#CBE86B] shrink-0"></span>
+                        <span class="break-words">${ing}</span>
+                    </div>
+                    ${item.ingredients.length > 1 ? `<button type="button" onclick="window.removeIngredientFromLoggedMeal(${iIdx})" class="text-[10px] font-bold text-gray-400 hover:text-rose-500 px-1.5 py-0.5 rounded-md">✕</button>` : ''}
+                </li>
+            `).join('');
+
+            const editIngBox = document.getElementById('recipe-modal-edit-ing-box');
+            if (editIngBox) editIngBox.classList.remove('hidden');
+
+            document.getElementById('recipe-modal-steps').innerHTML = (item.steps || []).map((st, sIdx) => `
+                <div class="flex items-start space-x-2.5">
+                    <span class="w-5 h-5 rounded-full bg-[#161618] text-[#CBE86B] font-extrabold text-[10px] flex items-center justify-center shrink-0 mt-0.5">${sIdx + 1}</span>
+                    <p class="flex-1">${st}</p>
+                </div>
+            `).join('');
+
+            const dagActions = document.getElementById('recipe-modal-dagschema-actions');
+            if (dagActions) {
+                dagActions.classList.remove('hidden');
+                const portLbl = document.getElementById('recipe-modal-portion-label');
+                if (portLbl) portLbl.innerText = `${qty}× ${item.portion || 'portie'} (${totKcal} kcal)`;
+                const qtyVal = document.getElementById('recipe-modal-qty-val');
+                if (qtyVal) qtyVal.innerText = `${qty}×`;
+
+                const addExtraBtn = document.getElementById('recipe-modal-add-extra-product-btn');
+                if (addExtraBtn) {
+                    addExtraBtn.onclick = () => {
+                        window.closeRecipeDetailModal();
+                        window.openFoodPickerModal(slot);
+                    };
+                }
+                const swapBtn = document.getElementById('recipe-modal-swap-recipe-btn');
+                if (swapBtn) {
+                    swapBtn.onclick = () => window.swapLoggedMealWithCookbook();
+                }
+            }
+
+            const addBtn = document.getElementById('recipe-modal-add-btn');
+            addBtn.innerText = '✓ Klaar & Sluiten';
+            addBtn.onclick = () => window.closeRecipeDetailModal();
+
+            document.getElementById('recipe-detail-modal').classList.remove('hidden');
+        };
+
+        window.addIngredientToLoggedMeal = () => {
+            if (!window.activeLoggedMealRef) return;
+            const { slot, idx } = window.activeLoggedMealRef;
+            const input = document.getElementById('recipe-modal-new-ing');
+            const val = (input?.value || '').trim();
+            if (!val) return;
+
+            const dateKey = window.getDateKey(window.selectedDate);
+            const dayLog = window.getDayNutritionLog(dateKey);
+            const item = dayLog[slot]?.[idx];
+            if (!item) return;
+
+            if (!Array.isArray(item.ingredients)) item.ingredients = [];
+            item.ingredients.push(val);
+            input.value = '';
+
+            window.saveToLocal();
+            window.renderNutrition();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
+            window.openLoggedMealItemModal(slot, idx);
+        };
+
+        window.removeIngredientFromLoggedMeal = (ingIdx) => {
+            if (!window.activeLoggedMealRef) return;
+            const { slot, idx } = window.activeLoggedMealRef;
+            const dateKey = window.getDateKey(window.selectedDate);
+            const dayLog = window.getDayNutritionLog(dateKey);
+            const item = dayLog[slot]?.[idx];
+            if (!item || !Array.isArray(item.ingredients)) return;
+
+            item.ingredients.splice(ingIdx, 1);
+            window.saveToLocal();
+            window.renderNutrition();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
+            window.openLoggedMealItemModal(slot, idx);
+        };
+
+        window.adjustLoggedMealModalQty = (delta) => {
+            if (!window.activeLoggedMealRef) return;
+            const { slot, idx } = window.activeLoggedMealRef;
+            const dateKey = window.getDateKey(window.selectedDate);
+            const dayLog = window.getDayNutritionLog(dateKey);
+            const item = dayLog[slot]?.[idx];
+            if (!item) return;
+
+            const newQty = +((parseFloat(item.qty) || 1) + delta).toFixed(2);
+            if (newQty <= 0) {
+                dayLog[slot].splice(idx, 1);
+                window.saveToLocal();
+                window.renderNutrition();
+                if (typeof window.syncToCloud === 'function') window.syncToCloud();
+                window.closeRecipeDetailModal();
+                return;
+            }
+            item.qty = newQty;
+            window.saveToLocal();
+            window.renderNutrition();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
+            window.openLoggedMealItemModal(slot, idx);
+        };
+
+        window.swapLoggedMealWithCookbook = () => {
+            if (!window.activeLoggedMealRef) return;
+            const { slot, idx } = window.activeLoggedMealRef;
+            const dateKey = window.getDateKey(window.selectedDate);
+            const dayLog = window.getDayNutritionLog(dateKey);
+            const currentItem = dayLog[slot]?.[idx];
+            if (!currentItem) return;
+
+            const recipeSlot = (slot === 'drinken') ? 'tussendoor' : slot;
+            const candidates = window.cookbookDB.filter(r => r.slot === recipeSlot && r.id !== currentItem.id);
+            if (candidates.length === 0) return;
+
+            const nextRec = candidates[Math.floor(Math.random() * candidates.length)];
+            const prevQty = parseFloat(currentItem.qty) || 1;
+
+            dayLog[slot][idx] = {
+                id: nextRec.id,
+                name: nextRec.title,
+                icon: nextRec.icon || '🍽️',
+                portion: '1 portie (op maat)',
+                kcal: nextRec.kcal,
+                p: nextRec.p,
+                c: nextRec.c,
+                f: nextRec.f,
+                sat: nextRec.sat || 2.0,
+                fib: nextRec.fib || 4.5,
+                schijf5: true,
+                allergens: nextRec.allergens || [],
+                ingredients: [...nextRec.ingredients],
+                steps: [...nextRec.steps],
+                coachTip: nextRec.coachTip || '',
+                qty: prevQty
+            };
+
+            window.saveToLocal();
+            window.renderNutrition();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
+            window.openLoggedMealItemModal(slot, idx);
+        };
+
         window.openRecipeDetailModal = (recipeId) => {
             const r = window.cookbookDB.find(x => x.id === recipeId);
             if (!r) return;
+            window.activeLoggedMealRef = null;
             const slotLabels = { ontbijt: 'Ontbijt', lunch: 'Lunch', avondeten: 'Avondeten', tussendoor: 'Snack / Shake' };
 
             document.getElementById('recipe-modal-icon').innerText = r.icon;
@@ -6163,7 +6404,17 @@
                 <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">VET</span><span class="text-xs font-extrabold text-[#161618]">${r.f}g</span></div>
                 <div class="bg-white rounded-2xl p-2 text-center shadow-2xs"><span class="text-[9px] font-bold text-gray-400 block">VEZEL</span><span class="text-xs font-extrabold text-[#161618]">${r.fib}g</span></div>
             `;
-            document.getElementById('recipe-modal-tip').innerHTML = `<span class="text-[#CBE86B] font-extrabold">Voedingscoach tip:</span> ${r.coachTip}`;
+            document.getElementById('recipe-modal-tip').innerHTML = `<span class="text-[#CBE86B] font-extrabold">AI Voedingsassistent:</span> ${r.coachTip}`;
+
+            const ingHeader = document.getElementById('recipe-modal-ing-header');
+            if (ingHeader) ingHeader.innerText = '🛒 Wat heb je nodig (Ingrediënten)';
+
+            const editIngBox = document.getElementById('recipe-modal-edit-ing-box');
+            if (editIngBox) editIngBox.classList.add('hidden');
+
+            const dagActions = document.getElementById('recipe-modal-dagschema-actions');
+            if (dagActions) dagActions.classList.add('hidden');
+
             document.getElementById('recipe-modal-ingredients').innerHTML = r.ingredients.map(ing => `<li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#CBE86B]"></span><span>${ing}</span></li>`).join('');
             document.getElementById('recipe-modal-steps').innerHTML = r.steps.map((st, idx) => `
                 <div class="flex items-start space-x-2.5">
@@ -6173,6 +6424,7 @@
             `).join('');
 
             const addBtn = document.getElementById('recipe-modal-add-btn');
+            addBtn.innerText = '+ Zet in mijn voedingsschema vandaag';
             addBtn.onclick = () => {
                 window.addRecipeToDayLog(r.id);
                 window.closeRecipeDetailModal();
@@ -6183,6 +6435,7 @@
         };
 
         window.closeRecipeDetailModal = () => {
+            window.activeLoggedMealRef = null;
             document.getElementById('recipe-detail-modal').classList.add('hidden');
         };
 
@@ -6197,6 +6450,7 @@
             dayLog[slot].push({
                 id: r.id,
                 name: r.title,
+                icon: r.icon || '🍽️',
                 portion: '1 kookboek portie',
                 kcal: r.kcal,
                 p: r.p,
@@ -6206,6 +6460,9 @@
                 fib: r.fib || 5.0,
                 schijf5: true,
                 allergens: r.allergens || [],
+                ingredients: Array.isArray(r.ingredients) ? [...r.ingredients] : [],
+                steps: Array.isArray(r.steps) ? [...r.steps] : [],
+                coachTip: r.coachTip || '',
                 qty: 1
             });
 
