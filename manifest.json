@@ -4,8 +4,8 @@
   "description": "Jouw persoonlijke doelen en taken, overal gesynchroniseerd.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F6F8",
-  "theme_color": "#F4F6F8",
+  "background_color": "#F6F4F2",
+  "theme_color": "#F6F4F2",
   "orientation": "portrait",
   "icons": [
     {
