@@ -68,12 +68,66 @@
             min-height: calc(100dvh - 175px);
             padding-bottom: calc(6.75rem + var(--safe-bottom));
         }
-        @media (min-width: 960px) {
+        @media (min-width: 768px) {
+            html, body {
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                width: 100vw !important;
+                overflow: hidden !important;
+            }
+            #app-shell {
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            #desktop-workspace-grid {
+                flex: 1 1 0% !important;
+                min-height: 0 !important;
+                display: grid !important;
+                grid-template-columns: 310px minmax(0, 1fr) !important;
+                gap: 1.25rem !important;
+                padding-left: 1.5rem !important;
+                padding-right: 0 !important;
+                overflow: hidden !important;
+            }
+            @media (min-width: 1100px) {
+                #desktop-workspace-grid {
+                    grid-template-columns: 340px minmax(0, 1fr) !important;
+                    gap: 1.75rem !important;
+                    padding-left: 2rem !important;
+                }
+            }
+            #desktop-inbox-sidebar {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+            #desktop-right-pane {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
             .structured-sheet {
-                border-radius: 2.5rem;
-                min-height: calc(100dvh - 155px);
-                padding-bottom: 3.5rem;
-                box-shadow: 0 12px 45px rgba(22, 22, 24, 0.05);
+                flex: 1 1 0% !important;
+                min-height: 0 !important;
+                height: 100% !important;
+                overflow-y: auto !important;
+                border-top-left-radius: 2.5rem !important;
+                border-top-right-radius: 0 !important;
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                padding-bottom: 5.5rem !important;
+                box-shadow: -4px -4px 36px rgba(22, 22, 24, 0.05) !important;
             }
         }
 
@@ -287,7 +341,7 @@
         }
     </style>
 </head>
-<body class="w-full max-w-[440px] lg:max-w-[1380px] mx-auto min-h-[100dvh] lg:px-6 relative selection:bg-[#F09590]/30 selection:text-[#161618] overflow-x-hidden">
+<body class="w-full max-w-[440px] md:max-w-none mx-auto min-h-[100dvh] md:h-[100dvh] relative selection:bg-[#F09590]/30 selection:text-[#161618] overflow-x-hidden">
     <div id="app-shell">
 
     <!-- IN-SCREEN HERINNERING & MELDING BANNER (Apple Dynamic Banner voor geplande activiteiten) -->
@@ -320,36 +374,55 @@
         </div>
     </div>
 
-    <!-- LOGIN SCHERM (Speels, organisch en niet stijf — met custom SVG symbolen) -->
-    <div id="login-screen" class="fixed inset-0 bg-[#F4F2F5] z-[100] flex flex-col justify-between p-6 overflow-y-auto transition-opacity duration-500">
+    <!-- LOGIN SCHERM (Passend op zowel iPhone als Desktop breedbeeld) -->
+    <div id="login-screen" class="fixed inset-0 bg-[#F4F2F5] z-[100] flex flex-col justify-between md:justify-center p-6 md:p-12 overflow-y-auto transition-opacity duration-500">
         <!-- Zachte organische achtergrond-accenten -->
         <div class="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[#F09590]/25 blur-3xl"></div>
         <div class="pointer-events-none absolute top-1/4 -right-20 w-72 h-72 rounded-full bg-[#6886A6]/20 blur-3xl"></div>
         <div class="pointer-events-none absolute bottom-10 left-10 w-60 h-60 rounded-full bg-[#8CBE68]/20 blur-3xl"></div>
 
-        <!-- Bovenbalk met merk-badge -->
-        <div class="relative z-10 flex items-center justify-between pt-1 max-w-md mx-auto w-full">
-            <div class="flex items-center space-x-2.5 bg-white/85 backdrop-blur-md px-3.5 py-2 rounded-full shadow-xs border border-white">
-                <img src="focusplanner-icon.png" alt="FocusPlanner" class="w-6 h-6 rounded-full object-cover">
-                <span class="text-xs font-extrabold text-[#161618] tracking-tight">FocusPlanner</span>
-            </div>
-            <span class="px-3 py-1 rounded-full bg-[#F09590]/15 text-[#D9726C] text-[11px] font-extrabold">iPhone & Desktop</span>
-        </div>
+        <div class="relative z-10 w-full max-w-md md:max-w-4xl mx-auto flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center my-auto">
+            <!-- Linkerzijde op Desktop (Merk, Titel & Inlogknoppen) -->
+            <div class="flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-2.5 bg-white/85 backdrop-blur-md px-3.5 py-2 rounded-full shadow-xs border border-white">
+                        <img src="focusplanner-icon.png" alt="FocusPlanner" class="w-6 h-6 rounded-full object-cover">
+                        <span class="text-xs font-extrabold text-[#161618] tracking-tight">FocusPlanner</span>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-[#F09590]/15 text-[#D9726C] text-[11px] font-extrabold">iPhone & Desktop</span>
+                </div>
 
-        <!-- Dynamische Visuele Showcase (Niet stijf: zwevende tijdlijn + gekleurde activiteit-symbolen) -->
-        <div class="relative z-10 my-auto py-4 max-w-md mx-auto w-full">
-            <div class="mb-5">
-                <h1 class="text-[31px] leading-[1.08] font-extrabold text-[#161618] tracking-tight">
-                    Plan je dag in een <span class="text-[#F09590]">vloeiend ritme.</span>
-                </h1>
-                <p class="text-gray-500 text-sm font-medium mt-2 leading-relaxed">
-                    Visuele tijdlijn, slimme AI-planning en directe iPhone-meldingen.
-                </p>
+                <div class="mb-6">
+                    <h1 class="text-[31px] md:text-[40px] leading-[1.08] font-extrabold text-[#161618] tracking-tight">
+                        Plan je dag in een <span class="text-[#F09590]">vloeiend ritme.</span>
+                    </h1>
+                    <p class="text-gray-500 text-sm md:text-base font-medium mt-3 leading-relaxed">
+                        Visuele tijdlijn met eigen symbolen, slimme AI-planning en directe meldingen op je iPhone en desktop.
+                    </p>
+                </div>
+
+                <!-- Inlogknoppen op Desktop direct onder de introductie -->
+                <div class="hidden md:block space-y-3 pt-2">
+                    <button onclick="window.loginWithGoogle()" class="w-full bg-[#161618] text-white px-6 py-4 rounded-full shadow-[0_14px_30px_rgba(22,22,24,0.2)] flex items-center justify-center space-x-3 hover:bg-black active:scale-95 transition-all font-extrabold text-sm">
+                        <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" viewBox="0 0 48 48">
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                            </svg>
+                        </div>
+                        <span>Doorgaan met Google</span>
+                    </button>
+                    <button onclick="window.continueWithoutAccount()" class="w-full bg-white/90 text-[#161618] px-6 py-3.5 rounded-full border border-white shadow-xs flex items-center justify-center space-x-2 hover:bg-white active:scale-95 transition-all font-bold text-xs">
+                        <span>Direct starten op dit toestel</span>
+                        <span class="text-[#F09590] font-extrabold">→</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Organische Collage van de Tijdlijn -->
-            <div class="relative mx-auto max-w-[360px] pt-3 pb-2">
-                <!-- Zwevende groene bel-bubbel linksboven (met SVG telefoon-symbool) -->
+            <!-- Rechterzijde op Desktop / Midden op Mobiel: Organische Collage van de Tijdlijn -->
+            <div class="relative mx-auto w-full max-w-[360px] pt-3 pb-4">
                 <div class="animate-float-slow absolute -top-2 right-4 z-20 flex items-center space-x-2 bg-white px-3 py-2 rounded-full shadow-lg border border-gray-100">
                     <span class="w-7 h-7 rounded-full bg-[#8CBE68] text-white flex items-center justify-center shadow-xs">
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/></svg>
@@ -360,17 +433,15 @@
                     </div>
                 </div>
 
-                <!-- Zwevende herinnering-pil linksonder -->
-                <div class="animate-float-delayed absolute -bottom-3 left-2 z-20 flex items-center space-x-2 bg-[#161618] text-white px-3.5 py-2 rounded-full shadow-xl">
+                <div class="animate-float-delayed absolute -bottom-2 left-2 z-20 flex items-center space-x-2 bg-[#161618] text-white px-3.5 py-2 rounded-full shadow-xl">
                     <span class="w-2 h-2 rounded-full bg-[#F09590] animate-ping"></span>
                     <span class="text-[10px] font-bold">09:00 • Yoga Workout start nu</span>
                 </div>
 
-                <!-- Mini Structured Tijdlijn Kaart (licht gekanteld voor speels effect) -->
                 <div class="bg-white rounded-[2rem] p-4 shadow-[0_20px_50px_rgba(22,22,24,0.08)] border border-white transform -rotate-1">
                     <div class="flex items-baseline justify-between mb-3 pb-2 border-b border-gray-100">
                         <div>
-                            <span class="text-lg font-extrabold text-[#161618]">16 oktober</span>
+                            <span class="text-lg font-extrabold text-[#161618]">4 november</span>
                             <span class="text-lg font-extrabold text-[#F09590]"> 2026 ›</span>
                         </div>
                         <div class="flex -space-x-1">
@@ -381,7 +452,6 @@
                         </div>
                     </div>
 
-                    <!-- Voorbeeld Rij 1: 08:30 Rise and Shine -->
                     <div class="flex items-center space-x-3 py-1.5">
                         <span class="text-[10px] font-bold text-gray-400 w-9 text-right">08:30</span>
                         <div class="w-10 h-10 rounded-full bg-[#F09590] text-white flex items-center justify-center shadow-xs shrink-0">
@@ -394,7 +464,6 @@
                         <span class="w-5 h-5 rounded-full border-2 border-[#F09590] shrink-0"></span>
                     </div>
 
-                    <!-- Voorbeeld Rij 2: 09:00 Yoga Workout (Tall Pill) -->
                     <div class="flex items-center space-x-3 py-1.5">
                         <span class="text-[10px] font-extrabold text-[#161618] w-9 text-right">09:41</span>
                         <div class="w-10 h-16 rounded-full bg-[#6886A6] text-white flex items-center justify-center shadow-xs shrink-0">
@@ -407,7 +476,6 @@
                         <span class="w-5 h-5 rounded-full border-2 border-[#6886A6] shrink-0"></span>
                     </div>
 
-                    <!-- Voorbeeld Rij 3: 10:15 Koffie -->
                     <div class="flex items-center space-x-3 py-1.5">
                         <span class="text-[10px] font-bold text-gray-400 w-9 text-right">10:15</span>
                         <div class="w-10 h-10 rounded-full bg-[#844A67] text-white flex items-center justify-center shadow-xs shrink-0">
@@ -423,8 +491,8 @@
             </div>
         </div>
         
-        <!-- Inlogknoppen onderaan -->
-        <div class="relative z-10 w-full max-w-md mx-auto space-y-2.5 pb-2">
+        <!-- Inlogknoppen onderaan op Mobiel -->
+        <div class="md:hidden relative z-10 w-full max-w-md mx-auto space-y-2.5 pb-2">
             <button onclick="window.loginWithGoogle()" class="w-full bg-[#161618] text-white px-6 py-4 rounded-full shadow-[0_14px_30px_rgba(22,22,24,0.2)] flex items-center justify-center space-x-3 hover:bg-black active:scale-95 transition-all font-extrabold text-sm">
                 <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" viewBox="0 0 48 48">
@@ -443,13 +511,13 @@
         </div>
     </div>
 
-    <!-- HEADER SECTIE (Mobiel + Desktop Structured Header zoals Afbeelding 1 & 3) -->
-    <header class="pt-1 pb-3 px-5 lg:px-2 relative z-30">
-        <!-- Bovenste balk: Links Inbox-pil (op desktop) & Profiel, Rechts Vandaag, AI Assistent, Meldingen & Desktop Tabs -->
-        <div class="flex justify-between items-center mb-2 lg:mb-3">
-            <div class="flex items-center space-x-2.5 min-w-0">
-                <!-- Desktop Inbox Pil (Zoals linksboven op Afbeelding 3) -->
-                <button onclick="window.focusDesktopInbox()" class="hidden lg:inline-flex items-center space-x-2 bg-[#F09590] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-xs hover:bg-[#E07A74] transition-all">
+    <!-- HEADER SECTIE (Mobiel + Full-Viewport Desktop Topbalk zoals Afbeelding 3) -->
+    <header class="shrink-0 pt-1 md:pt-2.5 pb-1.5 md:pb-2 px-5 md:px-6 lg:px-8 relative z-30">
+        <!-- Bovenste balk: Links Inbox-pil (op desktop) & Profiel, Midden Datum (op desktop), Rechts Tabs, Pijltjes, AI & Meldingen -->
+        <div class="flex items-center justify-between gap-2 relative">
+            <!-- Links: Inbox pil (Desktop) + Profiel -->
+            <div class="flex items-center space-x-2.5 min-w-0 z-10">
+                <button onclick="window.focusDesktopInbox()" class="hidden md:inline-flex items-center space-x-2 bg-[#F09590] text-white px-4 py-1.5 rounded-full text-xs font-extrabold shadow-xs hover:bg-[#E07A74] transition-all shrink-0">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                     <span>Inbox</span>
                     <span id="desktop-inbox-count-badge" class="bg-white/25 text-white px-1.5 py-0.2 rounded-full text-[10px]">0</span>
@@ -460,19 +528,37 @@
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.8-3.5 5-5 8-5s6.2 1.5 8 5"/></svg>
                     </div>
                 </div>
-                <div class="min-w-0 flex items-center space-x-1.5">
-                    <span id="user-time-greeting" class="text-[11px] font-semibold text-gray-400">Goedemorgen,</span>
+                <div class="min-w-0 flex items-center space-x-1.5 md:hidden xl:flex">
+                    <span id="user-time-greeting" class="text-[11px] font-semibold text-gray-400 hidden sm:inline">Goedemorgen,</span>
                     <span id="user-greeting" class="text-xs font-extrabold text-[#161618] truncate">Welkom!</span>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-1.5 shrink-0">
+            <!-- Midden op Desktop: Grote Datum Titel ("4 november 2026 ›", exact zoals "October 9, 2025 ›" middenboven op Afbeelding 3) -->
+            <div class="hidden md:flex items-center justify-center">
+                <div class="relative inline-flex items-baseline space-x-1.5 cursor-pointer group">
+                    <h1 class="text-[21px] leading-none font-extrabold tracking-tight text-[#161618]">
+                        <span id="header-day-month-desk">4 november</span>
+                        <span id="header-year-arrow-desk" class="text-[#F09590] font-extrabold ml-1">2026 ›</span>
+                    </h1>
+                    <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
+                </div>
+            </div>
+
+            <!-- Rechts: Desktop Tabs, Week-pijltjes, Vandaag, ✦ AI & Meldingen -->
+            <div class="flex items-center space-x-1.5 shrink-0 z-10">
                 <!-- Desktop View Switcher (Tijdlijn / Doelen / Journal / Ontdek) -->
-                <div class="hidden lg:flex items-center bg-white/85 p-1 rounded-full border border-white shadow-2xs mr-1">
-                    <button onclick="window.switchTab('vandaag')" id="desk-nav-vandaag" class="desk-nav-btn px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#F09590] text-white transition-all">Tijdlijn</button>
-                    <button onclick="window.switchTab('uitdaging')" id="desk-nav-uitdaging" class="desk-nav-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-gray-600 hover:text-[#161618] transition-all">Doelen</button>
-                    <button onclick="window.switchTab('journal')" id="desk-nav-journal" class="desk-nav-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-gray-600 hover:text-[#161618] transition-all">Journal</button>
-                    <button onclick="window.switchTab('ontdek')" id="desk-nav-ontdek" class="desk-nav-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-gray-600 hover:text-[#161618] transition-all">Ontdek</button>
+                <div class="hidden md:flex items-center bg-white/85 p-1 rounded-full border border-white shadow-2xs mr-1">
+                    <button onclick="window.switchTab('vandaag')" id="desk-nav-vandaag" class="desk-nav-btn px-3 py-1 rounded-full text-xs font-extrabold bg-[#161618] text-white transition-all">Tijdlijn</button>
+                    <button onclick="window.switchTab('uitdaging')" id="desk-nav-uitdaging" class="desk-nav-btn px-3 py-1 rounded-full text-xs font-bold text-gray-500 hover:text-[#161618] transition-all">Doelen</button>
+                    <button onclick="window.switchTab('journal')" id="desk-nav-journal" class="desk-nav-btn px-3 py-1 rounded-full text-xs font-bold text-gray-500 hover:text-[#161618] transition-all">Journal</button>
+                    <button onclick="window.switchTab('ontdek')" id="desk-nav-ontdek" class="desk-nav-btn px-3 py-1 rounded-full text-xs font-bold text-gray-500 hover:text-[#161618] transition-all">Ontdek</button>
+                </div>
+
+                <!-- Week terug / vooruit pijltjes rechtsboven op Desktop (Zoals "< >" op Afbeelding 3) -->
+                <div class="hidden md:flex items-center space-x-0.5 bg-white/90 px-1.5 py-1 rounded-full border border-white shadow-2xs">
+                    <button onclick="window.shiftSelectedDays(-7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Vorige week">‹</button>
+                    <button onclick="window.shiftSelectedDays(7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Volgende week">›</button>
                 </div>
 
                 <button onclick="window.resetToToday()" id="today-pill-btn" class="bg-white/90 px-2.5 py-1.5 rounded-full text-[11px] font-extrabold shadow-2xs border border-white flex items-center space-x-1 text-[#161618] hover:bg-white active:scale-95 transition-all">
@@ -480,7 +566,7 @@
                     <span id="current-month-text">Vandaag</span>
                 </button>
 
-                <!-- AI Plan-Assistent Knop (Zoals "✦ AI" rechtsboven op Afbeelding 3) -->
+                <!-- AI Plan-Assistent Knop ("✦ AI" rechtsboven op Afbeelding 3) -->
                 <button onclick="window.openAIPlannerModal()" class="bg-white/95 hover:bg-white px-3 py-1.5 rounded-full text-[11px] font-extrabold shadow-2xs border border-white flex items-center space-x-1 text-[#161618] active:scale-95 transition-all" title="AI Plan-Assistent & Overzicht">
                     <svg class="w-3.5 h-3.5 text-[#F09590]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>
                     <span>AI</span>
@@ -494,60 +580,52 @@
             </div>
         </div>
 
-        <!-- Grote Structured Datum Titel (zonder punt: "4 november 2026 ›") + Weekstrip -->
-        <div class="lg:max-w-[780px] lg:mx-auto">
-            <div class="flex items-center justify-between mb-3">
-                <div class="relative inline-flex items-baseline space-x-1.5 cursor-pointer group">
-                    <h1 class="text-[28px] lg:text-[26px] leading-none font-extrabold tracking-tight text-[#161618]">
-                        <span id="header-day-month">4 november</span>
-                        <span id="header-year-arrow" class="text-[#F09590] font-extrabold ml-1">2026 ›</span>
-                    </h1>
-                    <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
-                </div>
-                <!-- Week terug / vooruit pijltjes -->
-                <div class="flex items-center space-x-1 bg-white/80 px-1.5 py-0.5 rounded-full border border-white shadow-2xs">
-                    <button onclick="window.shiftSelectedDays(-7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Vorige week">‹</button>
-                    <button onclick="window.shiftSelectedDays(7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Volgende week">›</button>
-                </div>
+        <!-- Mobiele Datumrij (alleen zichtbaar op mobiel; op desktop staat deze midden in de topbalk) -->
+        <div class="md:hidden flex items-center justify-between mt-2 mb-1">
+            <div class="relative inline-flex items-baseline space-x-1.5 cursor-pointer group">
+                <h1 class="text-[28px] leading-none font-extrabold tracking-tight text-[#161618]">
+                    <span id="header-day-month">4 november</span>
+                    <span id="header-year-arrow" class="text-[#F09590] font-extrabold ml-1">2026 ›</span>
+                </h1>
+                <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
             </div>
-
-            <!-- 7-Dagen Week Strip met gekleurde taak-bolletjes per dag -->
-            <div id="calendar-container">
-                <div class="grid grid-cols-7 gap-1 pt-0.5" id="calendar-strip"></div>
+            <div class="flex items-center space-x-1 bg-white/80 px-1.5 py-0.5 rounded-full border border-white shadow-2xs">
+                <button onclick="window.shiftSelectedDays(-7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Vorige week">‹</button>
+                <button onclick="window.shiftSelectedDays(7)" class="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Volgende week">›</button>
             </div>
         </div>
     </header>
 
-    <!-- RESPONSIVE WORKSPACE: Op Desktop 2 kolommen (Links Inbox-paneel zoals Afbeelding 3 + Rechts het Witte Tijdlijn-blad) -->
-    <div class="lg:grid lg:grid-cols-[330px_1fr] lg:gap-6 lg:items-start">
+    <!-- RESPONSIVE WORKSPACE: Op Desktop exact 2 kolommen op volledige schermhoogte (Links Inbox direct onder de Inbox-knop + Rechts Week-strip boven het witte Tijdlijn-blad) -->
+    <div id="desktop-workspace-grid" class="flex-1 min-h-0">
 
-        <!-- DESKTOP LINKER KOLOM: INBOX TAKEN ZONDER TIJD (Zoals Afbeelding 3: Grocery Shopping, Water Plants, Call Mum) -->
-        <aside id="desktop-inbox-sidebar" class="hidden lg:flex flex-col space-y-3 pt-1">
-            <div class="flex items-center justify-between px-1">
-                <div>
-                    <h3 class="text-sm font-extrabold text-[#161618]">Inbox & Losse Taken</h3>
-                    <p class="text-[11px] font-medium text-gray-400">Taken zonder vaste starttijd</p>
-                </div>
-                <button onclick="window.openAIPlannerModal()" class="text-[11px] font-extrabold text-[#F09590] hover:underline flex items-center space-x-1" title="Laat AI je Inbox inplannen">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>
-                    <span>Slim inplannen</span>
-                </button>
-            </div>
+        <!-- DESKTOP LINKER KOLOM: INBOX TAKEN ZONDER TIJD (Start direct onder de Inbox-knop, exact zoals Afbeelding 3) -->
+        <aside id="desktop-inbox-sidebar" class="hidden md:flex flex-col h-full min-h-0 pt-1 pb-5 pr-3 relative">
+            <!-- Subtiele verticale scheidings-pil aan de rechterrand (zoals in Afbeelding 3) -->
+            <div class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full bg-gray-300/90"></div>
 
             <!-- Snel een Inbox-taak toevoegen op Desktop -->
-            <div class="bg-white rounded-2xl p-2 shadow-xs border border-white flex items-center space-x-2">
-                <input type="text" id="desktop-quick-inbox-input" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addQuickDesktopInboxTask();}" placeholder="Nieuwe inbox-taak toevoegen..." class="flex-1 px-2.5 py-1.5 bg-transparent outline-none text-xs font-semibold text-[#161618] placeholder-gray-400">
+            <div class="bg-white rounded-2xl p-2 mb-2.5 shadow-2xs border border-white flex items-center space-x-2 shrink-0">
+                <input type="text" id="desktop-inbox-quick-input" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addQuickDesktopInboxTask();}" placeholder="Nieuwe inbox-taak toevoegen..." class="flex-1 px-2.5 py-1.5 bg-transparent outline-none text-xs font-semibold text-[#161618] placeholder-gray-400">
                 <button onclick="window.addQuickDesktopInboxTask()" class="w-8 h-8 rounded-xl bg-[#F09590] hover:bg-[#E07A74] text-white flex items-center justify-center font-extrabold text-sm shrink-0 transition-all" title="Toevoegen aan Inbox">+</button>
             </div>
 
-            <!-- Lijst van Inbox kaarten op Desktop -->
-            <div id="desktop-inbox-list" class="space-y-2.5 max-h-[calc(100dvh-250px)] overflow-y-auto pr-1"></div>
+            <!-- Lijst van Inbox kaarten op Desktop (scrollt netjes binnen de kolom) -->
+            <div id="desktop-inbox-list" class="space-y-2.5 flex-1 min-h-0 overflow-y-auto pr-1"></div>
         </aside>
 
-    <!-- WITTE AFGERONDE SHEET CONTAINER (Begint direct onder de week-strip zoals in Structured) -->
-    <div class="structured-sheet px-5 lg:px-10 pt-3 lg:pt-5 relative z-10">
-        <!-- Subtiele grijze grab-bar bovenaan het witte blad -->
-        <div class="w-11 h-1 bg-gray-200/90 rounded-full mx-auto mb-3"></div>
+        <!-- RECHTER KOLOM OP DESKTOP (en hoofdcontainer op mobiel): 7-Dagen Week Strip bovenaan + Witte Afgeronde Sheet eronder -->
+        <div id="desktop-right-pane" class="flex flex-col h-full min-h-0">
+            <!-- 7-Dagen Week Strip met gekleurde taak-bolletjes per dag (Op desktop gecentreerd boven het witte blad zoals Afbeelding 3) -->
+            <div id="calendar-container" class="px-5 md:px-6 pb-2.5 md:pb-2 w-full md:max-w-[520px] md:mx-auto shrink-0">
+                <div class="grid grid-cols-7 gap-1 pt-0.5" id="calendar-strip"></div>
+            </div>
+
+            <!-- WITTE AFGERONDE SHEET CONTAINER (Vult op desktop de rechterkolom tot aan de rechter- en onderrand van het scherm) -->
+            <div class="structured-sheet px-5 md:px-10 lg:px-14 pt-3 md:pt-4 relative z-10">
+                <div class="md:max-w-[760px] md:mx-auto w-full">
+                <!-- Subtiele grijze grab-bar bovenaan het witte blad -->
+                <div class="w-11 h-1 bg-gray-200/90 rounded-full mx-auto mb-3"></div>
 
     <!-- TAB 1: VANDAAG / TIJDLIJN -->
     <main id="view-vandaag" class="tab-content active space-y-4 relative z-10">
@@ -655,17 +733,19 @@
         </div>
         <div id="discover-list" class="grid grid-cols-2 lg:grid-cols-3 gap-3 pb-6"></div>
     </main>
+        </div><!-- /.md:max-w-[760px] -->
 
         <!-- Desktop Zwevende Coral '+' Knop rechtsonder in het witte blad (Zoals op Afbeelding 3) -->
-        <button onclick="window.openSmartModal()" class="hidden lg:flex fixed bottom-8 right-10 w-14 h-14 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white shadow-[0_12px_28px_rgba(240,149,144,0.55)] items-center justify-center active:scale-95 transition-all z-30" title="Nieuwe activiteit plannen">
+        <button onclick="window.openSmartModal()" class="hidden md:flex fixed bottom-7 right-8 w-14 h-14 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white shadow-[0_12px_28px_rgba(240,149,144,0.55)] items-center justify-center active:scale-95 transition-all z-30" title="Nieuwe activiteit plannen">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"></path></svg>
         </button>
-    </div><!-- /.structured-sheet -->
-    </div><!-- /.lg:grid -->
+            </div><!-- /.structured-sheet -->
+        </div><!-- /#desktop-right-pane -->
+    </div><!-- /#desktop-workspace-grid -->
     </div><!-- /#app-shell -->
 
     <!-- FLOATING BOTTOM NAVIGATION BAR OP MOBIEL + LOSSE CORAL '+' KNOP RECHTS -->
-    <div class="lg:hidden fixed safe-bottom-nav left-0 right-0 mx-auto w-full max-w-[440px] px-4 z-40 pointer-events-none flex items-center gap-3">
+    <div class="md:hidden fixed safe-bottom-nav left-0 right-0 mx-auto w-full max-w-[440px] px-4 z-40 pointer-events-none flex items-center gap-3">
         <nav class="apple-glass-dock flex-1 relative rounded-full p-1.5 grid grid-cols-4 gap-1 place-items-center pointer-events-auto">
             <div id="nav-active-pill" style="position:absolute; top:6px; bottom:6px; left:6px; width:calc((100% - 12px) / 4); background:rgba(240,149,144,0.18); border-radius:9999px; pointer-events:none; z-index:0;"></div>
             <button onclick="window.switchTab('vandaag')" id="nav-vandaag" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#F09590] w-full transition-colors duration-200">
@@ -710,9 +790,9 @@
     </div>
 
     <!-- HOOFD MODAL (Add / Edit Task, Goal, Note & Workout) -->
-    <div id="main-modal" data-apple-sheet="closeSmartModal" class="hidden fixed inset-0 bg-[#161618]/45 backdrop-blur-sm z-[60] flex items-end justify-center">
+    <div id="main-modal" data-apple-sheet="closeSmartModal" class="hidden fixed inset-0 bg-[#161618]/45 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center">
         <div class="absolute inset-0 sheet-backdrop" onclick="window.closeSmartModal()"></div>
-        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[440px] max-h-[88dvh] overflow-y-auto rounded-t-[2.25rem] p-5 safe-bottom-sheet animate-slide-up shadow-2xl border-t border-white">
+        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[460px] max-h-[88dvh] overflow-y-auto rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet animate-slide-up shadow-2xl border-t border-white">
             <div class="sheet-grab-zone" aria-label="Sleep omlaag om te sluiten"><div class="sheet-grab-pill"></div></div>
             <!-- Top balk met ronde X en Vinkje -->
             <div class="flex items-center justify-between mb-5">
@@ -3351,10 +3431,16 @@
 
             // Grote Structured Header zonder punt achter het dagnummer: bijv. "4 november" + "2026 ›"
             const monthName = centerDate.toLocaleDateString('nl-NL', { month: 'long' }).toLowerCase();
+            const dayMonthText = `${centerDate.getDate()} ${monthName}`;
+            const yearArrowText = `${centerDate.getFullYear()} ›`;
             const headerDayMonth = document.getElementById('header-day-month');
             const headerYearArrow = document.getElementById('header-year-arrow');
-            if (headerDayMonth) headerDayMonth.innerText = `${centerDate.getDate()} ${monthName}`;
-            if (headerYearArrow) headerYearArrow.innerText = `${centerDate.getFullYear()} ›`;
+            if (headerDayMonth) headerDayMonth.innerText = dayMonthText;
+            if (headerYearArrow) headerYearArrow.innerText = yearArrowText;
+            const headerDayMonthDesk = document.getElementById('header-day-month-desk');
+            const headerYearArrowDesk = document.getElementById('header-year-arrow-desk');
+            if (headerDayMonthDesk) headerDayMonthDesk.innerText = dayMonthText;
+            if (headerYearArrowDesk) headerYearArrowDesk.innerText = yearArrowText;
 
             const dateBadge = document.getElementById('selected-date-badge');
             if (dateBadge) {
@@ -4141,19 +4227,19 @@
             selDate.setHours(0, 0, 0, 0);
             const dKey = window.getDateKey(selDate);
 
-            // Alle ongetimede taken (op deze dag of algemeen zonder tijd)
-            const inboxTasks = (window.tasks || []).filter(t => !t.time && window.shouldShowItemOnDate(t, selDate, false));
+            // Alle ongetimede taken in de Inbox (zodat je op desktop altijd al je losse taken links ziet staan en met + kunt inplannen op de gekozen dag)
+            const inboxTasks = (window.tasks || []).filter(t => !t.time);
             const openInboxTasks = inboxTasks.filter(t => !(t.completedHistory ? t.completedHistory[dKey] : t.completed));
 
             if (badgeEl) {
-                badgeEl.innerText = `${openInboxTasks.length} ${openInboxTasks.length === 1 ? 'taak' : 'taken'}`;
+                badgeEl.innerText = `${openInboxTasks.length}`;
             }
 
             if (inboxTasks.length === 0) {
                 inboxListEl.innerHTML = `
-                    <div class="bg-white/75 rounded-2xl p-4 text-center border border-white">
+                    <div class="bg-white/85 rounded-2xl p-4 text-center border border-white shadow-2xs">
                         <p class="text-xs font-extrabold text-[#161618]">Je Inbox is leeg</p>
-                        <p class="text-[11px] font-medium text-gray-400 mt-0.5">Voeg hieronder snel losse taken toe en plan ze met <strong class="text-[#161618]">+</strong> op je tijdlijn.</p>
+                        <p class="text-[11px] font-medium text-gray-400 mt-1 leading-relaxed">Typ hierboven een losse taak zonder tijd. Klik daarna op <strong class="text-[#F09590]">+</strong> om hem direct op je tijdlijn te zetten.</p>
                     </div>
                 `;
                 return;
