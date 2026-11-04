@@ -19,8 +19,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #F6F4F2;
+            --bg-base: #F3F2F5;
             --ink-dark: #161618;
+            --accent-coral: #F09590;
+            --accent-coral-dark: #E07A74;
             --accent-lime: #CBE86B;
             --accent-lime-dark: #A5C838;
             --accent-purple: #8B5CF6;
@@ -42,11 +44,28 @@
         }
         body {
             background-image:
-                radial-gradient(at 15% 0%, rgba(226, 204, 250, 0.55) 0px, transparent 48%),
-                radial-gradient(at 85% 4%, rgba(249, 218, 198, 0.6) 0px, transparent 48%),
-                radial-gradient(at 50% 16%, rgba(244, 224, 238, 0.38) 0px, transparent 55%);
+                radial-gradient(at 15% 0%, rgba(240, 149, 144, 0.16) 0px, transparent 48%),
+                radial-gradient(at 88% 4%, rgba(104, 134, 166, 0.12) 0px, transparent 48%);
             background-attachment: fixed;
-            padding-top: max(0.75rem, var(--safe-top));
+            padding-top: max(0.5rem, var(--safe-top));
+            padding-bottom: 0;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-7px) rotate(1.5deg); }
+        }
+        @keyframes floatDelayed {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(-2deg); }
+        }
+        .animate-float-slow { animation: floatSlow 4.8s ease-in-out infinite; }
+        .animate-float-delayed { animation: floatDelayed 5.4s ease-in-out 1.2s infinite; }
+        .structured-sheet {
+            background: #FFFFFF;
+            border-top-left-radius: 2.35rem;
+            border-top-right-radius: 2.35rem;
+            box-shadow: 0 -8px 34px rgba(22, 22, 24, 0.045);
+            min-height: calc(100dvh - 175px);
             padding-bottom: calc(6.75rem + var(--safe-bottom));
         }
 
@@ -263,20 +282,134 @@
 <body class="w-full max-w-[440px] mx-auto min-h-[100dvh] relative selection:bg-[#CBE86B] selection:text-[#161618] overflow-x-hidden">
     <div id="app-shell">
 
-    <!-- LOGIN SCHERM -->
-    <div id="login-screen" class="fixed inset-0 modal-pastel-surface z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
-        <div class="text-center mb-10">
-            <div class="relative inline-block mb-5">
-                <div class="absolute -inset-2 rounded-[2.5rem] bg-gradient-to-tr from-purple-300/60 via-orange-200/60 to-[#CBE86B]/60 blur-lg"></div>
-                <img src="focusplanner-icon.png" alt="FocusPlanner Icon" class="relative w-24 h-24 rounded-[2rem] shadow-xl mx-auto border-4 border-white object-cover bg-white">
+    <!-- IN-SCREEN HERINNERING & MELDING BANNER (Apple Dynamic Banner voor geplande activiteiten) -->
+    <div id="in-app-reminder-banner" class="hidden fixed top-3 left-0 right-0 mx-auto w-[92%] max-w-[408px] z-[120] transition-all duration-300">
+        <div class="bg-[#161618]/95 backdrop-blur-2xl text-white rounded-[2rem] p-3.5 shadow-[0_20px_50px_rgba(22,22,24,0.38)] border border-white/15">
+            <div class="flex items-center space-x-3">
+                <div id="reminder-banner-icon" class="w-11 h-11 rounded-full bg-[#F09590] text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-md">
+                    ⏰
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#F09590] animate-ping"></span>
+                        <span id="reminder-banner-time" class="text-[10px] font-extrabold uppercase tracking-wider text-[#F09590]">Nu op je planning • 09:00</span>
+                    </div>
+                    <h4 id="reminder-banner-title" class="text-sm font-extrabold text-white truncate mt-0.5">Activiteit staat klaar</h4>
+                    <p id="reminder-banner-sub" class="text-[11px] text-white/65 truncate">Tijd om te starten!</p>
+                </div>
+                <button onclick="window.dismissReminderBanner()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/75 flex items-center justify-center text-xs font-bold shrink-0">✕</button>
             </div>
-            <span class="inline-block px-3.5 py-1 rounded-full bg-white/80 text-xs font-bold text-gray-600 shadow-sm mb-3">✨ Focus & Productiviteit</span>
-            <h1 class="text-3xl font-extrabold text-[#161618] tracking-tight">FocusPlanner</h1>
-            <p class="text-gray-500 mt-2 text-sm font-medium max-w-xs mx-auto leading-relaxed">Jouw persoonlijke doelen, taken en workouts in één rustig en modern overzicht.</p>
+            <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-white/10">
+                <button id="reminder-btn-snooze" onclick="window.snoozeActiveReminder(10)" class="py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center space-x-1.5 transition-all">
+                    <span>💤</span>
+                    <span>+10 min snooze</span>
+                </button>
+                <button id="reminder-btn-complete" onclick="window.completeTaskFromReminder()" class="py-2 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white text-xs font-extrabold flex items-center justify-center space-x-1.5 shadow-sm transition-all">
+                    <span>✓</span>
+                    <span>Direct afvinken</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN SCHERM (Speels, organisch en niet stijf — geïnspireerd op Structured Daily Planner) -->
+    <div id="login-screen" class="fixed inset-0 bg-[#F4F2F5] z-[100] flex flex-col justify-between p-6 overflow-y-auto transition-opacity duration-500">
+        <!-- Zachte organische achtergrond-accenten -->
+        <div class="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[#F09590]/25 blur-3xl"></div>
+        <div class="pointer-events-none absolute top-1/4 -right-20 w-72 h-72 rounded-full bg-[#6886A6]/20 blur-3xl"></div>
+        <div class="pointer-events-none absolute bottom-10 left-10 w-60 h-60 rounded-full bg-[#8CBE68]/20 blur-3xl"></div>
+
+        <!-- Bovenbalk met merk-badge -->
+        <div class="relative z-10 flex items-center justify-between pt-1">
+            <div class="flex items-center space-x-2.5 bg-white/85 backdrop-blur-md px-3.5 py-2 rounded-full shadow-xs border border-white">
+                <img src="focusplanner-icon.png" alt="FocusPlanner" class="w-6 h-6 rounded-full object-cover">
+                <span class="text-xs font-extrabold text-[#161618] tracking-tight">FocusPlanner</span>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-[#F09590]/15 text-[#D9726C] text-[11px] font-extrabold">Structured Edition</span>
+        </div>
+
+        <!-- Dynamische Visuele Showcase (Niet stijf: zwevende tijdlijn + gekleurde activiteit-bubbels) -->
+        <div class="relative z-10 my-auto py-4">
+            <div class="mb-5">
+                <h1 class="text-[31px] leading-[1.08] font-extrabold text-[#161618] tracking-tight">
+                    Plan je dag in een <span class="text-[#F09590]">vloeiend ritme.</span>
+                </h1>
+                <p class="text-gray-500 text-sm font-medium mt-2 leading-relaxed">
+                    Visuele tijdlijn, slimme herinneringen op je scherm en rust in je hoofd.
+                </p>
+            </div>
+
+            <!-- Organische Collage van de Tijdlijn -->
+            <div class="relative mx-auto max-w-[360px] pt-3 pb-2">
+                <!-- Zwevende groene bel-bubbel linksboven -->
+                <div class="animate-float-slow absolute -top-2 right-4 z-20 flex items-center space-x-2 bg-white px-3 py-2 rounded-full shadow-lg border border-gray-100">
+                    <span class="w-7 h-7 rounded-full bg-[#8CBE68] text-white flex items-center justify-center text-xs shadow-xs">📞</span>
+                    <div class="pr-1">
+                        <p class="text-[10px] font-extrabold text-[#161618] leading-none">Bel Mama</p>
+                        <p class="text-[9px] font-semibold text-gray-400">Inbox bubbel</p>
+                    </div>
+                </div>
+
+                <!-- Zwevende herinnering-pil linksonder -->
+                <div class="animate-float-delayed absolute -bottom-3 left-2 z-20 flex items-center space-x-2 bg-[#161618] text-white px-3.5 py-2 rounded-full shadow-xl">
+                    <span class="w-2 h-2 rounded-full bg-[#F09590] animate-ping"></span>
+                    <span class="text-[10px] font-bold">🔔 09:00 • Yoga Workout start nu!</span>
+                </div>
+
+                <!-- Mini Structured Tijdlijn Kaart (licht gekanteld voor speels effect) -->
+                <div class="bg-white rounded-[2rem] p-4 shadow-[0_20px_50px_rgba(22,22,24,0.08)] border border-white transform -rotate-1">
+                    <div class="flex items-baseline justify-between mb-3 pb-2 border-b border-gray-100">
+                        <div>
+                            <span class="text-lg font-extrabold text-[#161618]">16. Oktober</span>
+                            <span class="text-lg font-extrabold text-[#F09590]"> 2026 ›</span>
+                        </div>
+                        <div class="flex -space-x-1">
+                            <span class="w-3 h-3 rounded-full bg-[#8CBE68] ring-2 ring-white"></span>
+                            <span class="w-3 h-3 rounded-full bg-[#F09590] ring-2 ring-white"></span>
+                            <span class="w-3 h-3 rounded-full bg-[#6886A6] ring-2 ring-white"></span>
+                            <span class="w-3 h-3 rounded-full bg-[#F6B519] ring-2 ring-white"></span>
+                        </div>
+                    </div>
+
+                    <!-- Voorbeeld Rij 1: 08:30 Rise and Shine -->
+                    <div class="flex items-center space-x-3 py-1.5">
+                        <span class="text-[10px] font-bold text-gray-400 w-9 text-right">08:30</span>
+                        <div class="w-10 h-10 rounded-full bg-[#F09590] text-white flex items-center justify-center text-sm shadow-xs shrink-0">⏰</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-semibold text-gray-400">08:30–08:45 (15 min)</p>
+                            <p class="text-xs font-extrabold text-[#161618] truncate">Rise and Shine</p>
+                        </div>
+                        <span class="w-5 h-5 rounded-full border-2 border-[#F09590] shrink-0"></span>
+                    </div>
+
+                    <!-- Voorbeeld Rij 2: 09:00 Yoga Workout (Tall Pill) -->
+                    <div class="flex items-center space-x-3 py-1.5">
+                        <span class="text-[10px] font-extrabold text-[#161618] w-9 text-right">09:41</span>
+                        <div class="w-10 h-16 rounded-full bg-[#6886A6] text-white flex items-center justify-center text-base shadow-xs shrink-0">🧘</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-bold text-[#6886A6]">Nog 19m resterend</p>
+                            <p class="text-xs font-extrabold text-[#161618] truncate">Yoga & Focus</p>
+                        </div>
+                        <span class="w-5 h-5 rounded-full border-2 border-[#6886A6] shrink-0"></span>
+                    </div>
+
+                    <!-- Voorbeeld Rij 3: 10:15 Koffie -->
+                    <div class="flex items-center space-x-3 py-1.5">
+                        <span class="text-[10px] font-bold text-gray-400 w-9 text-right">10:15</span>
+                        <div class="w-10 h-10 rounded-full bg-[#844A67] text-white flex items-center justify-center text-sm shadow-xs shrink-0">☕</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-semibold text-gray-400">10:15–10:30 (15 min)</p>
+                            <p class="text-xs font-extrabold text-[#161618] truncate">Koffie & Dagstart</p>
+                        </div>
+                        <span class="w-5 h-5 rounded-full border-2 border-[#844A67] shrink-0"></span>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div class="w-full max-w-xs space-y-4">
-            <button onclick="window.loginWithGoogle()" class="w-full bg-[#161618] text-white px-6 py-4 rounded-full shadow-[0_12px_28px_rgba(22,22,24,0.22)] flex items-center justify-center space-x-3 hover:bg-black active:scale-95 transition-all font-bold text-sm">
+        <!-- Inlogknoppen onderaan -->
+        <div class="relative z-10 w-full space-y-2.5 pb-2">
+            <button onclick="window.loginWithGoogle()" class="w-full bg-[#161618] text-white px-6 py-4 rounded-full shadow-[0_14px_30px_rgba(22,22,24,0.2)] flex items-center justify-center space-x-3 hover:bg-black active:scale-95 transition-all font-extrabold text-sm">
                 <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" viewBox="0 0 48 48">
                         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
@@ -287,145 +420,111 @@
                 </div>
                 <span>Doorgaan met Google</span>
             </button>
+            <button onclick="window.continueWithoutAccount()" class="w-full bg-white/90 text-[#161618] px-6 py-3.5 rounded-full border border-white shadow-xs flex items-center justify-center space-x-2 hover:bg-white active:scale-95 transition-all font-bold text-xs">
+                <span>Direct starten op dit toestel</span>
+                <span class="text-[#F09590] font-extrabold">→</span>
+            </button>
         </div>
     </div>
 
-    <!-- HEADER SECTIE (Geoptimaliseerd voor iPhone 17 Pro Max schermverhouding) -->
-    <header class="pt-2 pb-2 px-5 relative z-30">
-        <!-- Top balk: Profiel links, Actieknoppen rechts -->
-        <div class="flex justify-between items-center mb-3.5">
-            <div class="flex items-center space-x-3 min-w-0">
-                <div id="avatar-container" onclick="window.logoutGoogle()" class="relative cursor-pointer hover:opacity-85 transition-opacity shrink-0" title="Uitloggen">
-                    <div class="w-11 h-11 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center text-base">👤</div>
+    <!-- HEADER SECTIE (Structured Daily Planner Stijl: 16. October 2026 › + Weekstrip met gekleurde bolletjes) -->
+    <header class="pt-1 pb-3 px-5 relative z-30">
+        <!-- Subtiele top-rij met profiel links & Meldingen / Vandaag / Datum rechts -->
+        <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center space-x-2.5 min-w-0">
+                <div id="avatar-container" onclick="window.logoutGoogle()" class="relative cursor-pointer hover:opacity-85 transition-opacity shrink-0" title="Account / Uitloggen">
+                    <div class="w-8 h-8 rounded-full bg-white border border-white shadow-xs flex items-center justify-center text-xs">👤</div>
                 </div>
-                <div class="min-w-0">
-                    <p id="user-time-greeting" class="text-[11px] font-semibold text-gray-500 leading-tight">Goedemorgen</p>
-                    <h2 id="user-greeting" class="text-[15px] font-extrabold text-[#161618] leading-tight truncate">Welkom!</h2>
+                <div class="min-w-0 flex items-center space-x-1.5">
+                    <span id="user-time-greeting" class="text-[11px] font-semibold text-gray-400">Goedemorgen,</span>
+                    <span id="user-greeting" class="text-xs font-extrabold text-[#161618] truncate">Welkom!</span>
                 </div>
             </div>
 
-            <!-- Rechtsboven ronde actieknoppen: + knop en Kalender knop -->
-            <div class="flex items-center space-x-2 shrink-0">
-                <button onclick="window.openSmartModal()" class="w-10 h-10 rounded-full bg-[#161618] text-white shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all" title="Nieuw item toevoegen">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"></path></svg>
+            <div class="flex items-center space-x-1.5 shrink-0">
+                <button onclick="window.resetToToday()" id="today-pill-btn" class="bg-white/90 px-2.5 py-1 rounded-full text-[11px] font-extrabold shadow-2xs border border-white flex items-center space-x-1 text-[#161618] hover:bg-white active:scale-95 transition-all">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#F09590]"></span>
+                    <span id="current-month-text">Vandaag</span>
                 </button>
-                <div class="relative w-10 h-10 rounded-full bg-white shadow-sm border border-white flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-all overflow-hidden" title="Kies een datum">
-                    <svg class="w-4 h-4 text-[#161618] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                        <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
-                </div>
+                <!-- Meldingen & Herinneringen Knop -->
+                <button onclick="window.openRemindersCenter()" class="relative w-8 h-8 rounded-full bg-white/90 shadow-2xs border border-white flex items-center justify-center text-[#161618] hover:bg-white active:scale-95 transition-all" title="Geplande meldingen & herinneringen">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span id="reminder-bell-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[15px] h-[15px] px-1 rounded-full bg-[#F09590] text-white text-[9px] font-extrabold flex items-center justify-center">0</span>
+                </button>
             </div>
         </div>
 
-        <!-- Grote Hero Titel + Vandaag pil -->
-        <div class="flex justify-between items-end mb-3.5">
-            <h1 id="hero-headline" class="text-[24px] leading-[1.16] font-extrabold tracking-tight text-[#161618]">
-                Laten we vandaag<br>productief maken
-            </h1>
-            <button onclick="window.resetToToday()" id="today-pill-btn" class="bg-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs border border-white flex items-center space-x-1.5 text-[#161618] hover:bg-gray-50 active:scale-95 transition-all shrink-0">
-                <span class="w-2 h-2 rounded-full bg-[#CBE86B] ring-2 ring-[#A5C838]/30"></span>
-                <span id="current-month-text" class="capitalize">Vandaag</span>
-            </button>
+        <!-- Grote Structured Datum Titel (bijv. "4. November 2026 ›") met directe datumkiezer -->
+        <div class="flex items-center justify-between mb-3">
+            <div class="relative inline-flex items-baseline space-x-1.5 cursor-pointer group">
+                <h1 class="text-[28px] leading-none font-extrabold tracking-tight text-[#161618]">
+                    <span id="header-day-month">4. November</span>
+                    <span id="header-year-arrow" class="text-[#F09590] font-extrabold ml-1">2026 ›</span>
+                </h1>
+                <input type="date" onchange="window.selectDateFromPicker(this.value)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" title="Kies een datum">
+            </div>
+            <!-- Week terug / vooruit pijltjes -->
+            <div class="flex items-center space-x-1">
+                <button onclick="window.shiftSelectedDays(-7)" class="w-7 h-7 rounded-full bg-white/70 hover:bg-white text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Vorige week">‹</button>
+                <button onclick="window.shiftSelectedDays(7)" class="w-7 h-7 rounded-full bg-white/70 hover:bg-white text-gray-500 hover:text-[#161618] flex items-center justify-center text-xs font-extrabold transition-all" title="Volgende week">›</button>
+            </div>
         </div>
 
-        <!-- Kalender Strip: 7 dagen passen precies in beeld op iPhone 17 Pro Max -->
+        <!-- 7-Dagen Week Strip met gekleurde taak-icoontjes/bolletjes per dag (zoals op de referentiefoto) -->
         <div id="calendar-container">
-            <div class="flex space-x-2 overflow-x-auto calendar-scroll py-1" id="calendar-strip"></div>
+            <div class="grid grid-cols-7 gap-1 pt-0.5" id="calendar-strip"></div>
         </div>
     </header>
 
-    <!-- TAB 1: VANDAAG / TAKEN -->
-    <main id="view-vandaag" class="tab-content active px-5 mt-2 space-y-4 relative z-10">
-        <!-- Today's Progress Donkere Kaart -->
-        <div class="dark-progress-card rounded-[1.85rem] p-5 text-white">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xs font-bold text-white/90 tracking-tight uppercase">Voortgang Vandaag</h3>
-                <span id="selected-date-badge" class="text-[11px] font-semibold text-white/70 bg-white/10 px-2.5 py-0.5 rounded-full">Vandaag</span>
+    <!-- WITTE AFGERONDE SHEET CONTAINER (Begint direct onder de week-strip zoals in Structured) -->
+    <div class="structured-sheet px-5 pt-3 relative z-10">
+        <!-- Subtiele grijze grab-bar bovenaan het witte blad -->
+        <div class="w-11 h-1 bg-gray-200/90 rounded-full mx-auto mb-3"></div>
+
+    <!-- TAB 1: VANDAAG / TIJDLIJN -->
+    <main id="view-vandaag" class="tab-content active space-y-4 relative z-10">
+        <!-- Compacte balk: Dag / Week / Maand + Filter + Voortgang-pil -->
+        <div class="flex items-center justify-between gap-2">
+            <div class="bg-[#F3F2F5] p-1 rounded-full grid grid-cols-3 gap-0.5">
+                <button type="button" onclick="window.setTaskPeriodView('day')" id="task-view-btn-day" class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-[#161618] text-white shadow-2xs transition-all">Dag</button>
+                <button type="button" onclick="window.setTaskPeriodView('week')" id="task-view-btn-week" class="px-3 py-1 rounded-full text-[11px] font-bold text-gray-500 hover:text-[#161618] transition-all">Week</button>
+                <button type="button" onclick="window.setTaskPeriodView('month')" id="task-view-btn-month" class="px-3 py-1 rounded-full text-[11px] font-bold text-gray-500 hover:text-[#161618] transition-all">Maand</button>
             </div>
-            <div class="flex items-center justify-between gap-3">
-                <!-- Cirkel grafiek met lime-groene ring -->
-                <div class="relative w-24 h-24 flex items-center justify-center shrink-0">
-                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                        <path class="text-white/10" d="M18 3.2 a 14.8 14.8 0 0 1 0 29.6 a 14.8 14.8 0 0 1 0 -29.6" fill="none" stroke="currentColor" stroke-width="3.8"/>
-                        <path id="tasks-progress-circle" class="text-[#CBE86B] transition-all duration-700 ease-out" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 3.2 a 14.8 14.8 0 0 1 0 29.6 a 14.8 14.8 0 0 1 0 -29.6" fill="none" stroke="currentColor" stroke-width="3.8"/>
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="tasks-progress-text" class="text-xl font-extrabold text-white tracking-tight">0%</span>
-                    </div>
+
+            <div class="flex items-center space-x-1.5">
+                <!-- Compacte voortgangsbadge (houdt stats bij) -->
+                <div class="hidden">
+                    <span id="stat-tasks-total">0</span>
+                    <span id="stat-tasks-done">0</span>
+                    <span id="stat-tasks-todo">0</span>
+                    <span id="selected-date-badge">Vandaag</span>
+                    <svg><path id="tasks-progress-circle"/></svg>
                 </div>
-
-                <!-- 3 Stat rijen rechts naast de cirkel -->
-                <div class="flex-1 grid grid-cols-1 gap-2 pl-3 border-l border-white/10">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white/80 shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
-                        </div>
-                        <div class="flex items-baseline space-x-1.5">
-                            <p id="stat-tasks-total" class="text-sm font-extrabold text-white">0</p>
-                            <p class="text-[11px] text-white/55 font-medium">Totaal</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-[#CBE86B]/20 flex items-center justify-center text-[#CBE86B] shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <div class="flex items-baseline space-x-1.5">
-                            <p id="stat-tasks-done" class="text-sm font-extrabold text-white">0</p>
-                            <p class="text-[11px] text-white/55 font-medium">Voltooid</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white/80 shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
-                        </div>
-                        <div class="flex items-baseline space-x-1.5">
-                            <p id="stat-tasks-todo" class="text-sm font-extrabold text-white">0</p>
-                            <p class="text-[11px] text-white/55 font-medium">Openstaand</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sectie Header + Dag/Week/Maand View Switcher & Clean Pull-down Filter -->
-        <div class="space-y-2.5">
-            <div class="flex justify-between items-center">
-                <h2 id="tasks-section-title" class="text-base font-extrabold text-[#161618] tracking-tight">Taken overzicht</h2>
-                <button onclick="window.openSmartModal()" class="px-3 py-1.5 rounded-full bg-[#161618] text-white text-xs font-bold hover:bg-black transition-colors shadow-2xs">+ Nieuwe taak</button>
-            </div>
-
-            <!-- Clean balk: Dag / Week / Maand switcher + Status Pull-down -->
-            <div class="flex items-center gap-2">
-                <div class="flex-1 bg-white p-1 rounded-full shadow-xs border border-white grid grid-cols-3 gap-1">
-                    <button type="button" onclick="window.setTaskPeriodView('day')" id="task-view-btn-day" class="py-1.5 rounded-full text-xs font-extrabold bg-[#161618] text-white shadow-2xs transition-all">Dag</button>
-                    <button type="button" onclick="window.setTaskPeriodView('week')" id="task-view-btn-week" class="py-1.5 rounded-full text-xs font-bold text-gray-500 hover:text-[#161618] transition-all">Week</button>
-                    <button type="button" onclick="window.setTaskPeriodView('month')" id="task-view-btn-month" class="py-1.5 rounded-full text-xs font-bold text-gray-500 hover:text-[#161618] transition-all">Maand</button>
+                <div class="bg-[#F3F2F5] px-2.5 py-1.5 rounded-full flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#8CBE68]"></span>
+                    <span id="tasks-progress-text" class="text-[11px] font-extrabold text-[#161618]">0%</span>
                 </div>
 
                 <div class="relative shrink-0">
-                    <select id="task-filter-select" onchange="window.setTaskFilter(this.value)" class="appearance-none bg-white border border-white text-[#161618] font-extrabold text-xs rounded-full pl-3.5 pr-8 py-2.5 shadow-xs outline-none cursor-pointer">
+                    <select id="task-filter-select" onchange="window.setTaskFilter(this.value)" class="appearance-none bg-[#F3F2F5] text-[#161618] font-extrabold text-[11px] rounded-full pl-3 pr-6 py-1.5 outline-none cursor-pointer">
                         <option value="all" id="opt-task-all">Alle (0)</option>
-                        <option value="todo" id="opt-task-todo">Openstaand (0)</option>
-                        <option value="done" id="opt-task-done">Voltooid (0)</option>
+                        <option value="todo" id="opt-task-todo">Open (0)</option>
+                        <option value="done" id="opt-task-done">Klaar (0)</option>
                     </select>
-                    <svg class="w-3.5 h-3.5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-3 h-3 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </div>
             </div>
         </div>
 
-        <!-- Takenlijst (Dag, Week of Maand weergave) -->
-        <div id="task-list" class="space-y-3 pb-6"></div>
+        <!-- Takenlijst: Rondjes bovenaan (taken zonder tijd) + Verticale Structured Tijdlijn (taken met tijd) -->
+        <div id="task-list" class="space-y-2 pb-6"></div>
     </main>
 
     <!-- TAB 2: UITDAGING / DOELEN -->
-    <main id="view-uitdaging" class="tab-content px-5 mt-2 relative z-10">
+    <main id="view-uitdaging" class="tab-content mt-1 relative z-10">
         <div class="dark-progress-card rounded-[1.85rem] p-5 text-white mb-5 flex justify-between items-center">
             <div>
-                <span class="bg-[#CBE86B] text-[#161618] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Dagelijkse Focus</span>
+                <span class="bg-[#F09590] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Dagelijkse Focus</span>
                 <h2 class="text-lg font-extrabold mt-2">Goede voortgang! ✨</h2>
                 <p class="text-xs text-white/60 mt-0.5 font-medium">Blijf bouwen aan je gewoontes</p>
             </div>
@@ -433,24 +532,24 @@
                 <span id="daily-focus-text" class="text-sm font-extrabold text-white">0%</span>
                 <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <path class="text-white/10" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"/>
-                    <path id="daily-focus-circle" class="text-[#CBE86B] transition-all duration-700 ease-out" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"/>
+                    <path id="daily-focus-circle" class="text-[#F09590] transition-all duration-700 ease-out" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"/>
                 </svg>
             </div>
         </div>
 
         <div class="flex justify-between items-center mb-3">
             <h2 class="text-base font-extrabold text-[#161618] tracking-tight">Mijn doelen</h2>
-            <button onclick="window.openCustomHabitModal()" class="text-xs font-bold text-gray-500 hover:text-[#161618] transition-colors">+ Nieuw doel</button>
+            <button onclick="window.openCustomHabitModal()" class="text-xs font-bold text-[#F09590] hover:text-[#161618] transition-colors">+ Nieuw doel</button>
         </div>
         <div id="habit-list" class="space-y-3 pb-6"></div>
     </main>
 
     <!-- TAB 3: JOURNAL & WORKOUTS -->
-    <main id="view-journal" class="tab-content px-5 mt-2 relative z-10">
+    <main id="view-journal" class="tab-content mt-1 relative z-10">
         <div class="flex justify-between items-center mb-3.5 gap-2">
             <h2 class="text-base font-extrabold text-[#161618] tracking-tight truncate">Journal & workouts</h2>
             <div class="flex items-center space-x-1.5 shrink-0">
-                <button onclick="window.openNoteHistory()" class="bg-white text-[#161618] border border-white px-3 py-2 rounded-full text-[11px] font-bold shadow-xs flex items-center space-x-1 hover:bg-gray-50 active:scale-95 transition-all">
+                <button onclick="window.openNoteHistory()" class="bg-[#F3F2F5] text-[#161618] px-3 py-2 rounded-full text-[11px] font-bold flex items-center space-x-1 hover:bg-gray-200 active:scale-95 transition-all">
                     <span>📝</span>
                     <span>Notities</span>
                 </button>
@@ -460,59 +559,63 @@
                 </button>
             </div>
         </div>
-        <button onclick="window.openSmartModal()" class="w-full py-3.5 px-4 rounded-[1.5rem] soft-card text-[#161618] font-bold hover:bg-gray-50 transition-all mb-4 flex justify-between items-center group">
+        <button onclick="window.openSmartModal()" class="w-full py-3.5 px-4 rounded-[1.5rem] bg-[#F3F2F5] text-[#161618] font-bold hover:bg-gray-200/70 transition-all mb-4 flex justify-between items-center group">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-full bg-[#CBE86B] text-[#161618] flex items-center justify-center font-bold shrink-0">
+                <div class="w-9 h-9 rounded-full bg-[#F09590] text-white flex items-center justify-center font-bold shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                 </div>
                 <span class="text-sm font-bold text-gray-700 group-hover:text-[#161618]">Notitie of workout loggen...</span>
             </div>
-            <span class="w-8 h-8 rounded-full bg-[#F6F4F2] flex items-center justify-center text-gray-500 text-xs shrink-0">↗</span>
+            <span class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-500 text-xs shrink-0">↗</span>
         </button>
         <div id="journal-list" class="space-y-3.5 pb-6"></div>
     </main>
 
     <!-- TAB 4: ONTDEK -->
-    <main id="view-ontdek" class="tab-content px-5 mt-2 relative z-10">
+    <main id="view-ontdek" class="tab-content mt-1 relative z-10">
         <button onclick="window.openCustomHabitModal()" class="w-full py-3.5 px-4 rounded-[1.5rem] bg-[#161618] text-white font-bold hover:bg-black transition-all mb-4 shadow-md flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <span class="w-8 h-8 rounded-full bg-[#CBE86B] text-[#161618] flex items-center justify-center font-extrabold text-sm shrink-0">+</span>
+                <span class="w-8 h-8 rounded-full bg-[#F09590] text-white flex items-center justify-center font-extrabold text-sm shrink-0">+</span>
                 <span class="text-sm">Zelf een gewoonte bedenken</span>
             </div>
             <span class="text-xs text-white/60">Aanpassen →</span>
         </button>
 
         <div class="relative mb-4">
-            <input type="text" id="search-discover" oninput="window.filterDiscover()" placeholder="Zoek uit 70+ gezonde gewoontes..." class="w-full py-3.5 px-4 pl-11 bg-white border border-white rounded-full outline-none focus:ring-2 focus:ring-[#161618] text-[#161618] placeholder-gray-400 font-medium shadow-xs transition-all">
+            <input type="text" id="search-discover" oninput="window.filterDiscover()" placeholder="Zoek uit 70+ gezonde gewoontes..." class="w-full py-3.5 px-4 pl-11 bg-[#F3F2F5] rounded-full outline-none focus:ring-2 focus:ring-[#F09590] text-[#161618] placeholder-gray-400 font-medium transition-all">
             <svg class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <div id="discover-list" class="grid grid-cols-2 gap-3 pb-6"></div>
     </main>
+    </div><!-- /.structured-sheet -->
     </div><!-- /#app-shell -->
 
-    <!-- FLOATING BOTTOM NAVIGATION BAR (Apple Translucent Dock met 4 specifieke tabs & vloeiende spring-pil) -->
-    <div class="fixed safe-bottom-nav left-0 right-0 mx-auto w-full max-w-[440px] px-4 z-40 pointer-events-none">
-        <nav class="apple-glass-dock relative rounded-full p-1.5 grid grid-cols-4 gap-1 place-items-center pointer-events-auto">
-            <div id="nav-active-pill" class="
-                position: absolute;
-            " style="position:absolute; top:6px; bottom:6px; left:6px; width:calc((100% - 12px) / 4); background:#161618; border-radius:9999px; box-shadow:0 6px 16px rgba(22,22,24,0.22); pointer-events:none; z-index:0;"></div>
-            <button onclick="window.switchTab('vandaag')" id="nav-vandaag" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-white w-full transition-colors duration-200">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span class="text-[10px] font-bold">Taken</span>
+    <!-- FLOATING BOTTOM NAVIGATION BAR + LOSSE CORAL '+' KNOP RECHTS (Zoals in het Structured voorbeeld) -->
+    <div class="fixed safe-bottom-nav left-0 right-0 mx-auto w-full max-w-[440px] px-4 z-40 pointer-events-none flex items-center gap-3">
+        <nav class="apple-glass-dock flex-1 relative rounded-full p-1.5 grid grid-cols-4 gap-1 place-items-center pointer-events-auto">
+            <div id="nav-active-pill" style="position:absolute; top:6px; bottom:6px; left:6px; width:calc((100% - 12px) / 4); background:rgba(240,149,144,0.18); border-radius:9999px; pointer-events:none; z-index:0;"></div>
+            <button onclick="window.switchTab('vandaag')" id="nav-vandaag" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#F09590] w-full transition-colors duration-200">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h10"></path></svg>
+                <span class="text-[10px] font-extrabold">Tijdlijn</span>
             </button>
-            <button onclick="window.switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-gray-500 hover:text-[#161618] w-full transition-colors duration-200">
+            <button onclick="window.switchTab('uitdaging')" id="nav-uitdaging" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#161618] hover:text-[#F09590] w-full transition-colors duration-200">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 <span class="text-[10px] font-bold">Doelen</span>
             </button>
-            <button onclick="window.switchTab('journal')" id="nav-journal" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-gray-500 hover:text-[#161618] w-full transition-colors duration-200">
+            <button onclick="window.switchTab('journal')" id="nav-journal" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#161618] hover:text-[#F09590] w-full transition-colors duration-200">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 <span class="text-[10px] font-bold">Journal</span>
             </button>
-            <button onclick="window.switchTab('ontdek')" id="nav-ontdek" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-gray-500 hover:text-[#161618] w-full transition-colors duration-200">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <button onclick="window.switchTab('ontdek')" id="nav-ontdek" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#161618] hover:text-[#F09590] w-full transition-colors duration-200">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 <span class="text-[10px] font-bold">Ontdek</span>
             </button>
         </nav>
+
+        <!-- Grote ronde koraalroze '+' knop rechts naast de navigatiebalk -->
+        <button onclick="window.openSmartModal()" class="pointer-events-auto w-14 h-14 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white shadow-[0_12px_28px_rgba(240,149,144,0.55)] flex items-center justify-center shrink-0 active:scale-95 transition-all" title="Nieuwe activiteit plannen">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"></path></svg>
+        </button>
     </div>
 
     <!-- DOEL WAARDE TOEVOEGEN MODAL -->
@@ -566,8 +669,27 @@
                 <textarea id="journal-note-body" rows="5" placeholder="" class="w-full p-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none shadow-xs border border-white"></textarea>
             </div>
 
-            <!-- Extra velden voor Taken (Subtaken, Kleur, Beschrijving, Datum/Tijd & Prioriteit) -->
+            <!-- Extra velden voor Taken (Icoon, Subtaken, Kleur, Beschrijving, Datum/Tijd/Duur, Meldingen & Prioriteit) -->
             <div id="modal-task-extra" class="space-y-4 mb-4">
+
+                <!-- ICOON KIEZER (Voor de ronde bubbels & tijdlijn-iconen zoals in Structured) -->
+                <div>
+                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Icoon op de tijdlijn</label>
+                    <div id="task-icon-picker" class="flex items-center space-x-2 overflow-x-auto bg-white p-2 rounded-2xl shadow-xs border border-white">
+                        <button type="button" onclick="window.setTaskIcon('⏰')" data-icon="⏰" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">⏰</button>
+                        <button type="button" onclick="window.setTaskIcon('📞')" data-icon="📞" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">📞</button>
+                        <button type="button" onclick="window.setTaskIcon('🧘')" data-icon="🧘" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">🧘</button>
+                        <button type="button" onclick="window.setTaskIcon('🚿')" data-icon="🚿" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">🚿</button>
+                        <button type="button" onclick="window.setTaskIcon('☕')" data-icon="☕" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">☕</button>
+                        <button type="button" onclick="window.setTaskIcon('🚲')" data-icon="🚲" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">🚲</button>
+                        <button type="button" onclick="window.setTaskIcon('💻')" data-icon="💻" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">💻</button>
+                        <button type="button" onclick="window.setTaskIcon('📚')" data-icon="📚" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">📚</button>
+                        <button type="button" onclick="window.setTaskIcon('📷')" data-icon="📷" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">📷</button>
+                        <button type="button" onclick="window.setTaskIcon('🏋️')" data-icon="🏋️" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">🏋️</button>
+                        <button type="button" onclick="window.setTaskIcon('🌴')" data-icon="🌴" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">🌴</button>
+                        <button type="button" onclick="window.setTaskIcon('✨')" data-icon="✨" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] flex items-center justify-center text-base shrink-0 transition-all">✨</button>
+                    </div>
+                </div>
                 
                 <!-- SUBTAKEN / CHECKLIST SECTIE -->
                 <div>
@@ -581,18 +703,18 @@
                     </div>
                 </div>
 
-                <!-- TAAK KLEUR KIEZER -->
+                <!-- TAAK KLEUR KIEZER (Structured Kleurenpalet) -->
                 <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-2 px-1">Kleur van de taak</label>
+                    <label class="block text-xs font-bold text-[#161618] mb-2 px-1">Kleur van de activiteit</label>
                     <div id="task-color-picker" class="flex items-center justify-between bg-white p-2.5 rounded-2xl shadow-xs border border-white">
-                        <button type="button" onclick="window.setTaskColor('white')" id="color-btn-white" class="w-8 h-8 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center transition-all" title="Standaard Wit"></button>
-                        <button type="button" onclick="window.setTaskColor('purple')" id="color-btn-purple" class="w-8 h-8 rounded-full bg-[#EDE9FE] border-2 border-[#C4B5FD] flex items-center justify-center transition-all" title="Lila / Paars"></button>
-                        <button type="button" onclick="window.setTaskColor('blue')" id="color-btn-blue" class="w-8 h-8 rounded-full bg-[#E0F2FE] border-2 border-[#7DD3FC] flex items-center justify-center transition-all" title="Blauw"></button>
-                        <button type="button" onclick="window.setTaskColor('green')" id="color-btn-green" class="w-8 h-8 rounded-full bg-[#DCFCE7] border-2 border-[#86EFAC] flex items-center justify-center transition-all" title="Mintgroen"></button>
-                        <button type="button" onclick="window.setTaskColor('yellow')" id="color-btn-yellow" class="w-8 h-8 rounded-full bg-[#FEF3C7] border-2 border-[#FCD34D] flex items-center justify-center transition-all" title="Zachtgeel"></button>
-                        <button type="button" onclick="window.setTaskColor('orange')" id="color-btn-orange" class="w-8 h-8 rounded-full bg-[#FFEDD5] border-2 border-[#FDBA74] flex items-center justify-center transition-all" title="Perzik / Oranje"></button>
-                        <button type="button" onclick="window.setTaskColor('pink')" id="color-btn-pink" class="w-8 h-8 rounded-full bg-[#FCE7F3] border-2 border-[#F9A8D4] flex items-center justify-center transition-all" title="Roze"></button>
-                        <button type="button" onclick="window.setTaskColor('teal')" id="color-btn-teal" class="w-8 h-8 rounded-full bg-[#CCFBF1] border-2 border-[#5EEAD4] flex items-center justify-center transition-all" title="Turquoise"></button>
+                        <button type="button" onclick="window.setTaskColor('coral')" id="color-btn-coral" class="w-8 h-8 rounded-full bg-[#F09590] border-2 border-[#E07A74] flex items-center justify-center transition-all" title="Koraalroze"></button>
+                        <button type="button" onclick="window.setTaskColor('green')" id="color-btn-green" class="w-8 h-8 rounded-full bg-[#8CBE68] border-2 border-[#74A850] flex items-center justify-center transition-all" title="Saliegroen"></button>
+                        <button type="button" onclick="window.setTaskColor('blue')" id="color-btn-blue" class="w-8 h-8 rounded-full bg-[#6886A6] border-2 border-[#526E8C] flex items-center justify-center transition-all" title="Leisteenblauw"></button>
+                        <button type="button" onclick="window.setTaskColor('navy')" id="color-btn-navy" class="w-8 h-8 rounded-full bg-[#2B506E] border-2 border-[#1E3B52] flex items-center justify-center transition-all" title="Diep Marineblauw"></button>
+                        <button type="button" onclick="window.setTaskColor('plum')" id="color-btn-plum" class="w-8 h-8 rounded-full bg-[#844A67] border-2 border-[#6B3852] flex items-center justify-center transition-all" title="Bordeaux / Pruim"></button>
+                        <button type="button" onclick="window.setTaskColor('yellow')" id="color-btn-yellow" class="w-8 h-8 rounded-full bg-[#F6B519] border-2 border-[#DA9B08] flex items-center justify-center transition-all" title="Zonnig Goudgeel"></button>
+                        <button type="button" onclick="window.setTaskColor('purple')" id="color-btn-purple" class="w-8 h-8 rounded-full bg-[#9B82F3] border-2 border-[#7E63E0] flex items-center justify-center transition-all" title="Lavendel"></button>
+                        <button type="button" onclick="window.setTaskColor('teal')" id="color-btn-teal" class="w-8 h-8 rounded-full bg-[#4EA8A1] border-2 border-[#398D86] flex items-center justify-center transition-all" title="Oceaanblauw"></button>
                     </div>
                 </div>
 
@@ -601,17 +723,48 @@
                     <textarea id="task-notes-input" rows="2" placeholder="" class="w-full p-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none placeholder-gray-400 shadow-xs border border-white"></textarea>
                 </div>
 
+                <!-- DATUM, STARTTIJD & DUUR -->
                 <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Datum & Tijd</label>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="px-3.5 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-2">
+                    <div class="flex items-center justify-between mb-1.5 px-1">
+                        <label class="text-xs font-bold text-[#161618]">Datum, Tijd & Duur</label>
+                        <span class="text-[10px] font-semibold text-gray-400">Zonder tijd = bovenin als ronde bubbel</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1.5">
                             <span class="text-xs">📅</span>
                             <input type="date" id="task-date-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs">
                         </div>
-                        <div class="px-3.5 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-2">
+                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1.5">
                             <span class="text-xs">🕒</span>
                             <input type="time" id="time-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs">
                         </div>
+                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1">
+                            <span class="text-xs">⏳</span>
+                            <select id="task-duration-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs cursor-pointer">
+                                <option value="15">15 min</option>
+                                <option value="30">30 min</option>
+                                <option value="45">45 min</option>
+                                <option value="60">60 min</option>
+                                <option value="90">90 min</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HERINNERING / MELDING OP SCHERM -->
+                <div>
+                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Melding op je scherm (bij ingestelde tijd)</label>
+                    <div class="px-3.5 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm">🔔</span>
+                            <span class="text-xs font-bold text-[#161618]">Herinner mij</span>
+                        </div>
+                        <select id="task-reminder-input" class="bg-[#F3F2F5] px-3 py-1.5 rounded-full text-xs font-extrabold text-[#161618] outline-none cursor-pointer">
+                            <option value="both">5 min vooraf & op starttijd</option>
+                            <option value="ontime">Precies op starttijd</option>
+                            <option value="15min">15 min vooraf & op starttijd</option>
+                            <option value="none">Geen melding</option>
+                        </select>
                     </div>
                 </div>
 
@@ -811,6 +964,53 @@
         </div>
     </div>
 
+    <!-- POPUP VENSTER: MELDINGEN & HERINNERINGEN OVERZICHT -->
+    <div id="reminders-center-modal" data-apple-sheet="closeRemindersCenter" class="hidden fixed inset-0 bg-[#161618]/55 backdrop-blur-sm z-[85] flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 sheet-backdrop" onclick="window.closeRemindersCenter()"></div>
+        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[440px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet max-h-[85dvh] flex flex-col animate-slide-up shadow-2xl border-t border-white">
+            <div class="sheet-grab-zone" aria-label="Sleep omlaag om te sluiten"><div class="sheet-grab-pill"></div></div>
+            <div class="flex justify-between items-center mb-3.5 shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-10 h-10 rounded-full bg-[#F09590] text-white flex items-center justify-center text-base shadow-xs">🔔</div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-[#161618]">Meldingen & Tijdschema</h3>
+                        <p class="text-[11px] font-medium text-gray-500">Herinneringen voor jouw geplande activiteiten</p>
+                    </div>
+                </div>
+                <button onclick="window.closeRemindersCenter()" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 font-bold hover:bg-gray-50">✕</button>
+            </div>
+
+            <!-- Instellingen & Test-knop kaart -->
+            <div class="bg-white rounded-3xl p-4 mb-3.5 shadow-xs border border-white space-y-3 shrink-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-extrabold text-[#161618]">Schermmeldingen & Geluid</p>
+                        <p id="notif-permission-status" class="text-[11px] font-medium text-gray-500">Meldingen verschijnen automatisch op je scherm</p>
+                    </div>
+                    <button onclick="window.requestBrowserNotificationPermission()" id="btn-enable-browser-notif" class="px-3 py-1.5 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[#161618] text-[11px] font-extrabold transition-all">
+                        Systeemmelding aan
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <button onclick="window.triggerTestReminder()" class="flex-1 py-2.5 px-3 rounded-full bg-[#161618] text-white text-xs font-extrabold flex items-center justify-center space-x-1.5 hover:bg-black active:scale-95 transition-all">
+                        <span>🔔</span>
+                        <span>Test melding op scherm</span>
+                    </button>
+                    <button onclick="window.closeRemindersCenter(); window.openSmartModal();" class="py-2.5 px-3.5 rounded-full bg-[#F09590] text-white text-xs font-extrabold hover:bg-[#E07A74] active:scale-95 transition-all">
+                        + Plan tijd
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-2 px-1 shrink-0">
+                <span class="text-xs font-extrabold text-[#161618]">Geplande tijden op geselecteerde dag</span>
+                <span id="reminders-list-count" class="text-[11px] font-bold text-[#F09590]">0 gepland</span>
+            </div>
+
+            <div id="reminders-center-list" class="overflow-y-auto space-y-2.5 flex-1 pr-0.5"></div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -831,7 +1031,28 @@
         const provider = new GoogleAuthProvider();
 
         window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(error => console.error(error));
-        window.logoutGoogle = () => { if(confirm("Weet je zeker dat je wilt uitloggen?")) signOut(auth); };
+        window.continueWithoutAccount = () => {
+            localStorage.setItem('guestModeActive', 'true');
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen) {
+                loginScreen.classList.add('animate-fade-out');
+                setTimeout(() => loginScreen.classList.add('hidden'), 420);
+            }
+            const gEl = document.getElementById('user-greeting');
+            if (gEl) gEl.innerText = 'Welkom!';
+        };
+        window.logoutGoogle = () => {
+            if (localStorage.getItem('guestModeActive') === 'true' && !window.currentUser) {
+                localStorage.removeItem('guestModeActive');
+                const loginScreen = document.getElementById('login-screen');
+                if (loginScreen) loginScreen.classList.remove('hidden', 'animate-fade-out');
+                return;
+            }
+            if(confirm("Weet je zeker dat je wilt uitloggen?")) {
+                localStorage.removeItem('guestModeActive');
+                signOut(auth);
+            }
+        };
 
         window.syncToCloud = async () => {
             if(!window.currentUser) return;
@@ -854,17 +1075,17 @@
                 setTimeout(() => loginScreen.classList.add('hidden'), 500);
 
                 const hour = new Date().getHours();
-                const timeGreet = hour < 12 ? 'Goedemorgen' : (hour < 18 ? 'Goedemiddag' : 'Goedenavond');
+                const timeGreet = hour < 12 ? 'Goedemorgen,' : (hour < 18 ? 'Goedemiddag,' : 'Goedenavond,');
                 const timeGreetEl = document.getElementById('user-time-greeting');
                 if (timeGreetEl) timeGreetEl.innerText = timeGreet;
 
                 const fullName = user.displayName || 'Focus Gebruiker';
-                document.getElementById('user-greeting').innerText = fullName;
-                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'F';
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Focus';
+                document.getElementById('user-greeting').innerText = firstName;
                 const photo = user.photoURL ? user.photoURL : `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=161618&color=fff`;
                 document.getElementById('avatar-container').innerHTML = `
-                    <img src="${photo}" alt="Profiel" class="w-11 h-11 rounded-full shadow-sm border-2 border-white object-cover">
-                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#CBE86B] border-2 border-white rounded-full"></div>
+                    <img src="${photo}" alt="Profiel" class="w-8 h-8 rounded-full shadow-xs border border-white object-cover">
+                    <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#8CBE68] border border-white rounded-full"></div>
                 `;
                 
                 try {
@@ -896,13 +1117,18 @@
                     } else {
                         await window.syncToCloud();
                     }
-                    window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscoverList(window.discoverChallenges);
+                    window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal(); window.renderDiscoverList(window.discoverChallenges);
                 } catch(e) { console.error("Leesfout Firebase:", e); }
 
             } else {
                 window.currentUser = null;
-                const loginScreen = document.getElementById('login-screen');
-                loginScreen.classList.remove('hidden', 'animate-fade-out');
+                if (localStorage.getItem('guestModeActive') === 'true') {
+                    const loginScreen = document.getElementById('login-screen');
+                    if (loginScreen) loginScreen.classList.add('hidden');
+                } else {
+                    const loginScreen = document.getElementById('login-screen');
+                    loginScreen.classList.remove('hidden', 'animate-fade-out');
+                }
             }
         });
     </script>
@@ -917,7 +1143,8 @@
         window.editingItemId = null;
         window.currentTaskFilter = 'all';
         window.currentTaskPriority = 'medium';
-        window.currentTaskColor = 'white';
+        window.currentTaskColor = 'coral';
+        window.currentTaskIcon = '⏰';
         window.currentModalSubtasks = [];
         
         window.selectedDate = new Date();
@@ -926,7 +1153,7 @@
 
         const initGreetingTime = () => {
             const h = new Date().getHours();
-            const g = h < 12 ? 'Goedemorgen' : (h < 18 ? 'Goedemiddag' : 'Goedenavond');
+            const g = h < 12 ? 'Goedemorgen,' : (h < 18 ? 'Goedemiddag,' : 'Goedenavond,');
             const el = document.getElementById('user-time-greeting');
             if (el) el.innerText = g;
         };
@@ -939,27 +1166,58 @@
             localStorage.setItem('lastUpdated', Date.now().toString());
         };
 
-        // --- KLEUREN PALET VOOR TAKEN ---
+        // --- STRUCTURED KLEUREN PALET & ICONEN VOOR ACTIVITEITEN ---
         window.taskColorThemes = {
-            white:  { bg: '#FFFFFF', border: '#FFFFFF', accent: '#161618', subBg: '#F6F4F2', swatchBorder: '#D1D5DB', swatchBg: '#FFFFFF' },
-            purple: { bg: '#F5F3FF', border: '#DDD6FE', accent: '#7C3AED', subBg: '#EDE9FE', swatchBorder: '#C4B5FD', swatchBg: '#EDE9FE' },
-            blue:   { bg: '#F0F9FF', border: '#BAE6FD', accent: '#0284C7', subBg: '#E0F2FE', swatchBorder: '#7DD3FC', swatchBg: '#E0F2FE' },
-            green:  { bg: '#F0FDF4', border: '#BBF7D0', accent: '#16A34A', subBg: '#DCFCE7', swatchBorder: '#86EFAC', swatchBg: '#DCFCE7' },
-            yellow: { bg: '#FFFBEB', border: '#FDE68A', accent: '#D97706', subBg: '#FEF3C7', swatchBorder: '#FCD34D', swatchBg: '#FEF3C7' },
-            orange: { bg: '#FFF7ED', border: '#FED7AA', accent: '#EA580C', subBg: '#FFEDD5', swatchBorder: '#FDBA74', swatchBg: '#FFEDD5' },
-            pink:   { bg: '#FDF2F8', border: '#FBCFE8', accent: '#DB2777', subBg: '#FCE7F3', swatchBorder: '#F9A8D4', swatchBg: '#FCE7F3' },
-            teal:   { bg: '#F0FDFA', border: '#99F6E4', accent: '#0D9488', subBg: '#CCFBF1', swatchBorder: '#5EEAD4', swatchBg: '#CCFBF1' }
+            coral:  { solid: '#F09590', bg: '#FDF4F3', border: '#F8D4D1', accent: '#E07A74', subBg: '#FCE8E6', textOnSolid: '#FFFFFF' },
+            green:  { solid: '#8CBE68', bg: '#F4F9F0', border: '#D4E9C5', accent: '#74A850', subBg: '#EBF5E3', textOnSolid: '#FFFFFF' },
+            blue:   { solid: '#6886A6', bg: '#F2F6FA', border: '#CBD8E6', accent: '#526E8C', subBg: '#E6EEF5', textOnSolid: '#FFFFFF' },
+            navy:   { solid: '#2B506E', bg: '#EFF4F8', border: '#BBD0E2', accent: '#2B506E', subBg: '#E2ECF3', textOnSolid: '#FFFFFF' },
+            plum:   { solid: '#844A67', bg: '#F9F2F6', border: '#E4C7D6', accent: '#844A67', subBg: '#F2E5EC', textOnSolid: '#FFFFFF' },
+            yellow: { solid: '#F6B519', bg: '#FFF9EB', border: '#FDE3A7', accent: '#D99B08', subBg: '#FEF3D1', textOnSolid: '#FFFFFF' },
+            purple: { solid: '#9B82F3', bg: '#F5F3FF', border: '#DDD6FE', accent: '#7C3AED', subBg: '#EDE9FE', textOnSolid: '#FFFFFF' },
+            teal:   { solid: '#4EA8A1', bg: '#F0FAF9', border: '#BCE6E3', accent: '#398D86', subBg: '#E0F4F2', textOnSolid: '#FFFFFF' },
+            // Fallback voor eerder opgeslagen kleuren
+            white:  { solid: '#F09590', bg: '#FDF4F3', border: '#F8D4D1', accent: '#E07A74', subBg: '#FCE8E6', textOnSolid: '#FFFFFF' },
+            orange: { solid: '#F6B519', bg: '#FFF9EB', border: '#FDE3A7', accent: '#D99B08', subBg: '#FEF3D1', textOnSolid: '#FFFFFF' },
+            pink:   { solid: '#F09590', bg: '#FDF4F3', border: '#F8D4D1', accent: '#E07A74', subBg: '#FCE8E6', textOnSolid: '#FFFFFF' }
+        };
+
+        window.inferTaskIcon = (title = '', fallback = '⏰') => {
+            const t = (title || '').toLowerCase();
+            if (t.includes('bel') || t.includes('call') || t.includes('telefoon') || t.includes('mama') || t.includes('oma')) return '📞';
+            if (t.includes('yoga') || t.includes('medit') || t.includes('stretch') || t.includes('rust')) return '🧘';
+            if (t.includes('douch') || t.includes('shower') || t.includes('bad') || t.includes('ochtend')) return '🚿';
+            if (t.includes('koffie') || t.includes('coffee') || t.includes('thee') || t.includes('ontbijt') || t.includes('lunch')) return '☕';
+            if (t.includes('fiets') || t.includes('bike') || t.includes('wandel') || t.includes('kantoor') || t.includes('reis')) return '🚲';
+            if (t.includes('sport') || t.includes('workout') || t.includes('gym') || t.includes('train') || t.includes('fitness')) return '🏋️';
+            if (t.includes('camera') || t.includes('foto') || t.includes('video') || t.includes('lens')) return '📷';
+            if (t.includes('boek') || t.includes('lees') || t.includes('studie') || t.includes('toets') || t.includes('school') || t.includes('leerling')) return '📚';
+            if (t.includes('vakantie') || t.includes('vrij') || t.includes('reis')) return '🌴';
+            if (t.includes('werk') || t.includes('mail') || t.includes('meeting') || t.includes('laptop')) return '💻';
+            return fallback || '⏰';
+        };
+
+        window.setTaskIcon = (icon) => {
+            window.currentTaskIcon = icon || '⏰';
+            document.querySelectorAll('.task-icon-btn').forEach(btn => {
+                if (btn.getAttribute('data-icon') === window.currentTaskIcon) {
+                    btn.className = "task-icon-btn w-9 h-9 rounded-full bg-[#161618] text-white flex items-center justify-center text-base shrink-0 scale-110 shadow-xs transition-all";
+                } else {
+                    btn.className = "task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center text-base shrink-0 hover:bg-gray-200 transition-all";
+                }
+            });
         };
 
         window.setTaskColor = (colorKey) => {
-            if (!window.taskColorThemes[colorKey]) colorKey = 'white';
+            if (!window.taskColorThemes[colorKey] || colorKey === 'white' || colorKey === 'pink') colorKey = 'coral';
+            if (colorKey === 'orange') colorKey = 'yellow';
             window.currentTaskColor = colorKey;
-            Object.keys(window.taskColorThemes).forEach(k => {
+            ['coral', 'green', 'blue', 'navy', 'plum', 'yellow', 'purple', 'teal'].forEach(k => {
                 const btn = document.getElementById(`color-btn-${k}`);
                 if (!btn) return;
                 if (k === colorKey) {
                     btn.classList.add('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
-                    btn.innerHTML = `<svg class="w-3.5 h-3.5 text-[#161618]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                    btn.innerHTML = `<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
                 } else {
                     btn.classList.remove('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
                     btn.innerHTML = '';
@@ -2764,15 +3022,42 @@
             window.generateCalendar(); window.renderTasks(); window.renderHabits(); window.renderJournal();
         };
 
+        window.shiftSelectedDays = (deltaDays) => {
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+            const next = new Date(window.selectedDate);
+            next.setDate(next.getDate() + deltaDays);
+            next.setHours(0, 0, 0, 0);
+            window.selectedDate = next;
+            window.generateCalendar();
+            window.renderTasks();
+            window.renderHabits();
+            window.renderJournal();
+        };
+
         window.generateCalendar = () => {
-            const s = document.getElementById('calendar-strip'); s.innerHTML=""; 
-            const centerDate = new Date(window.selectedDate); centerDate.setHours(0,0,0,0);
-            const actualToday = new Date(); actualToday.setHours(0,0,0,0);
+            const s = document.getElementById('calendar-strip');
+            if (!s) return;
+            s.innerHTML = "";
+            const centerDate = new Date(window.selectedDate);
+            centerDate.setHours(0, 0, 0, 0);
+            const actualToday = new Date();
+            actualToday.setHours(0, 0, 0, 0);
 
             const isTodaySelected = centerDate.getTime() === actualToday.getTime();
-            document.getElementById('current-month-text').innerText = isTodaySelected
-                ? 'Vandaag'
-                : centerDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+            const currentMonthTextEl = document.getElementById('current-month-text');
+            if (currentMonthTextEl) {
+                currentMonthTextEl.innerText = isTodaySelected
+                    ? 'Vandaag'
+                    : centerDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+            }
+
+            // Grote Structured Header: bijv. "16. Oktober" + "2026 ›"
+            const monthName = centerDate.toLocaleDateString('nl-NL', { month: 'long' });
+            const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            const headerDayMonth = document.getElementById('header-day-month');
+            const headerYearArrow = document.getElementById('header-year-arrow');
+            if (headerDayMonth) headerDayMonth.innerText = `${centerDate.getDate()}. ${capMonth}`;
+            if (headerYearArrow) headerYearArrow.innerText = `${centerDate.getFullYear()} ›`;
 
             const dateBadge = document.getElementById('selected-date-badge');
             if (dateBadge) {
@@ -2780,34 +3065,60 @@
                     ? 'Vandaag'
                     : centerDate.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
             }
-            
-            for(let i=-15; i<=15; i++){ 
-                let d = new Date(centerDate); d.setDate(centerDate.getDate()+i); 
-                const isSelected = d.getTime() === window.selectedDate.getTime();
-                const isActualToday = d.getTime() === actualToday.getTime();
-                const dayLabel = d.toLocaleDateString('nl-NL',{weekday:'short'}).replace('.', '');
-                
-                let pillClass = 'bg-white text-gray-500 hover:bg-gray-50 shadow-xs border border-white';
-                let circleClass = 'bg-transparent text-[#161618]';
 
-                if (isSelected) {
-                    pillClass = 'bg-white text-[#161618] shadow-md border border-white active-day';
-                    circleClass = 'bg-[#161618] text-white shadow-xs';
-                } else if (isActualToday) {
-                    pillClass = 'bg-white text-[#161618] border border-[#CBE86B]';
-                    circleClass = 'bg-[#CBE86B]/40 text-[#161618]';
+            // Bereken Maandag t/m Zondag van de geselecteerde week
+            const dayOfWeek = centerDate.getDay(); // 0 = Zo, 1 = Ma ...
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(centerDate);
+            monday.setDate(centerDate.getDate() + diffToMonday);
+            monday.setHours(0, 0, 0, 0);
+
+            const fallbackPalette = ['#8CBE68', '#F09590', '#6886A6', '#F6B519', '#844A67', '#2B506E'];
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const dKey = window.getDateKey(d);
+                const isSelected = d.getTime() === centerDate.getTime();
+                const isActualToday = d.getTime() === actualToday.getTime();
+                const dayLabel = d.toLocaleDateString('nl-NL', { weekday: 'short' }).replace('.', '');
+
+                // Zoek alle taken op deze dag om de gekleurde bolletjes onder de datum te tonen (zoals op het voorbeeld)
+                const dayTasks = (window.tasks || []).filter(t => window.shouldShowItemOnDate(t, d, false));
+                let dotsHTML = '';
+                if (dayTasks.length > 0) {
+                    const visibleTasks = dayTasks.slice(0, 4);
+                    const dots = visibleTasks.map((t, idx) => {
+                        const isDone = !!(t.completedHistory ? t.completedHistory[dKey] : t.completed);
+                        const theme = window.taskColorThemes[t.color] || null;
+                        const dotColor = isDone ? '#D1D5DB' : (theme ? theme.solid : fallbackPalette[idx % fallbackPalette.length]);
+                        return `<span style="background:${dotColor};" class="w-2.5 h-2.5 rounded-full ring-1 ring-[#F3F2F5] inline-block"></span>`;
+                    }).join('');
+                    dotsHTML = `<div class="flex items-center justify-center -space-x-1 mt-1 h-3">${dots}</div>`;
+                } else {
+                    dotsHTML = `<div class="flex items-center justify-center mt-1 h-3"><span class="w-1 h-1 rounded-full bg-gray-300/70"></span></div>`;
                 }
 
-                s.insertAdjacentHTML('beforeend',`
-                    <div data-ts="${d.getTime()}" onclick="window.selectDate(${d.getTime()})" class="calendar-item flex flex-col items-center justify-between w-[48px] h-[68px] py-2 rounded-full shrink-0 cursor-pointer transition-all ${pillClass}">
-                        <span class="text-[10px] capitalize font-bold pointer-events-none">${dayLabel}</span>
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs pointer-events-none transition-all ${circleClass}">
+                let numCircleClass = 'text-[#161618] bg-transparent';
+                let dayLabelClass = 'text-gray-400';
+                if (isSelected) {
+                    numCircleClass = 'bg-[#F09590] text-white shadow-[0_4px_12px_rgba(240,149,144,0.45)]';
+                    dayLabelClass = 'text-[#161618]';
+                } else if (isActualToday) {
+                    numCircleClass = 'bg-white text-[#F09590] border border-[#F09590]/40';
+                    dayLabelClass = 'text-[#F09590]';
+                }
+
+                s.insertAdjacentHTML('beforeend', `
+                    <div data-ts="${d.getTime()}" onclick="window.selectDate(${d.getTime()})" class="calendar-item flex flex-col items-center justify-between py-1 rounded-2xl cursor-pointer transition-all select-none ${isSelected ? 'active-day' : ''}">
+                        <span class="text-[11px] capitalize font-semibold ${dayLabelClass} pointer-events-none">${dayLabel}</span>
+                        <div class="w-8 h-8 mt-0.5 rounded-full flex items-center justify-center font-extrabold text-[14px] pointer-events-none transition-all ${numCircleClass}">
                             ${d.getDate()}
                         </div>
+                        ${dotsHTML}
                     </div>
-                `); 
+                `);
             }
-            setTimeout(()=>{const a=document.querySelector('.active-day');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});},50);
         };
 
         // --- NAV & MODALS (Met interruptible Apple Spring tab-pill) ---
@@ -2822,11 +3133,11 @@
             if (targetView) targetView.classList.add('active');
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-gray-500 hover:text-[#161618] w-full transition-colors duration-200";
+                btn.className = "nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#161618] hover:text-[#F09590] w-full transition-colors duration-200";
             });
             const activeBtn = document.getElementById(`nav-${tab}`);
             if (activeBtn) {
-                activeBtn.className = "nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-2 rounded-full text-white w-full transition-colors duration-200";
+                activeBtn.className = "nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#F09590] w-full transition-colors duration-200";
             }
 
             // Vloeiende, interruptible spring-animatie voor de actieve navigatie-pil
@@ -2858,16 +3169,8 @@
                 pillEl.style.transform = `translate3d(calc(${targetIdx * 100}% + ${targetIdx * 4}px), 0, 0)`;
             }
 
-            const headlines = {
-                vandaag: 'Laten we vandaag<br>productief maken',
-                uitdaging: 'Jouw dagelijkse<br>doelen & focus',
-                journal: 'Jouw gedachten<br>& workouts',
-                ontdek: 'Ontdek nieuwe<br>gewoontes'
-            };
-            const heroEl = document.getElementById('hero-headline');
-            if (heroEl && headlines[tab]) heroEl.innerHTML = headlines[tab];
-
-            document.getElementById('calendar-container').style.display = (tab === 'ontdek') ? 'none' : 'block';
+            const calContainer = document.getElementById('calendar-container');
+            if (calContainer) calContainer.style.display = (tab === 'ontdek') ? 'none' : 'block';
         };
 
         window.resetModalState = () => {
@@ -2878,6 +3181,10 @@
             document.getElementById('journal-note-body').value = "";
             document.getElementById('task-notes-input').value = "";
             document.getElementById('time-input').value = "";
+            const durInput = document.getElementById('task-duration-input');
+            if (durInput) durInput.value = "15";
+            const remInput = document.getElementById('task-reminder-input');
+            if (remInput) remInput.value = "both";
             const taskDateInput = document.getElementById('task-date-input');
             if (taskDateInput) taskDateInput.value = window.getDateKey(window.selectedDate);
             document.getElementById('custom-habit-target').value = "";
@@ -2889,7 +3196,10 @@
             window.currentModalSubtasks = [];
             window.renderModalSubtasks();
             window.setTaskPriority('medium');
-            window.setTaskColor('white');
+            const colorKeys = ['coral', 'green', 'blue', 'navy', 'plum', 'yellow', 'purple', 'teal'];
+            const nextColor = colorKeys[(window.tasks ? window.tasks.length : 0) % colorKeys.length];
+            window.setTaskColor(nextColor);
+            window.setTaskIcon('⏰');
             document.querySelectorAll('#custom-days-wrapper button').forEach(el => {
                 el.className = "w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs";
             });
@@ -2909,10 +3219,10 @@
             document.getElementById('modal-note-body-extra').classList.add('hidden');
 
             if(window.currentTab === 'vandaag') {
-                document.getElementById('modal-title').innerText = 'Nieuwe taak toevoegen';
-                document.getElementById('modal-input-label').innerText = 'Taak Titel';
+                document.getElementById('modal-title').innerText = 'Nieuwe activiteit plannen';
+                document.getElementById('modal-input-label').innerText = 'Naam van activiteit / taak';
                 document.getElementById('modal-input').placeholder = '';
-                document.getElementById('modal-submit-btn').innerText = 'Taak Aanmaken';
+                document.getElementById('modal-submit-btn').innerText = 'Toevoegen aan planning';
                 document.getElementById('modal-task-extra').classList.remove('hidden');
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
                 window.setRecurrence('none'); 
@@ -2925,7 +3235,7 @@
         };
 
         window.editTaskItem = (e, id) => {
-            e.stopPropagation();
+            if (e) e.stopPropagation();
             if (window.isSwiping) return;
             const task = window.tasks.find(t => t.id === id);
             if (!task) return;
@@ -2934,18 +3244,23 @@
             window.resetModalState();
             window.editingItemId = id;
 
-            document.getElementById('main-modal').classList.remove('hidden');
-            document.getElementById('modal-title').innerText = 'Taak aanpassen';
-            document.getElementById('modal-input-label').innerText = 'Taak Titel';
+            window.presentAppleSheet('main-modal');
+            document.getElementById('modal-title').innerText = 'Activiteit aanpassen';
+            document.getElementById('modal-input-label').innerText = 'Naam van activiteit / taak';
             document.getElementById('modal-input').placeholder = '';
             document.getElementById('modal-submit-btn').innerText = 'Wijzigingen Opslaan';
             document.getElementById('modal-input').value = task.title || '';
             document.getElementById('task-notes-input').value = task.notes || '';
             document.getElementById('time-input').value = task.time || '';
+            const durInput = document.getElementById('task-duration-input');
+            if (durInput) durInput.value = String(task.duration || 15);
+            const remInput = document.getElementById('task-reminder-input');
+            if (remInput) remInput.value = task.reminder || 'both';
             const taskDateInput = document.getElementById('task-date-input');
             if (taskDateInput) taskDateInput.value = task.dateKey || window.getDateKey(window.selectedDate);
             window.setTaskPriority(task.priority || 'medium');
-            window.setTaskColor(task.color || 'white');
+            window.setTaskColor(task.color || 'coral');
+            window.setTaskIcon(task.icon || window.inferTaskIcon(task.title, '⏰'));
             window.currentModalSubtasks = Array.isArray(task.subtasks)
                 ? JSON.parse(JSON.stringify(task.subtasks))
                 : [];
@@ -2984,7 +3299,7 @@
             window.resetModalState();
             window.editingItemId = id;
 
-            document.getElementById('main-modal').classList.remove('hidden');
+            window.presentAppleSheet('main-modal');
             document.getElementById('modal-submit-btn').innerText = 'Wijzigingen Opslaan';
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
@@ -3007,7 +3322,7 @@
             window.modalMode = 'custom_habit'; window.customizingIcon = '✨';
             window.resetModalState();
 
-            document.getElementById('main-modal').classList.remove('hidden');
+            window.presentAppleSheet('main-modal');
             document.getElementById('modal-title').innerText = 'Nieuw doel toevoegen';
             document.getElementById('modal-input-label').innerText = 'Naam van gewoonte';
             document.getElementById('modal-input').placeholder = '';
@@ -3028,7 +3343,7 @@
             window.modalMode = 'custom_habit'; window.customizingIcon = challenge.icon;
             window.resetModalState();
 
-            document.getElementById('main-modal').classList.remove('hidden');
+            window.presentAppleSheet('main-modal');
             document.getElementById('modal-title').innerText = 'Doel instellen';
             document.getElementById('modal-input-label').innerText = 'Naam van gewoonte';
             document.getElementById('modal-submit-btn').innerText = 'Doel Toevoegen';
@@ -3045,9 +3360,13 @@
             window.setRecurrence('daily');
         };
 
-        window.closeSmartModal = () => {
+        window.closeSmartModal = (velocityY = 0) => {
             window.editingItemId = null;
-            document.getElementById('main-modal').classList.add('hidden');
+            if (typeof window.dismissAppleSheet === 'function') {
+                window.dismissAppleSheet('main-modal', velocityY);
+            } else {
+                document.getElementById('main-modal').classList.add('hidden');
+            }
         };
 
         window.saveSmartItem = () => {
@@ -3128,9 +3447,14 @@
 
                 const taskNotes = document.getElementById('task-notes-input').value.trim();
                 const taskTime = document.getElementById('time-input').value || null;
+                const taskDuration = parseInt(document.getElementById('task-duration-input')?.value || '15', 10) || 15;
+                const taskReminder = document.getElementById('task-reminder-input')?.value || 'both';
                 const taskDateKey = document.getElementById('task-date-input')?.value || window.getDateKey(window.selectedDate);
                 const taskPriority = window.currentTaskPriority || 'medium';
-                const taskColor = window.currentTaskColor || 'white';
+                const taskColor = window.currentTaskColor || 'coral';
+                const chosenIcon = (window.currentTaskIcon && window.currentTaskIcon !== '⏰')
+                    ? window.currentTaskIcon
+                    : window.inferTaskIcon(title, window.currentTaskIcon || '⏰');
 
                 if (window.editingItemId) {
                     const existingTask = window.tasks.find(t => t.id === window.editingItemId);
@@ -3138,6 +3462,9 @@
                         existingTask.title = title;
                         existingTask.notes = taskNotes;
                         existingTask.time = taskTime;
+                        existingTask.duration = taskDuration;
+                        existingTask.reminder = taskReminder;
+                        existingTask.icon = chosenIcon;
                         existingTask.dateKey = taskDateKey;
                         existingTask.repeat = finalRepeat;
                         existingTask.priority = taskPriority;
@@ -3150,6 +3477,9 @@
                         title: title, 
                         notes: taskNotes,
                         time: taskTime, 
+                        duration: taskDuration,
+                        reminder: taskReminder,
+                        icon: chosenIcon,
                         priority: taskPriority,
                         color: taskColor,
                         subtasks: cleanedSubtasks,
@@ -3158,14 +3488,29 @@
                         repeat: finalRepeat 
                     });
                 }
-                window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud();
+                window.saveToLocal();
+                window.generateCalendar();
+                window.renderTasks();
+                if (typeof window.checkScheduledReminders === 'function') window.checkScheduledReminders();
+                if(typeof window.syncToCloud === 'function') window.syncToCloud();
             }
             window.closeSmartModal();
+        };
+
+        // --- HULPFUNCTIE VOOR EINDTIJD BEREKENING (bijv. "08:30" + 15m -> "08:45") ---
+        window.addMinutesToTimeStr = (timeStr, durationMins = 15) => {
+            if (!timeStr || !timeStr.includes(':')) return '';
+            const [hStr, mStr] = timeStr.split(':');
+            const totalMins = (parseInt(hStr, 10) * 60) + parseInt(mStr, 10) + (parseInt(durationMins, 10) || 15);
+            const endH = Math.floor((totalMins % 1440) / 60).toString().padStart(2, '0');
+            const endM = (totalMins % 60).toString().padStart(2, '0');
+            return `${endH}:${endM}`;
         };
 
         // --- RENDERS ---
         window.toggleTask = (id, customDateKey) => {
             if(window.isSwiping) return;
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
             const task = window.tasks.find(t => t.id === id);
             if(task) { 
                 const dKey = customDateKey || window.getDateKey(window.selectedDate);
@@ -3182,49 +3527,184 @@
                     });
                 }
 
-                window.saveToLocal(); window.renderTasks(); if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
+                window.saveToLocal();
+                window.generateCalendar();
+                window.renderTasks();
+                if (typeof window.updateReminderBellBadge === 'function') window.updateReminderBellBadge();
+                if(typeof window.syncToCloud === 'function') window.syncToCloud(); 
             }
         };
 
-        window.buildSingleTaskCardHTML = (t, dateKeyForCard, compactMode = false) => {
-            const prioMeta = {
-                high: { label: 'Hoge prioriteit', dot: 'bg-red-500', badge: 'bg-red-50 text-red-700 border-red-100' },
-                medium: { label: 'Middel prioriteit', dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-700 border-amber-100' },
-                low: { label: 'Lage prioriteit', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100' }
-            };
-
+        // --- STRUCTURED RONDE BUBBEL BOVENAAN (Voor taken op deze dag zonder specifieke tijd, zoals "Call Mum" / "Book Vacation") ---
+        window.buildUntimedBubbleHTML = (t, dateKeyForCard, index = 0) => {
             const isCompleted = !!(t.completedHistory ? t.completedHistory[dateKeyForCard] : t.completed);
-            const colorKey = t.color || 'white';
-            const theme = window.taskColorThemes[colorKey] || window.taskColorThemes.white;
+            const fallbackColors = ['green', 'coral', 'yellow', 'blue', 'plum', 'teal'];
+            const cKey = (t.color && t.color !== 'white') ? t.color : fallbackColors[index % fallbackColors.length];
+            const theme = window.taskColorThemes[cKey] || window.taskColorThemes.coral;
+            const icon = t.icon || window.inferTaskIcon(t.title, '✨');
+            const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
+            const doneSubs = subtasks.filter(st => window.isSubtaskDone(t, st, dateKeyForCard)).length;
+
+            const circleStyle = isCompleted
+                ? `background-color: #ECECE9; color: #9CA3AF;`
+                : `background-color: ${theme.solid}; color: #FFFFFF; box-shadow: 0 10px 22px -6px ${theme.solid}88;`;
+
+            return `
+                <div class="flex flex-col items-center w-[88px] shrink-0 group select-none">
+                    <div class="relative">
+                        <button type="button" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" style="${circleStyle}" class="w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all duration-200 active:scale-95 relative">
+                            <span>${isCompleted ? '✓' : icon}</span>
+                        </button>
+                        <button type="button" onclick="window.editTaskItem(event, ${t.id})" class="w-6 h-6 rounded-full bg-white text-[#161618] shadow-md border border-gray-100 flex items-center justify-center text-[10px] font-bold absolute -top-1 -right-1 hover:scale-105 transition-all" title="Bewerken">
+                            ✎
+                        </button>
+                        ${subtasks.length > 0 ? `
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full bg-white text-[#161618] text-[9px] font-extrabold shadow-xs border border-gray-100">
+                            ${doneSubs}/${subtasks.length}
+                        </span>` : ''}
+                    </div>
+                    <p onclick="window.editTaskItem(event, ${t.id})" class="mt-2 text-[12px] font-extrabold text-center leading-tight line-clamp-2 cursor-pointer ${isCompleted ? 'line-through text-gray-400' : 'text-[#161618]'}">
+                        ${t.title}
+                    </p>
+                </div>
+            `;
+        };
+
+        // --- STRUCTURED VERTICALE TIJDLIJN RIJ (Voor geplande activiteiten met tijd of in de algemene lijst) ---
+        window.buildTimelineTaskRowHTML = (t, dateKeyForCard, index = 0, isLast = false) => {
+            const isCompleted = !!(t.completedHistory ? t.completedHistory[dateKeyForCard] : t.completed);
+            const fallbackColors = ['coral', 'blue', 'navy', 'plum', 'green', 'yellow', 'purple', 'teal'];
+            const cKey = (t.color && t.color !== 'white') ? t.color : fallbackColors[index % fallbackColors.length];
+            const theme = window.taskColorThemes[cKey] || window.taskColorThemes.coral;
+            const icon = t.icon || window.inferTaskIcon(t.title, '⏰');
+            const duration = parseInt(t.duration, 10) || 15;
+            const startTime = t.time || '';
+            const endTime = startTime ? window.addMinutesToTimeStr(startTime, duration) : '';
+
+            // Controleer of deze taak NU bezig is (voor "Nog Xm resterend" en dikgedrukte huidige tijd links)
+            const now = new Date();
+            const todayKey = window.getDateKey(now);
+            let isCurrentlyActive = false;
+            let remainingMins = 0;
+            let currentClockStr = '';
+
+            if (dateKeyForCard === todayKey && startTime && !isCompleted) {
+                const [sh, sm] = startTime.split(':').map(Number);
+                const startTotal = sh * 60 + sm;
+                const endTotal = startTotal + duration;
+                const nowTotal = now.getHours() * 60 + now.getMinutes();
+                if (nowTotal >= startTotal && nowTotal < endTotal) {
+                    isCurrentlyActive = true;
+                    remainingMins = Math.max(1, endTotal - nowTotal);
+                    currentClockStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                }
+            }
+
+            // Hoogte van de gekleurde pil schaalt mee met de duur (15m = cirkel, 30m+ = langwerpige pil zoals "Yoga Workout" in Structured)
+            let pillHeightClass = 'h-12';
+            if (duration >= 60) pillHeightClass = 'min-h-[96px] py-3';
+            else if (duration >= 45) pillHeightClass = 'min-h-[82px] py-2.5';
+            else if (duration >= 30) pillHeightClass = 'min-h-[68px] py-2';
+
+            const nodeStyle = isCompleted
+                ? `background-color: #ECECE9; color: #9CA3AF;`
+                : `background-color: ${theme.solid}; color: #FFFFFF; box-shadow: 0 8px 20px -5px ${theme.solid}80;`;
+
+            const ringStyle = isCompleted
+                ? `background-color: #E5E5E2; border-color: #D4D4D0; color: #FFFFFF;`
+                : `border-color: ${theme.solid}; background-color: transparent;`;
+
+            // Subtotaal / tijd-label boven de titel
+            let timeMetaHTML = '';
+            if (isCurrentlyActive) {
+                timeMetaHTML = `<span style="color:${theme.solid};" class="text-[11px] font-extrabold">${remainingMins}m resterend</span>`;
+            } else if (startTime) {
+                timeMetaHTML = `<span class="text-[11px] font-semibold text-gray-400">${startTime}–${endTime} (${duration} min)</span>`;
+            } else {
+                timeMetaHTML = `<span class="text-[11px] font-semibold text-gray-400">Vandaag op je lijst</span>`;
+            }
+
+            // Subtaken onder de hoofdtaak op de tijdlijn
+            const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
+            let subtasksHTML = '';
+            if (subtasks.length > 0) {
+                const items = subtasks.map(st => {
+                    const stDone = window.isSubtaskDone(t, st, dateKeyForCard);
+                    return `
+                        <div onclick="window.toggleSubtask(event, ${t.id}, '${st.id}', '${dateKeyForCard}')" class="flex items-center space-x-2 py-1 px-2.5 rounded-xl ${stDone ? 'bg-gray-100/80 text-gray-400' : 'bg-[#F3F2F5]/80 text-[#161618]'} cursor-pointer transition-all">
+                            <span style="${stDone ? 'background:#D1D5DB;border-color:#D1D5DB;' : `border-color:${theme.solid};`}" class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center text-white text-[9px] shrink-0">
+                                ${stDone ? '✓' : ''}
+                            </span>
+                            <span class="text-xs font-semibold ${stDone ? 'line-through text-gray-400' : 'text-gray-700'}">${st.title}</span>
+                        </div>
+                    `;
+                }).join('');
+                subtasksHTML = `<div class="mt-2 space-y-1">${items}</div>`;
+            }
+
+            const reminderIconBadge = (startTime && t.reminder !== 'none' && !isCompleted)
+                ? `<span class="text-[10px] text-gray-400 ml-1" title="Schermmelding actief">🔔</span>`
+                : '';
+
+            return `
+                <div class="relative overflow-hidden rounded-3xl w-full">
+                    <div id="delete-bg-task-${t.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0 transition-opacity duration-150">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </div>
+                    <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" class="relative z-10 bg-white flex items-stretch gap-3 py-2 px-1 transition-all">
+                        <!-- Linker kolom: Starttijd, huidige tijd & eindtijd -->
+                        <div class="w-10 shrink-0 flex flex-col justify-between text-right py-0.5 select-none">
+                            <span class="text-[11px] font-semibold text-gray-400 leading-none">${startTime || '•'}</span>
+                            ${isCurrentlyActive ? `<span class="text-[11px] font-extrabold text-[#161618] leading-none my-auto">${currentClockStr}</span>` : ''}
+                            ${endTime ? `<span class="text-[11px] font-semibold text-gray-300 leading-none">${endTime}</span>` : ''}
+                        </div>
+
+                        <!-- Midden-links: Verticale verbindingslijn + Gekleurde Structured Cirkel of Langwerpige Pil -->
+                        <div class="relative flex flex-col items-center shrink-0">
+                            ${!isLast ? `<div class=" timeline-spine absolute top-3 bottom-[-18px] w-[2px] bg-gray-200/90 z-0"></div>` : ''}
+                            <button type="button" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" style="${nodeStyle}" class="relative z-10 w-12 ${pillHeightClass} rounded-full flex items-center justify-center text-xl transition-all active:scale-95">
+                                <span>${icon}</span>
+                            </button>
+                        </div>
+
+                        <!-- Midden-rechts: Tijd-range, Titel, Notitie & Subtaken -->
+                        <div onclick="window.editTaskItem(event, ${t.id})" class="flex-1 min-w-0 flex flex-col justify-center py-0.5 cursor-pointer">
+                            <div class="flex items-center">
+                                ${timeMetaHTML}
+                                ${reminderIconBadge}
+                            </div>
+                            <h3 class="font-extrabold text-[16px] leading-snug tracking-tight ${isCompleted ? 'line-through text-gray-400' : 'text-[#161618]'}">
+                                ${t.title}
+                            </h3>
+                            ${t.notes ? `<p class="text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-500'} mt-0.5 line-clamp-2">${t.notes}</p>` : ''}
+                            ${subtasksHTML}
+                        </div>
+
+                        <!-- Rechter kolom: Ronde gekleurde Check-cirkel (zoals rechts in het Structured voorbeeld) -->
+                        <div class="flex items-center space-x-1.5 shrink-0 pl-1">
+                            <button type="button" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" style="${ringStyle}" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all active:scale-90" title="Afvinken">
+                                ${isCompleted ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.buildSingleTaskCardHTML = (t, dateKeyForCard, compactMode = false) => {
+            const isCompleted = !!(t.completedHistory ? t.completedHistory[dateKeyForCard] : t.completed);
+            const colorKey = (t.color && t.color !== 'white') ? t.color : 'coral';
+            const theme = window.taskColorThemes[colorKey] || window.taskColorThemes.coral;
+            const icon = t.icon || window.inferTaskIcon(t.title, '⏰');
 
             const cardStyle = isCompleted
                 ? `background-color: #F2F2F0; border: 1px solid #E5E5E2;`
-                : `background-color: ${theme.bg}; border: 1.5px solid ${theme.border}; box-shadow: 0 6px 24px -6px rgba(24,24,27,0.05);`;
+                : `background-color: ${theme.bg}; border: 1.5px solid ${theme.border};`;
 
             const checkedText = isCompleted ? 'line-through text-gray-400' : 'text-[#161618]';
-            const checkIcon = isCompleted
-                ? 'bg-gray-300 border-gray-300 text-white'
-                : 'border-gray-300 bg-white hover:border-[#161618]';
-            
-            const pKey = t.priority || 'medium';
-            const pInfo = prioMeta[pKey] || prioMeta.medium;
-
-            const prioBadgeHTML = isCompleted
-                ? `<span class="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gray-200/70 text-gray-500 border border-gray-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                    <span>Voltooid</span>
-                   </span>`
-                : `<span class="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${pInfo.badge}">
-                    <span class="w-1.5 h-1.5 rounded-full ${pInfo.dot}"></span>
-                    <span>${pInfo.label}</span>
-                   </span>`;
-
-            const repBadge = (t.repeat && t.repeat !== 'none')
-                ? `<span class="inline-flex items-center space-x-1 text-[10px] font-bold ${isCompleted ? 'text-gray-400 bg-gray-200/60' : 'text-purple-700 bg-purple-100/80'} px-2.5 py-0.5 rounded-full">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Herhalend
-                   </span>`
-                : '';
+            const ringStyle = isCompleted
+                ? `background-color: #D1D5DB; border-color: #D1D5DB; color: #FFFFFF;`
+                : `border-color: ${theme.solid}; background-color: #FFFFFF;`;
 
             const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
             let subtasksHTML = '';
@@ -3233,98 +3713,48 @@
             if (subtasks.length > 0) {
                 const doneSubCount = subtasks.filter(st => window.isSubtaskDone(t, st, dateKeyForCard)).length;
                 subtaskCountBadge = `
-                    <span class="inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isCompleted ? 'bg-gray-200/70 text-gray-500' : 'bg-white/90 text-gray-700 border border-black/5'}">
+                    <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${isCompleted ? 'bg-gray-200/70 text-gray-500' : 'bg-white text-gray-700'}">
                         ✓ ${doneSubCount}/${subtasks.length}
                     </span>
                 `;
 
                 const itemsHTML = subtasks.map(st => {
                     const stDone = window.isSubtaskDone(t, st, dateKeyForCard);
-                    const stBoxClass = stDone ? 'bg-gray-300 border-gray-300 text-white' : 'bg-white border-gray-300';
-                    const stTextClass = stDone ? 'line-through text-gray-400' : 'text-gray-800';
-                    const stRowBg = stDone ? 'bg-gray-200/40' : 'bg-white/80 hover:bg-white';
-
                     return `
-                        <div onclick="window.toggleSubtask(event, ${t.id}, '${st.id}', '${dateKeyForCard}')" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl ${stRowBg} border border-black/[0.03] cursor-pointer transition-all">
-                            <div class="w-4 h-4 rounded-md border ${stBoxClass} flex items-center justify-center shrink-0 transition-all">
-                                ${stDone ? '<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                            </div>
-                            <span class="text-xs font-semibold ${stTextClass} leading-snug select-none">${st.title}</span>
+                        <div onclick="window.toggleSubtask(event, ${t.id}, '${st.id}', '${dateKeyForCard}')" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/80 cursor-pointer transition-all">
+                            <span style="${stDone ? 'background:#D1D5DB;border-color:#D1D5DB;' : `border-color:${theme.solid};`}" class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center text-white text-[9px] shrink-0">
+                                ${stDone ? '✓' : ''}
+                            </span>
+                            <span class="text-xs font-semibold ${stDone ? 'line-through text-gray-400' : 'text-gray-800'}">${st.title}</span>
                         </div>
                     `;
                 }).join('');
 
-                subtasksHTML = `
-                    <div class="mt-2.5 pl-8 space-y-1.5 z-20 relative">
-                        ${itemsHTML}
-                    </div>
-                `;
-            }
-
-            if (compactMode) {
-                return `
-                    <div style="${cardStyle}" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" class="p-3.5 rounded-2xl flex flex-col justify-between w-full cursor-pointer transition-all duration-200">
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="flex items-center space-x-2.5 min-w-0 flex-1">
-                                <div class="w-5 h-5 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 transition-all">
-                                    ${isCompleted ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <h4 class="font-extrabold text-sm ${checkedText} truncate">${t.title}</h4>
-                                    ${t.notes ? `<p class="text-[11px] ${isCompleted ? 'text-gray-400' : 'text-gray-600'} truncate">${t.notes}</p>` : ''}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1.5 shrink-0">
-                                ${t.time ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/80 text-gray-700">🕒 ${t.time}</span>` : ''}
-                                ${subtaskCountBadge}
-                                <button onclick="window.editTaskItem(event, ${t.id})" class="w-6 h-6 rounded-full bg-white/80 hover:bg-white text-[#161618] flex items-center justify-center text-[11px] font-bold shadow-2xs" title="Taak bewerken">↗</button>
-                            </div>
-                        </div>
-                        ${subtasksHTML}
-                    </div>
-                `;
+                subtasksHTML = `<div class="mt-2 pl-9 space-y-1">${itemsHTML}</div>`;
             }
 
             return `
-                <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                    <div id="delete-bg-task-${t.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </div>
-                    <div id="card-task-${t.id}" style="${cardStyle}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" class="relative z-10 p-4 rounded-[1.5rem] flex flex-col justify-between w-full cursor-pointer transition-all duration-300">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-1.5 flex-wrap gap-y-1 pointer-events-none">
-                                ${prioBadgeHTML}
-                                ${subtaskCountBadge}
-                                ${repBadge}
+                <div style="${cardStyle}" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" class="p-3.5 rounded-2xl flex flex-col justify-between w-full cursor-pointer transition-all duration-200">
+                    <div class="flex items-center justify-between gap-2.5">
+                        <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                            <div style="background:${isCompleted ? '#E5E5E2' : theme.solid}; color:${isCompleted ? '#9CA3AF' : '#FFF'};" class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0">
+                                ${icon}
                             </div>
-                            <button onclick="window.editTaskItem(event, ${t.id})" class="w-7 h-7 rounded-full bg-white/80 hover:bg-white text-[#161618] flex items-center justify-center shrink-0 transition-colors z-20 text-xs font-bold shadow-2xs" title="Taak bewerken">
-                                ↗
-                            </button>
-                        </div>
-
-                        <div class="flex items-start space-x-3 pointer-events-none">
-                            <div class="w-6 h-6 mt-0.5 rounded-full border-2 ${checkIcon} flex items-center justify-center shrink-0 transition-all">
-                                ${isCompleted ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-extrabold text-[15px] ${checkedText} leading-snug transition-all">${t.title}</h3>
-                                ${t.notes ? `<p class="text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-600'} mt-1 whitespace-pre-line leading-relaxed">${t.notes}</p>` : ''}
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-extrabold text-sm ${checkedText} truncate">${t.title}</h4>
+                                ${t.notes ? `<p class="text-[11px] ${isCompleted ? 'text-gray-400' : 'text-gray-600'} truncate">${t.notes}</p>` : ''}
                             </div>
                         </div>
-
-                        ${subtasksHTML}
-
-                        ${t.time ? `
-                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-black/5 pointer-events-none">
-                            <div class="flex items-center space-x-1.5 text-xs font-semibold ${isCompleted ? 'text-gray-400' : 'text-gray-600'}">
-                                <svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
-                                <span>${t.time}</span>
+                        <div class="flex items-center space-x-1.5 shrink-0">
+                            ${t.time ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-gray-700">🕒 ${t.time}</span>` : ''}
+                            ${subtaskCountBadge}
+                            <button onclick="window.editTaskItem(event, ${t.id})" class="w-6 h-6 rounded-full bg-white text-[#161618] flex items-center justify-center text-[11px] font-bold shadow-2xs" title="Taak bewerken">✎</button>
+                            <div style="${ringStyle}" class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0">
+                                ${isCompleted ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
                             </div>
-                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isCompleted ? 'bg-gray-200/80 text-gray-500' : 'bg-white/80 text-gray-700'}">
-                                ${isCompleted ? 'Voldaan' : 'Gepland'}
-                            </span>
-                        </div>` : ''}
+                        </div>
                     </div>
+                    ${subtasksHTML}
                 </div>
             `;
         };
@@ -3356,24 +3786,26 @@
                 const optAll = document.getElementById('opt-task-all');
                 const optTodo = document.getElementById('opt-task-todo');
                 const optDone = document.getElementById('opt-task-done');
-                if (optAll) optAll.textContent = `Filter: Alle taken (${totalCount})`;
-                if (optTodo) optTodo.textContent = `Filter: Openstaand (${todoCount})`;
-                if (optDone) optDone.textContent = `Filter: Voltooid (${doneCount})`;
+                if (optAll) optAll.textContent = `Alle (${totalCount})`;
+                if (optTodo) optTodo.textContent = `Open (${todoCount})`;
+                if (optDone) optDone.textContent = `Klaar (${doneCount})`;
             };
 
             const sortTasksForDateKey = (arr, dKey) => {
                 return [...arr].sort((a, b) => {
+                    if (a.time && b.time) return a.time.localeCompare(b.time);
+                    if (a.time) return 1;
+                    if (b.time) return -1;
                     const aDone = a.completedHistory ? !!a.completedHistory[dKey] : !!a.completed;
                     const bDone = b.completedHistory ? !!b.completedHistory[dKey] : !!b.completed;
                     if (aDone !== bDone) return aDone ? 1 : -1;
-                    if (a.time && b.time) return a.time.localeCompare(b.time);
-                    if (a.time) return -1;
-                    if (b.time) return 1;
                     return 0;
                 });
             };
 
-            // 1. DAG WEERGAVE
+            if (typeof window.updateReminderBellBadge === 'function') window.updateReminderBellBadge();
+
+            // 1. DAG WEERGAVE (Structured Stijl: Ronde Bubbels bovenaan voor ongetimede taken + Verticale Tijdlijn voor getimede taken)
             if (period === 'day') {
                 const allTasksForDay = window.tasks.filter(t => window.shouldShowItemOnDate(t, selDate, false));
                 const completedTasks = allTasksForDay.filter(t => t.completedHistory ? t.completedHistory[currentSelectedDateKey] : t.completed);
@@ -3384,21 +3816,43 @@
                 let tasksToRender = allTasksForDay;
                 if (filter === 'todo') tasksToRender = todoTasks;
                 if (filter === 'done') tasksToRender = completedTasks;
-                tasksToRender = sortTasksForDateKey(tasksToRender, currentSelectedDateKey);
 
                 if (tasksToRender.length === 0) {
                     list.innerHTML = `
-                        <div class="soft-card rounded-[1.5rem] p-6 text-center">
-                            <div class="w-11 h-11 rounded-full bg-[#CBE86B]/30 text-[#161618] flex items-center justify-center mx-auto mb-2.5 text-lg">✨</div>
-                            <p class="font-bold text-sm text-[#161618]">Geen taken op deze dag</p>
-                            <p class="text-xs text-gray-400 mt-1">Tik op + om een nieuwe taak voor deze dag te plannen.</p>
+                        <div class="py-10 px-5 text-center">
+                            <div class="w-14 h-14 rounded-full bg-[#F09590]/15 text-[#F09590] flex items-center justify-center mx-auto mb-3 text-2xl">✨</div>
+                            <p class="font-extrabold text-base text-[#161618]">Je tijdlijn is nog leeg</p>
+                            <p class="text-xs text-gray-400 mt-1 max-w-[240px] mx-auto">Tik rechtsonder op de roze <span class="font-extrabold text-[#F09590]">+</span> knop om een activiteit met tijd of losse taak-bubbel toe te voegen.</p>
                         </div>`;
                     return;
                 }
 
-                tasksToRender.forEach(t => {
-                    list.insertAdjacentHTML('beforeend', window.buildSingleTaskCardHTML(t, currentSelectedDateKey, false));
-                });
+                const untimedTasks = tasksToRender.filter(t => !t.time);
+                const timedTasks = tasksToRender.filter(t => !!t.time).sort((a, b) => a.time.localeCompare(b.time));
+
+                // A. Bovenste rij met grote gekleurde ronde bubbels (zoals "Call Mum", "Structure Tomorrow", "Book Vacation")
+                if (untimedTasks.length > 0) {
+                    const bubblesHTML = untimedTasks.map((t, idx) => window.buildUntimedBubbleHTML(t, currentSelectedDateKey, idx)).join('');
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="pt-1 pb-3 border-b border-gray-100">
+                            <div class="flex items-start space-x-4 overflow-x-auto py-1 px-1">
+                                ${bubblesHTML}
+                            </div>
+                        </div>
+                    `);
+                }
+
+                // B. Verticale Structured Tijdlijn voor taken met een tijdstip
+                if (timedTasks.length > 0) {
+                    const rowsHTML = timedTasks.map((t, idx) =>
+                        window.buildTimelineTaskRowHTML(t, currentSelectedDateKey, idx, idx === timedTasks.length - 1)
+                    ).join('');
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="pt-2 space-y-1">
+                            ${rowsHTML}
+                        </div>
+                    `);
+                }
                 return;
             }
 
@@ -4495,12 +4949,336 @@
             grabZone.addEventListener("pointercancel", finishDrag);
         });
 
+        // ============================================================================
+        // LIVE SCHERMMELDINGEN & HERINNERINGEN ENGINE (VOOR GEPLANDE TIJDEN)
+        // ============================================================================
+        window.firedRemindersLog = JSON.parse(localStorage.getItem('firedRemindersLog') || '{}');
+        window.snoozedReminders = JSON.parse(localStorage.getItem('snoozedReminders') || '{}');
+        window.activeBannerTaskId = null;
+
+        // Zacht Apple-achtig akkoord-belletje via Web Audio API bij een melding
+        window.playReminderChime = () => {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const notes = [587.33, 880.0]; // D5 -> A5 zachte chime
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.14);
+                    gain.gain.exponentialRampToValueAtTime(0.14, ctx.currentTime + idx * 0.14 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.14 + 0.55);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.14);
+                    osc.stop(ctx.currentTime + idx * 0.14 + 0.6);
+                });
+            } catch (_) {}
+        };
+
+        window.showInAppReminderBanner = (task, labelText = 'Nu op je planning', subText = 'Tijd om te starten met deze activiteit!') => {
+            const banner = document.getElementById('in-app-reminder-banner');
+            if (!banner || !task) return;
+
+            window.activeBannerTaskId = task.id;
+            const iconEl = document.getElementById('reminder-banner-icon');
+            const timeEl = document.getElementById('reminder-banner-time');
+            const titleEl = document.getElementById('reminder-banner-title');
+            const subEl = document.getElementById('reminder-banner-sub');
+
+            const theme = window.taskColorThemes[task.color] || window.taskColorThemes.coral;
+            const icon = task.icon || window.inferTaskIcon(task.title, '⏰');
+
+            if (iconEl) {
+                iconEl.style.backgroundColor = theme.solid;
+                iconEl.innerText = icon;
+            }
+            if (timeEl) timeEl.innerText = `${labelText} • ${task.time || 'Nu'}`;
+            if (titleEl) titleEl.innerText = task.title || 'Geplande activiteit';
+            if (subEl) subEl.innerText = task.notes ? task.notes : subText;
+
+            banner.classList.remove('hidden');
+            banner.style.transform = 'translate3d(0, -90px, 0) scale(0.94)';
+            banner.style.opacity = '0';
+
+            if (typeof window.appleSpring === 'function') {
+                window.appleSpring(-90, 0, {
+                    damping: 0.78,
+                    response: 0.36,
+                    onUpdate: (y) => {
+                        const p = 1 - Math.min(1, Math.abs(y) / 90);
+                        banner.style.transform = `translate3d(0, ${y}px, 0) scale(${0.94 + 0.06 * p})`;
+                        banner.style.opacity = String(Math.max(0.2, p));
+                    },
+                    onComplete: () => {
+                        banner.style.transform = 'translate3d(0, 0, 0) scale(1)';
+                        banner.style.opacity = '1';
+                    }
+                });
+            } else {
+                banner.style.transform = 'translate3d(0, 0, 0) scale(1)';
+                banner.style.opacity = '1';
+            }
+
+            window.playReminderChime();
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
+
+            // Stuur ook een native browser/PWA notificatie indien toegestaan
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(`🔔 ${task.title}`, {
+                        body: `${labelText} (${task.time || 'Nu'}) — ${task.notes || 'Tik om je planning te bekijken.'}`,
+                        icon: '/focusplanner-icon.png'
+                    });
+                } catch (_) {}
+            }
+        };
+
+        window.dismissReminderBanner = () => {
+            const banner = document.getElementById('in-app-reminder-banner');
+            if (!banner) return;
+            banner.classList.add('hidden');
+            window.activeBannerTaskId = null;
+        };
+
+        window.snoozeActiveReminder = (minutes = 10) => {
+            if (!window.activeBannerTaskId) {
+                window.dismissReminderBanner();
+                return;
+            }
+            const targetTimeMs = Date.now() + (minutes * 60 * 1000);
+            window.snoozedReminders[window.activeBannerTaskId] = targetTimeMs;
+            localStorage.setItem('snoozedReminders', JSON.stringify(window.snoozedReminders));
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+            window.dismissReminderBanner();
+        };
+
+        window.completeTaskFromReminder = () => {
+            if (window.activeBannerTaskId) {
+                const todayKey = window.getDateKey(new Date());
+                const task = window.tasks.find(t => t.id === window.activeBannerTaskId);
+                if (task) {
+                    if (!task.completedHistory) task.completedHistory = {};
+                    task.completedHistory[todayKey] = true;
+                    window.saveToLocal();
+                    window.generateCalendar();
+                    window.renderTasks();
+                    if (typeof window.syncToCloud === 'function') window.syncToCloud();
+                }
+            }
+            window.dismissReminderBanner();
+        };
+
+        window.updateReminderBellBadge = () => {
+            const badge = document.getElementById('reminder-bell-badge');
+            if (!badge) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayKey = window.getDateKey(today);
+            const upcomingTimed = (window.tasks || []).filter(t => {
+                if (!window.shouldShowItemOnDate(t, today, false)) return false;
+                if (!t.time || t.reminder === 'none') return false;
+                const isDone = !!(t.completedHistory ? t.completedHistory[todayKey] : t.completed);
+                return !isDone;
+            });
+
+            if (upcomingTimed.length > 0) {
+                badge.innerText = String(upcomingTimed.length);
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        };
+
+        window.checkScheduledReminders = () => {
+            const now = new Date();
+            const today = new Date(now);
+            today.setHours(0, 0, 0, 0);
+            const todayKey = window.getDateKey(today);
+            const nowMins = now.getHours() * 60 + now.getMinutes();
+
+            window.updateReminderBellBadge();
+
+            // 1. Controleer gesnoozede herinneringen
+            Object.keys(window.snoozedReminders || {}).forEach(taskIdStr => {
+                const dueMs = window.snoozedReminders[taskIdStr];
+                if (dueMs && Date.now() >= dueMs) {
+                    delete window.snoozedReminders[taskIdStr];
+                    localStorage.setItem('snoozedReminders', JSON.stringify(window.snoozedReminders));
+                    const task = (window.tasks || []).find(t => String(t.id) === String(taskIdStr));
+                    if (task) {
+                        window.showInAppReminderBanner(task, 'Snooze afgelopen', 'Je uitgestelde activiteit staat nu klaar!');
+                    }
+                }
+            });
+
+            // 2. Controleer geplande taken van vandaag
+            const todayTasks = (window.tasks || []).filter(t => window.shouldShowItemOnDate(t, today, false));
+            todayTasks.forEach(task => {
+                if (!task.time || task.reminder === 'none') return;
+                const isDone = !!(task.completedHistory ? task.completedHistory[todayKey] : task.completed);
+                if (isDone) return;
+
+                const [th, tm] = task.time.split(':').map(Number);
+                if (isNaN(th) || isNaN(tm)) return;
+                const taskStartMins = th * 60 + tm;
+                const diffMins = taskStartMins - nowMins;
+                const reminderMode = task.reminder || 'both';
+
+                // A. Vooraf-melding (5 min of 15 min vooraf)
+                if ((reminderMode === 'both' && diffMins === 5) || (reminderMode === '15min' && diffMins === 15)) {
+                    const preKey = `${todayKey}_${task.id}_pre_${diffMins}`;
+                    if (!window.firedRemindersLog[preKey]) {
+                        window.firedRemindersLog[preKey] = Date.now();
+                        localStorage.setItem('firedRemindersLog', JSON.stringify(window.firedRemindersLog));
+                        window.showInAppReminderBanner(task, `Start over ${diffMins} min`, `Om ${task.time} staat "${task.title}" op je planning.`);
+                    }
+                }
+
+                // B. Op starttijd zelf (binnen 0 of 1 minuut van starttijd)
+                if (diffMins <= 0 && diffMins >= -1) {
+                    const startKey = `${todayKey}_${task.id}_start_${task.time}`;
+                    if (!window.firedRemindersLog[startKey]) {
+                        window.firedRemindersLog[startKey] = Date.now();
+                        localStorage.setItem('firedRemindersLog', JSON.stringify(window.firedRemindersLog));
+                        window.showInAppReminderBanner(task, 'Nu op je planning', `Het is ${task.time} — tijd voor "${task.title}"!`);
+                    }
+                }
+            });
+        };
+
+        window.requestBrowserNotificationPermission = async () => {
+            const statusEl = document.getElementById('notif-permission-status');
+            const btnEl = document.getElementById('btn-enable-browser-notif');
+            if (!('Notification' in window)) {
+                if (statusEl) statusEl.innerText = 'In-app schermmeldingen zijn actief op dit toestel.';
+                return;
+            }
+            const perm = await Notification.requestPermission();
+            window.updateNotificationPermissionUI(perm);
+        };
+
+        window.updateNotificationPermissionUI = (perm = ('Notification' in window ? Notification.permission : 'default')) => {
+            const statusEl = document.getElementById('notif-permission-status');
+            const btnEl = document.getElementById('btn-enable-browser-notif');
+            if (!statusEl || !btnEl) return;
+            if (perm === 'granted') {
+                statusEl.innerText = '✓ Schermmeldingen én systeemmeldingen staan aan';
+                btnEl.innerText = 'Actief ✓';
+                btnEl.className = 'px-3 py-1.5 rounded-full bg-[#8CBE68]/20 text-[#4E7A2E] text-[11px] font-extrabold';
+            } else {
+                statusEl.innerText = 'Meldingen verschijnen automatisch bovenin je scherm';
+                btnEl.innerText = 'Systeemmelding aan';
+            }
+        };
+
+        window.triggerTestReminder = () => {
+            const selDate = new Date(window.selectedDate);
+            selDate.setHours(0, 0, 0, 0);
+            const timedTasks = (window.tasks || []).filter(t => window.shouldShowItemOnDate(t, selDate, false) && t.time);
+            const sampleTask = timedTasks[0] || {
+                id: 0,
+                title: 'Voorbeeld: Activiteit op je planning',
+                time: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
+                notes: 'Zo verschijnt een herinnering bovenin je scherm zodra het tijd is!',
+                color: 'coral',
+                icon: '⏰'
+            };
+            window.closeRemindersCenter();
+            setTimeout(() => {
+                window.showInAppReminderBanner(sampleTask, 'Voorbeeld Herinnering', 'Zo word je herinnerd zodra een activiteit start!');
+            }, 220);
+        };
+
+        window.openRemindersCenter = () => {
+            window.updateNotificationPermissionUI();
+            window.renderRemindersCenter();
+            window.presentAppleSheet('reminders-center-modal');
+        };
+
+        window.closeRemindersCenter = (velocityY = 0) => {
+            if (typeof window.dismissAppleSheet === 'function') {
+                window.dismissAppleSheet('reminders-center-modal', velocityY);
+            } else {
+                document.getElementById('reminders-center-modal').classList.add('hidden');
+            }
+        };
+
+        window.renderRemindersCenter = () => {
+            const listEl = document.getElementById('reminders-center-list');
+            const countEl = document.getElementById('reminders-list-count');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            const selDate = new Date(window.selectedDate);
+            selDate.setHours(0, 0, 0, 0);
+            const dKey = window.getDateKey(selDate);
+            const timedTasks = (window.tasks || [])
+                .filter(t => window.shouldShowItemOnDate(t, selDate, false) && t.time)
+                .sort((a, b) => a.time.localeCompare(b.time));
+
+            if (countEl) countEl.innerText = `${timedTasks.length} gepland`;
+
+            if (timedTasks.length === 0) {
+                listEl.innerHTML = `
+                    <div class="bg-white rounded-3xl p-5 text-center border border-white shadow-xs">
+                        <p class="text-sm font-extrabold text-[#161618]">Nog geen tijden ingesteld op deze dag</p>
+                        <p class="text-xs text-gray-400 mt-1">Geef bij het maken van een taak een tijdstip op (bijv. 09:00) om automatisch een melding op je scherm te krijgen.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            timedTasks.forEach(t => {
+                const isDone = !!(t.completedHistory ? t.completedHistory[dKey] : t.completed);
+                const theme = window.taskColorThemes[t.color] || window.taskColorThemes.coral;
+                const icon = t.icon || window.inferTaskIcon(t.title, '⏰');
+                const endStr = window.addMinutesToTimeStr(t.time, t.duration || 15);
+                const remLabels = {
+                    both: '🔔 5m vooraf & op tijd',
+                    ontime: '🔔 Op starttijd',
+                    '15min': '🔔 15m vooraf & op tijd',
+                    none: '🔕 Melding uit'
+                };
+                const remText = remLabels[t.reminder || 'both'] || '🔔 Actief';
+
+                listEl.insertAdjacentHTML('beforeend', `
+                    <div onclick="window.closeRemindersCenter(); window.editTaskItem(event, ${t.id});" class="bg-white rounded-2xl p-3.5 border border-white shadow-xs flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-all">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <div style="background:${isDone ? '#E5E5E2' : theme.solid}; color:#FFF;" class="w-10 h-10 rounded-full flex items-center justify-center text-base shrink-0">
+                                ${icon}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-bold text-gray-400">${t.time}–${endStr} • ${remText}</p>
+                                <h4 class="text-sm font-extrabold ${isDone ? 'line-through text-gray-400' : 'text-[#161618]'} truncate">${t.title}</h4>
+                            </div>
+                        </div>
+                        <span class="text-xs font-extrabold px-2.5 py-1 rounded-full ${isDone ? 'bg-gray-100 text-gray-400' : 'bg-[#F09590]/15 text-[#D9726C]'} shrink-0">
+                            ${isDone ? 'Voltooid' : t.time}
+                        </span>
+                    </div>
+                `);
+            });
+        };
+
+        // Controleer elke 15 seconden op geplande herinneringen en werk de tijdlijn bij
+        setInterval(() => {
+            window.checkScheduledReminders();
+            if (window.currentTab === 'vandaag' && (window.currentTaskPeriodView || 'day') === 'day') {
+                window.renderTasks();
+            }
+        }, 15000);
+
         // ALTIJD DIRECT TEKENEN
         window.generateCalendar();
         window.renderDiscoverList(window.discoverChallenges); 
         window.renderTasks();
         window.renderHabits();
         window.renderJournal();
+        window.checkScheduledReminders();
     </script>
 </body>
 </html>
