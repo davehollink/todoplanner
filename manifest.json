@@ -1,12 +1,12 @@
 {
   "name": "FocusPlanner",
   "short_name": "FocusPlanner",
-  "description": "Jouw persoonlijke doelen en taken, overal gesynchroniseerd.",
+  "description": "Jouw persoonlijke dagplanning, tijdlijn en doelen op iPhone en Desktop.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F6F4F2",
-  "theme_color": "#F6F4F2",
-  "orientation": "portrait",
+  "background_color": "#F3F2F5",
+  "theme_color": "#F3F2F5",
+  "orientation": "any",
   "icons": [
     {
       "src": "/focusplanner-icon.png",
