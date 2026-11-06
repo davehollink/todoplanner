@@ -256,17 +256,14 @@
                 inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
         }
 
-        /* Modal dreamy gradient surface with Apple sheet specular top border */
+        /* Clean, rustige Apple Sheet achtergrond zonder drukke kleurverlopen */
         .modal-pastel-surface {
-            background-color: rgba(246, 244, 242, 0.96);
-            background-image:
-                radial-gradient(at 20% 0%, rgba(224, 198, 252, 0.48) 0px, transparent 50%),
-                radial-gradient(at 85% 5%, rgba(251, 219, 198, 0.52) 0px, transparent 50%);
+            background-color: #F6F5F8;
             backdrop-filter: blur(28px) saturate(180%);
             -webkit-backdrop-filter: blur(28px) saturate(180%);
             box-shadow:
-                0 -16px 48px rgba(22, 22, 24, 0.2),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+                0 -12px 42px rgba(22, 22, 24, 0.16),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
             will-change: transform;
         }
 
@@ -614,18 +611,41 @@
             <div id="desktop-inbox-list" class="space-y-2.5 flex-1 min-h-0 overflow-y-auto pr-1"></div>
         </aside>
 
-        <!-- RECHTER KOLOM OP DESKTOP (en hoofdcontainer op mobiel): 7-Dagen Week Strip bovenaan + Witte Afgeronde Sheet eronder -->
+        <!-- RECHTER KOLOM OP DESKTOP (en hoofdcontainer op mobiel): 7-Dagen Week Strip bovenaan + Uitklapbare Maandlade + Witte Afgeronde Sheet eronder -->
         <div id="desktop-right-pane" class="flex flex-col h-full min-h-0">
-            <!-- 7-Dagen Week Strip met gekleurde taak-bolletjes per dag (Op desktop gecentreerd boven het witte blad zoals Afbeelding 3) -->
-            <div id="calendar-container" class="px-5 md:px-6 pb-2.5 md:pb-2 w-full md:max-w-[520px] md:mx-auto shrink-0">
+            <!-- 7-Dagen Week Strip + Uitklapbare Maandkalender Lade -->
+            <div id="calendar-container" class="px-5 md:px-6 pb-2 md:pb-1.5 w-full md:max-w-[520px] md:mx-auto shrink-0 select-none">
                 <div class="grid grid-cols-7 gap-1 pt-0.5" id="calendar-strip"></div>
+
+                <!-- Uitklapbare Maandkalender (opent wanneer je het streepje naar beneden veegt of erop klikt) -->
+                <div id="expanded-month-drawer" class="hidden overflow-hidden transition-all duration-300 pt-2">
+                    <div class="bg-white/90 rounded-3xl p-3.5 shadow-xs border border-white">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <button type="button" onclick="window.shiftCalendarMonth(-1)" class="w-7 h-7 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-xs font-extrabold text-[#161618] flex items-center justify-center">‹</button>
+                            <span id="drawer-month-title" class="text-xs font-extrabold text-[#161618] capitalize">november 2026</span>
+                            <button type="button" onclick="window.shiftCalendarMonth(1)" class="w-7 h-7 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-xs font-extrabold text-[#161618] flex items-center justify-center">›</button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center mb-1">
+                            <span class="text-[10px] font-bold text-gray-400">Ma</span>
+                            <span class="text-[10px] font-bold text-gray-400">Di</span>
+                            <span class="text-[10px] font-bold text-gray-400">Wo</span>
+                            <span class="text-[10px] font-bold text-gray-400">Do</span>
+                            <span class="text-[10px] font-bold text-gray-400">Vr</span>
+                            <span class="text-[10px] font-bold text-gray-400">Za</span>
+                            <span class="text-[10px] font-bold text-gray-400">Zo</span>
+                        </div>
+                        <div id="drawer-month-grid" class="grid grid-cols-7 gap-1"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- WITTE AFGERONDE SHEET CONTAINER (Vult op desktop de rechterkolom tot aan de rechter- en onderrand van het scherm) -->
-            <div class="structured-sheet px-5 md:px-10 lg:px-14 pt-3 md:pt-4 relative z-10">
+            <div class="structured-sheet px-5 md:px-10 lg:px-14 pt-2 md:pt-3 relative z-10">
                 <div class="md:max-w-[760px] md:mx-auto w-full">
-                <!-- Subtiele grijze grab-bar bovenaan het witte blad -->
-                <div class="w-11 h-1 bg-gray-200/90 rounded-full mx-auto mb-3"></div>
+                <!-- Interactieve Swipe-Handle bovenaan het witte blad: veeg omlaag (of klik) om de volledige maandkalender te openen/sluiten -->
+                <div id="calendar-pull-handle" onclick="window.toggleMonthDrawer()" title="Veeg omlaag of klik voor de maandkalender" style="touch-action: none;" class="py-2 -mt-1 mb-1.5 flex flex-col items-center justify-center cursor-pointer group select-none">
+                    <div id="calendar-pull-pill" class="w-11 h-1.5 bg-gray-200 group-hover:bg-[#F09590]/70 rounded-full transition-all"></div>
+                </div>
 
     <!-- TAB 1: VANDAAG / TIJDLIJN -->
     <main id="view-vandaag" class="tab-content active space-y-4 relative z-10">
@@ -746,7 +766,7 @@
 
     <!-- FLOATING BOTTOM NAVIGATION BAR OP MOBIEL + LOSSE CORAL '+' KNOP RECHTS -->
     <div class="md:hidden fixed safe-bottom-nav left-0 right-0 mx-auto w-full max-w-[440px] px-4 z-40 pointer-events-none flex items-center gap-3">
-        <nav class="apple-glass-dock flex-1 relative rounded-full p-1.5 grid grid-cols-4 gap-1 place-items-center pointer-events-auto">
+        <nav class="apple-glass-dock flex-1 relative rounded-full p-1.5 grid grid-cols-4 gap-0 place-items-center pointer-events-auto">
             <div id="nav-active-pill" style="position:absolute; top:6px; bottom:6px; left:6px; width:calc((100% - 12px) / 4); background:rgba(240,149,144,0.18); border-radius:9999px; pointer-events:none; z-index:0;"></div>
             <button onclick="window.switchTab('vandaag')" id="nav-vandaag" class="nav-btn relative z-10 flex flex-col items-center justify-center py-2 px-1 rounded-full text-[#F09590] w-full transition-colors duration-200">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h10"></path></svg>
@@ -789,213 +809,209 @@
         </div>
     </div>
 
-    <!-- HOOFD MODAL (Add / Edit Task, Goal, Note & Workout) -->
+    <!-- HOOFD MODAL (Clean, rustig ontwerp voor Taak, Doel, Notitie & Workout) -->
     <div id="main-modal" data-apple-sheet="closeSmartModal" class="hidden fixed inset-0 bg-[#161618]/45 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center">
         <div class="absolute inset-0 sheet-backdrop" onclick="window.closeSmartModal()"></div>
-        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[460px] max-h-[88dvh] overflow-y-auto rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet animate-slide-up shadow-2xl border-t border-white">
+        <div id="main-modal-panel" class="sheet-panel relative modal-pastel-surface w-full max-w-[440px] max-h-[88dvh] overflow-y-auto rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet animate-slide-up shadow-2xl border-t border-white">
             <div class="sheet-grab-zone" aria-label="Sleep omlaag om te sluiten"><div class="sheet-grab-pill"></div></div>
-            <!-- Top balk met ronde X en Vinkje -->
-            <div class="flex items-center justify-between mb-5">
-                <button type="button" onclick="window.closeSmartModal()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-[#161618] hover:bg-gray-50 active:scale-95 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+
+            <!-- Compacte Topbalk -->
+            <div class="flex items-center justify-between mb-4">
+                <button type="button" onclick="window.closeSmartModal()" class="w-9 h-9 rounded-full bg-white shadow-2xs flex items-center justify-center text-gray-500 hover:text-[#161618] active:scale-95 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
-                <h2 id="modal-title" class="text-base font-extrabold text-[#161618] tracking-tight">Nieuwe taak</h2>
-                <button type="button" onclick="window.saveSmartItem()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-[#161618] hover:bg-gray-50 active:scale-95 transition-all" title="Opslaan">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <h2 id="modal-title" class="text-sm font-extrabold text-[#161618] tracking-tight">Nieuwe taak</h2>
+                <button type="button" onclick="window.saveSmartItem()" class="w-9 h-9 rounded-full bg-[#F09590] text-white shadow-2xs flex items-center justify-center hover:bg-[#E07A74] active:scale-95 transition-all" title="Opslaan">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </button>
             </div>
             
             <!-- Schakelaar voor Journal: Notitie vs Workout -->
-            <div id="modal-journal-type-switch" class="hidden flex bg-white/80 p-1.5 rounded-full mb-4 shadow-xs border border-white">
-                <button type="button" onclick="window.setJournalMode('note')" id="j-mode-note" class="flex-1 py-2.5 rounded-full font-bold text-xs bg-[#161618] text-white shadow-sm transition-all">📝 Notitie</button>
-                <button type="button" onclick="window.setJournalMode('workout')" id="j-mode-workout" class="flex-1 py-2.5 rounded-full font-bold text-xs text-gray-500 transition-all">🏋️‍♂️ Workout</button>
+            <div id="modal-journal-type-switch" class="hidden flex bg-white p-1 rounded-full mb-3.5 shadow-2xs border border-white">
+                <button type="button" onclick="window.setJournalMode('note')" id="j-mode-note" class="flex-1 py-2 rounded-full font-bold text-xs bg-[#161618] text-white shadow-2xs transition-all">Notitie</button>
+                <button type="button" onclick="window.setJournalMode('workout')" id="j-mode-workout" class="flex-1 py-2 rounded-full font-bold text-xs text-gray-500 transition-all">Workout</button>
             </div>
 
-            <!-- Titel veld -->
-            <div id="modal-title-group" class="mb-4">
-                <label id="modal-input-label" class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Titel</label>
-                <input type="text" id="modal-input" placeholder="" class="w-full px-4 py-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-semibold placeholder-gray-400 shadow-xs border border-white">
+            <!-- 1. TITEL + KLEUR & SYMBOOL IN ÉÉN STRAKKE KAART -->
+            <div id="modal-title-group" class="bg-white rounded-3xl p-3.5 mb-3 shadow-2xs border border-white">
+                <label id="modal-input-label" class="sr-only">Titel</label>
+                <div class="flex items-center space-x-3">
+                    <!-- Live voorbeeld van het gekozen icoon + kleur -->
+                    <div id="modal-live-icon-preview" style="background-color: #F09590; color: #FFFFFF;" class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-2xs transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="m6 19-2 2"/><path d="m18 19 2 2"/></svg>
+                    </div>
+                    <input type="text" id="modal-input" oninput="window.onModalTitleInput(this.value)" placeholder="Wat staat er op de planning?" class="flex-1 py-2 bg-transparent outline-none text-[#161618] text-base font-extrabold placeholder-gray-400">
+                </div>
+
+                <!-- Compacte Kleur- & Symboolkiezer (alleen zichtbaar bij taken) -->
+                <div id="modal-task-appearance-bar" class="pt-3 mt-2.5 border-t border-gray-100 space-y-2.5">
+                    <!-- Kleuren op 1 strakke rij -->
+                    <div id="task-color-picker" class="flex items-center justify-between px-0.5">
+                        <button type="button" onclick="window.setTaskColor('coral')" id="color-btn-coral" class="w-7 h-7 rounded-full bg-[#F09590] border-2 border-[#E07A74] flex items-center justify-center transition-all" title="Koraalroze"></button>
+                        <button type="button" onclick="window.setTaskColor('green')" id="color-btn-green" class="w-7 h-7 rounded-full bg-[#8CBE68] border-2 border-[#74A850] flex items-center justify-center transition-all" title="Saliegroen"></button>
+                        <button type="button" onclick="window.setTaskColor('blue')" id="color-btn-blue" class="w-7 h-7 rounded-full bg-[#6886A6] border-2 border-[#526E8C] flex items-center justify-center transition-all" title="Leisteenblauw"></button>
+                        <button type="button" onclick="window.setTaskColor('navy')" id="color-btn-navy" class="w-7 h-7 rounded-full bg-[#2B506E] border-2 border-[#1E3B52] flex items-center justify-center transition-all" title="Diep Marineblauw"></button>
+                        <button type="button" onclick="window.setTaskColor('plum')" id="color-btn-plum" class="w-7 h-7 rounded-full bg-[#844A67] border-2 border-[#6B3852] flex items-center justify-center transition-all" title="Bordeaux / Pruim"></button>
+                        <button type="button" onclick="window.setTaskColor('yellow')" id="color-btn-yellow" class="w-7 h-7 rounded-full bg-[#F6B519] border-2 border-[#DA9B08] flex items-center justify-center transition-all" title="Zonnig Goudgeel"></button>
+                        <button type="button" onclick="window.setTaskColor('purple')" id="color-btn-purple" class="w-7 h-7 rounded-full bg-[#9B82F3] border-2 border-[#7E63E0] flex items-center justify-center transition-all" title="Lavendel"></button>
+                        <button type="button" onclick="window.setTaskColor('teal')" id="color-btn-teal" class="w-7 h-7 rounded-full bg-[#4EA8A1] border-2 border-[#398D86] flex items-center justify-center transition-all" title="Oceaanblauw"></button>
+                    </div>
+
+                    <!-- Symbolen op 1 strakke horizontale rij -->
+                    <div id="task-icon-picker" class="flex items-center space-x-1.5 overflow-x-auto pt-0.5 pb-0.5 no-scrollbar">
+                        <button type="button" onclick="window.setTaskIcon('alarm')" data-icon="alarm" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Wekker / Start"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="m6 19-2 2"/><path d="m18 19 2 2"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('check')" data-icon="check" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Structuur / Taak"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('laptop')" data-icon="laptop" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Werk / Computer"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('book')" data-icon="book" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Studie / Lezen"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-2.2-1.5-5.5-1.5-8 0v12c2.5-1.5 5.8-1.5 8 0"/><path d="M12 6.5c2.2-1.5 5.5-1.5 8 0v12c-2.5-1.5-5.8-1.5-8 0"/><path d="M12 6.5v12"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('coffee')" data-icon="coffee" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Koffie / Pauze"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v6a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V8Z"/><path d="M8 4v2"/><path d="M11 3v3"/><path d="M14 4v2"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('dumbbell')" data-icon="dumbbell" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Sport / Krachttraining"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11"/><path d="M17.5 6.5v11"/><path d="M3.5 9v6"/><path d="M20.5 9v6"/><path d="M6.5 12h11"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('users')" data-icon="users" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Team / Overleg"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M14.5 19c.3-2.2 2-3.8 4.5-3.8 1.2 0 2.3.5 3 1.3"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('phone')" data-icon="phone" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Bellen / Contact"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('cart')" data-icon="cart" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Boodschappen"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('bike')" data-icon="bike" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Fietsen / Onderweg"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h3l2 5.5"/><path d="M5.5 17.5 9.5 10h6l-3 7.5"/><path d="M8 10h3.5"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('plant')" data-icon="plant" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Plant / Huis"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h10l-1.2 6H8.2L7 15Z"/><path d="M12 15V8"/><path d="M12 11c-3.5 0-5.5-2-5.5-5 3 0 5.5 1.5 5.5 5Z"/><path d="M12 9.5c3.5 0 5.5-2 5.5-5-3 0-5.5 1.5-5.5 5Z"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('yoga')" data-icon="yoga" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Yoga / Rust"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2"/><path d="M12 8.5v6.5l-3.5 5"/><path d="M12 11l5.5-2"/><path d="M12 9.5 7.5 7v4.5"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('shower')" data-icon="shower" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Douche / Ochtend"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V6a4 4 0 0 0-8 0v1"/><path d="M6.5 11h7a3.5 3.5 0 0 0-7 0Z"/><path d="M8 15v2"/><path d="M10 16v3"/><path d="M12 15v2"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('brush')" data-icon="brush" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Verzorging / Creatief"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m18.5 3.5 2 2L11 15l-3 1 1-3 9.5-9.5Z"/><path d="M8 16c-2.5 0-4 1.5-4 4 2.5 0 5-.8 5-3"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('gift')" data-icon="gift" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Cadeau / Feest"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5c2.5 0 4.5 5 4.5 5"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C14 3 12 8 12 8"/></svg></button>
+                        <button type="button" onclick="window.setTaskIcon('palm')" data-icon="palm" class="task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Vrije tijd / Vakantie"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c-3-3.5-7-2.5-8 1 3-.5 5.5 0 8-1Z"/><path d="M12 9c3-3.5 7-2.5 8 1-3-.5-5.5 0-8-1Z"/><path d="M12 9c-1.5-4.5-5.5-5.5-7.5-3 2.5.5 5 1.5 7.5 3Z"/><path d="M12 9c1.5-4.5 5.5-5.5 7.5-3-2.5.5-5 1.5-7.5 3Z"/></svg></button>
+                    </div>
+                </div>
             </div>
             
             <!-- Uitgebreide tekst voor Journal Notities -->
-            <div id="modal-note-body-extra" class="hidden mb-4">
-                <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Notitie</label>
-                <textarea id="journal-note-body" rows="5" placeholder="" class="w-full p-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none shadow-xs border border-white"></textarea>
+            <div id="modal-note-body-extra" class="hidden mb-3.5">
+                <textarea id="journal-note-body" rows="5" placeholder="Schrijf je notitie..." class="w-full p-4 bg-white rounded-3xl outline-none focus:ring-2 focus:ring-[#161618]/15 text-[#161618] font-medium resize-none shadow-2xs border border-white"></textarea>
             </div>
 
-            <!-- Extra velden voor Taken (Symbool, Subtaken, Kleur, Beschrijving, Datum/Tijd/Duur, Meldingen & Prioriteit) -->
-            <div id="modal-task-extra" class="space-y-4 mb-4">
+            <!-- Extra velden voor Taken (Clean ingedeeld: Wanneer, Subtaken & Inklapbare Meer Opties) -->
+            <div id="modal-task-extra" class="space-y-3 mb-4">
 
-                <!-- SYMBOOL KIEZER (Eigen Vector SVG Symbolen zoals Afbeelding 2 & 3 — geen emoji's) -->
-                <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Symbool op de tijdlijn</label>
-                    <div id="task-icon-picker" class="flex items-center space-x-2 overflow-x-auto bg-white p-2 rounded-2xl shadow-xs border border-white">
-                        <button type="button" onclick="window.setTaskIcon('alarm')" data-icon="alarm" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Wekker / Start"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="m6 19-2 2"/><path d="m18 19 2 2"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('check')" data-icon="check" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Structuur / Taak"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('plant')" data-icon="plant" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Plant / Verzorging"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h10l-1.2 6H8.2L7 15Z"/><path d="M12 15V8"/><path d="M12 11c-3.5 0-5.5-2-5.5-5 3 0 5.5 1.5 5.5 5Z"/><path d="M12 9.5c3.5 0 5.5-2 5.5-5-3 0-5.5 1.5-5.5 5Z"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('phone')" data-icon="phone" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Bellen / Contact"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('yoga')" data-icon="yoga" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Yoga / Beweging"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2"/><path d="M12 8.5v6.5l-3.5 5"/><path d="M12 11l5.5-2"/><path d="M12 9.5 7.5 7v4.5"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('bike')" data-icon="bike" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Fietsen / Onderweg"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h3l2 5.5"/><path d="M5.5 17.5 9.5 10h6l-3 7.5"/><path d="M8 10h3.5"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('users')" data-icon="users" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Team / Overleg"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M14.5 19c.3-2.2 2-3.8 4.5-3.8 1.2 0 2.3.5 3 1.3"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('shower')" data-icon="shower" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Douche / Ochtendroutine"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V6a4 4 0 0 0-8 0v1"/><path d="M6.5 11h7a3.5 3.5 0 0 0-7 0Z"/><path d="M8 15v2"/><path d="M10 16v3"/><path d="M12 15v2"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('coffee')" data-icon="coffee" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Koffie / Pauze"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M5 8h12v6a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V8Z"/><path d="M8 4v2"/><path d="M11 3v3"/><path d="M14 4v2"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('laptop')" data-icon="laptop" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Werk / Computer"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('book')" data-icon="book" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Studie / Lezen"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-2.2-1.5-5.5-1.5-8 0v12c2.5-1.5 5.8-1.5 8 0"/><path d="M12 6.5c2.2-1.5 5.5-1.5 8 0v12c-2.5-1.5-5.8-1.5-8 0"/><path d="M12 6.5v12"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('cart')" data-icon="cart" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Boodschappen"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('brush')" data-icon="brush" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Creatief / Schoonmaken"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m18.5 3.5 2 2L11 15l-3 1 1-3 9.5-9.5Z"/><path d="M8 16c-2.5 0-4 1.5-4 4 2.5 0 5-.8 5-3"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('gift')" data-icon="gift" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Cadeau / Verjaardag"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5c2.5 0 4.5 5 4.5 5"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C14 3 12 8 12 8"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('dumbbell')" data-icon="dumbbell" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Krachttraining / Sport"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11"/><path d="M17.5 6.5v11"/><path d="M3.5 9v6"/><path d="M20.5 9v6"/><path d="M6.5 12h11"/></svg></button>
-                        <button type="button" onclick="window.setTaskIcon('palm')" data-icon="palm" class="task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 transition-all" title="Ontspanning / Vrije tijd"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c-3-3.5-7-2.5-8 1 3-.5 5.5 0 8-1Z"/><path d="M12 9c3-3.5 7-2.5 8 1-3-.5-5.5 0-8-1Z"/><path d="M12 9c-1.5-4.5-5.5-5.5-7.5-3 2.5.5 5 1.5 7.5 3Z"/><path d="M12 9c1.5-4.5 5.5-5.5 7.5-3-2.5.5-5 1.5-7.5 3Z"/></svg></button>
+                <!-- 2. WANNEER: DATUM, TIJD & DUUR (Ruim en nooit afgekapt) -->
+                <div class="bg-white rounded-3xl p-3.5 shadow-2xs border border-white space-y-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="px-3 py-2 bg-[#F6F5F8] rounded-2xl flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <input type="date" id="task-date-input" class="w-full bg-transparent outline-none text-[#161618] font-bold text-xs">
+                        </div>
+                        <div class="px-3 py-2 bg-[#F6F5F8] rounded-2xl flex items-center justify-between space-x-1.5">
+                            <div class="flex items-center space-x-2 flex-1 min-w-0">
+                                <svg class="w-4 h-4 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                                <input type="time" id="time-input" class="w-full bg-transparent outline-none text-[#161618] font-bold text-xs">
+                            </div>
+                            <button type="button" onclick="document.getElementById('time-input').value='';" class="text-[10px] font-bold text-gray-400 hover:text-[#161618] px-1" title="Geen tijd (zet in Inbox)">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Duur knoppen op 1 strakke rij -->
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-[11px] font-bold text-gray-400 pl-1">Duur</span>
+                        <input type="hidden" id="task-duration-input" value="15">
+                        <div class="flex items-center space-x-1">
+                            <button type="button" onclick="window.setTaskDurationPill(15)" data-dur="15" class="dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-[#161618] text-white transition-all">15m</button>
+                            <button type="button" onclick="window.setTaskDurationPill(30)" data-dur="30" class="dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F5F8] text-gray-600 hover:text-[#161618] transition-all">30m</button>
+                            <button type="button" onclick="window.setTaskDurationPill(45)" data-dur="45" class="dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F5F8] text-gray-600 hover:text-[#161618] transition-all">45m</button>
+                            <button type="button" onclick="window.setTaskDurationPill(60)" data-dur="60" class="dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F5F8] text-gray-600 hover:text-[#161618] transition-all">1u</button>
+                            <button type="button" onclick="window.setTaskDurationPill(90)" data-dur="90" class="dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F5F8] text-gray-600 hover:text-[#161618] transition-all">1,5u</button>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- SUBTAKEN / CHECKLIST SECTIE -->
-                <div>
-                    <div class="flex items-center justify-between mb-1.5 px-1">
-                        <label class="text-xs font-bold text-[#161618]">Subtaken</label>
-                    </div>
-                    <div id="modal-subtasks-list" class="space-y-2 mb-2"></div>
+
+                <!-- 3. SUBTAKEN (Strak & overzichtelijk) -->
+                <div class="bg-white rounded-3xl p-3.5 shadow-2xs border border-white">
+                    <div id="modal-subtasks-list" class="space-y-1.5 mb-2 empty:mb-0"></div>
                     <div class="flex items-center space-x-2">
-                        <input type="text" id="subtask-input" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addSubtaskFromModal();}" placeholder="" class="flex-1 px-4 py-3 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium placeholder-gray-400 shadow-xs border border-white">
-                        <button type="button" onclick="window.addSubtaskFromModal()" class="w-11 h-11 rounded-2xl bg-[#161618] text-white font-bold text-lg flex items-center justify-center shrink-0 hover:bg-black active:scale-95 transition-all shadow-xs" title="Subtaak toevoegen">+</button>
+                        <input type="text" id="subtask-input" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addSubtaskFromModal();}" placeholder="+ Subtaak toevoegen..." class="flex-1 px-3 py-2 bg-[#F6F5F8] rounded-xl outline-none text-xs font-semibold text-[#161618] placeholder-gray-400">
+                        <button type="button" onclick="window.addSubtaskFromModal()" class="w-8 h-8 rounded-xl bg-[#161618] text-white font-bold text-sm flex items-center justify-center shrink-0 hover:bg-black active:scale-95 transition-all" title="Subtaak toevoegen">+</button>
                     </div>
                 </div>
 
-                <!-- TAAK KLEUR KIEZER (Structured Kleurenpalet) -->
-                <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-2 px-1">Kleur van de activiteit</label>
-                    <div id="task-color-picker" class="flex items-center justify-between bg-white p-2.5 rounded-2xl shadow-xs border border-white">
-                        <button type="button" onclick="window.setTaskColor('coral')" id="color-btn-coral" class="w-8 h-8 rounded-full bg-[#F09590] border-2 border-[#E07A74] flex items-center justify-center transition-all" title="Koraalroze"></button>
-                        <button type="button" onclick="window.setTaskColor('green')" id="color-btn-green" class="w-8 h-8 rounded-full bg-[#8CBE68] border-2 border-[#74A850] flex items-center justify-center transition-all" title="Saliegroen"></button>
-                        <button type="button" onclick="window.setTaskColor('blue')" id="color-btn-blue" class="w-8 h-8 rounded-full bg-[#6886A6] border-2 border-[#526E8C] flex items-center justify-center transition-all" title="Leisteenblauw"></button>
-                        <button type="button" onclick="window.setTaskColor('navy')" id="color-btn-navy" class="w-8 h-8 rounded-full bg-[#2B506E] border-2 border-[#1E3B52] flex items-center justify-center transition-all" title="Diep Marineblauw"></button>
-                        <button type="button" onclick="window.setTaskColor('plum')" id="color-btn-plum" class="w-8 h-8 rounded-full bg-[#844A67] border-2 border-[#6B3852] flex items-center justify-center transition-all" title="Bordeaux / Pruim"></button>
-                        <button type="button" onclick="window.setTaskColor('yellow')" id="color-btn-yellow" class="w-8 h-8 rounded-full bg-[#F6B519] border-2 border-[#DA9B08] flex items-center justify-center transition-all" title="Zonnig Goudgeel"></button>
-                        <button type="button" onclick="window.setTaskColor('purple')" id="color-btn-purple" class="w-8 h-8 rounded-full bg-[#9B82F3] border-2 border-[#7E63E0] flex items-center justify-center transition-all" title="Lavendel"></button>
-                        <button type="button" onclick="window.setTaskColor('teal')" id="color-btn-teal" class="w-8 h-8 rounded-full bg-[#4EA8A1] border-2 border-[#398D86] flex items-center justify-center transition-all" title="Oceaanblauw"></button>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Beschrijving / Notitie</label>
-                    <textarea id="task-notes-input" rows="2" placeholder="" class="w-full p-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-medium resize-none placeholder-gray-400 shadow-xs border border-white"></textarea>
-                </div>
-
-                <!-- DATUM, STARTTIJD & DUUR -->
-                <div>
-                    <div class="flex items-center justify-between mb-1.5 px-1">
-                        <label class="text-xs font-bold text-[#161618]">Datum, Tijd & Duur</label>
-                        <span class="text-[10px] font-semibold text-gray-400">Zonder tijd = bovenin als ronde bubbel / Inbox</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1.5">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <input type="date" id="task-date-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs">
+                <!-- 4. INKLAPBARE EXTRA OPTIES (Notitie, Meldingen & Prioriteit — houdt het scherm rustig) -->
+                <div class="bg-white rounded-3xl shadow-2xs border border-white overflow-hidden">
+                    <button type="button" onclick="window.toggleTaskMoreOptions()" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50/60 transition-all">
+                        <span class="text-xs font-bold text-gray-500">Extra opties (melding, notitie & prioriteit)</span>
+                        <span id="task-more-options-chevron" class="text-xs font-extrabold text-gray-400 transition-transform">▾</span>
+                    </button>
+                    <div id="task-more-options-drawer" class="hidden px-3.5 pb-3.5 pt-1 border-t border-gray-100 space-y-3">
+                        <!-- Notitie -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 mb-1">Notitie</label>
+                            <textarea id="task-notes-input" rows="2" placeholder="Optionele toelichting..." class="w-full p-2.5 bg-[#F6F5F8] rounded-2xl outline-none text-xs text-[#161618] font-medium resize-none placeholder-gray-400"></textarea>
                         </div>
-                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1.5">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                            <input type="time" id="time-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs">
-                        </div>
-                        <div class="px-3 py-2.5 bg-white rounded-2xl shadow-xs border border-white flex items-center space-x-1">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4"/><path d="M12 14v-4"/><circle cx="12" cy="14" r="8"/></svg>
-                            <select id="task-duration-input" class="w-full bg-transparent outline-none text-[#161618] font-semibold text-xs cursor-pointer">
-                                <option value="15">15 min</option>
-                                <option value="30">30 min</option>
-                                <option value="45">45 min</option>
-                                <option value="60">60 min</option>
-                                <option value="90">90 min</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- HERINNERING / MELDING OP SCHERM & IPHONE -->
-                <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Melding op iPhone & Scherm</label>
-                    <div class="p-3 bg-white rounded-2xl shadow-xs border border-white space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4 text-[#E07A74]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                                <span class="text-xs font-bold text-[#161618]">Herinner mij</span>
+                        <!-- Melding op telefoon & scherm (voor elke telefoon: iPhone & Android) -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-[#161618]">Herinnering</span>
+                                <select id="task-reminder-input" class="bg-[#F6F5F8] px-3 py-1.5 rounded-full text-xs font-bold text-[#161618] outline-none cursor-pointer">
+                                    <option value="both">5 min vooraf & op tijd</option>
+                                    <option value="ontime">Precies op starttijd</option>
+                                    <option value="15min">15 min vooraf & op tijd</option>
+                                    <option value="none">Geen melding</option>
+                                </select>
                             </div>
-                            <select id="task-reminder-input" class="bg-[#F3F2F5] px-3 py-1.5 rounded-full text-xs font-extrabold text-[#161618] outline-none cursor-pointer">
-                                <option value="both">5 min vooraf & op starttijd</option>
-                                <option value="ontime">Precies op starttijd</option>
-                                <option value="15min">15 min vooraf & op starttijd</option>
-                                <option value="none">Geen melding</option>
-                            </select>
+                            <label class="flex items-center justify-between pt-1.5 border-t border-gray-100 cursor-pointer">
+                                <span class="text-[11px] font-semibold text-gray-600 pr-2">Ook als alarm in telefoon-agenda zetten (iPhone & Android)</span>
+                                <input type="checkbox" id="task-ios-alarm-check" class="w-4 h-4 accent-[#F09590] rounded cursor-pointer">
+                            </label>
                         </div>
-                        <label class="flex items-center justify-between pt-2 border-t border-gray-100 cursor-pointer">
-                            <div class="flex items-center space-x-2 pr-2">
-                                <svg class="w-4 h-4 text-[#161618] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                                <div>
-                                    <span class="text-[11px] font-bold text-[#161618] block">Ook melding op iPhone Vergrendelscherm</span>
-                                    <span class="text-[10px] font-medium text-gray-400 block">Opent iOS Kalender-wekker als app gesloten is</span>
-                                </div>
-                            </div>
-                            <input type="checkbox" id="task-ios-alarm-check" class="w-4 h-4 accent-[#E07A74] rounded cursor-pointer">
-                        </label>
-                    </div>
-                </div>
 
-                <!-- Priority Pills -->
-                <div>
-                    <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Prioriteit</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" onclick="window.setTaskPriority('low')" id="prio-btn-low" class="py-2.5 rounded-full text-xs font-bold border transition-all bg-[#DCFCE7]/70 border-[#86EFAC] text-[#15803D]">
-                            Laag
-                        </button>
-                        <button type="button" onclick="window.setTaskPriority('medium')" id="prio-btn-medium" class="py-2.5 rounded-full text-xs font-bold border transition-all bg-[#FEF3C7]/70 border-[#FCD34D] text-[#B45309]">
-                            Middel
-                        </button>
-                        <button type="button" onclick="window.setTaskPriority('high')" id="prio-btn-high" class="py-2.5 rounded-full text-xs font-bold border transition-all bg-[#FEE2E2]/70 border-[#FCA5A5] text-[#B91C1C]">
-                            Hoog
-                        </button>
+                        <!-- Prioriteit -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 mb-1">Prioriteit</label>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button type="button" onclick="window.setTaskPriority('low')" id="prio-btn-low" class="py-2 rounded-full text-xs font-bold border transition-all bg-[#DCFCE7]/70 border-[#86EFAC] text-[#15803D]">Laag</button>
+                                <button type="button" onclick="window.setTaskPriority('medium')" id="prio-btn-medium" class="py-2 rounded-full text-xs font-bold border transition-all bg-[#FEF3C7]/70 border-[#FCD34D] text-[#B45309]">Middel</button>
+                                <button type="button" onclick="window.setTaskPriority('high')" id="prio-btn-high" class="py-2 rounded-full text-xs font-bold border transition-all bg-[#FEE2E2]/70 border-[#FCA5A5] text-[#B91C1C]">Hoog</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Extra velden voor Doelen -->
-            <div id="modal-custom-habit-extra" class="hidden mb-4">
+            <div id="modal-custom-habit-extra" class="hidden mb-3.5">
                 <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Doel & Eenheid</label>
                 <div class="grid grid-cols-2 gap-2.5">
-                    <input type="number" id="custom-habit-target" placeholder="Doel" class="w-full px-4 py-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-semibold shadow-xs border border-white">
-                    <input type="text" id="custom-habit-unit" placeholder="Eenheid" class="w-full px-4 py-3.5 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-[#161618]/20 text-[#161618] font-semibold shadow-xs border border-white">
+                    <input type="number" id="custom-habit-target" placeholder="Doel (bijv. 8)" class="w-full px-4 py-3 bg-white rounded-2xl outline-none text-[#161618] font-semibold shadow-2xs border border-white">
+                    <input type="text" id="custom-habit-unit" placeholder="Eenheid (bijv. glazen)" class="w-full px-4 py-3 bg-white rounded-2xl outline-none text-[#161618] font-semibold shadow-2xs border border-white">
                 </div>
             </div>
 
             <!-- WORKOUT BUILDER SECTIE -->
-            <div id="modal-workout-extra" class="hidden mb-5 space-y-3">
+            <div id="modal-workout-extra" class="hidden mb-4 space-y-3">
                 <div id="workout-exercises-container" class="space-y-3"></div>
-                
-                <button type="button" onclick="window.openExercisePicker()" class="w-full py-3.5 rounded-full bg-white text-[#161618] font-bold text-xs border-2 border-dashed border-gray-300 hover:border-[#161618] transition-colors flex justify-center items-center shadow-xs">
+                <button type="button" onclick="window.openExercisePicker()" class="w-full py-3 rounded-full bg-white text-[#161618] font-bold text-xs border-2 border-dashed border-gray-300 hover:border-[#161618] transition-colors flex justify-center items-center shadow-2xs">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     Oefening kiezen (met uitleg & beeld)
                 </button>
             </div>
 
-            <!-- Herhaling sectie -->
-            <div id="modal-recurrence-extra" class="mb-6">
-                <label class="block text-xs font-bold text-[#161618] mb-1.5 px-1">Herhalen</label>
-                <div class="flex space-x-2 overflow-x-auto pb-1">
-                    <button type="button" onclick="window.setRecurrence('none')" id="rec-btn-none" class="rec-btn px-4 py-2.5 rounded-full bg-white text-gray-600 font-bold text-xs shrink-0 transition-all shadow-xs border border-white">Eenmalig</button>
-                    <button type="button" onclick="window.setRecurrence('daily')" id="rec-btn-daily" class="rec-btn px-4 py-2.5 rounded-full bg-[#161618] text-white font-bold text-xs shrink-0 transition-all shadow-xs">Elke dag</button>
-                    <button type="button" onclick="window.setRecurrence('custom')" id="rec-btn-custom" class="rec-btn px-4 py-2.5 rounded-full bg-white text-gray-600 font-bold text-xs shrink-0 transition-all shadow-xs border border-white">Kies dagen...</button>
-                </div>
-                
-                <div id="custom-days-wrapper" class="hidden mt-3 flex justify-between space-x-1">
-                    <button type="button" onclick="window.toggleCustomDay(1, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Ma</button>
-                    <button type="button" onclick="window.toggleCustomDay(2, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Di</button>
-                    <button type="button" onclick="window.toggleCustomDay(3, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Wo</button>
-                    <button type="button" onclick="window.toggleCustomDay(4, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Do</button>
-                    <button type="button" onclick="window.toggleCustomDay(5, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Vr</button>
-                    <button type="button" onclick="window.toggleCustomDay(6, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Za</button>
-                    <button type="button" onclick="window.toggleCustomDay(0, this)" class="w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs">Zo</button>
+            <!-- Herhaling sectie (Compacte rij) -->
+            <div id="modal-recurrence-extra" class="mb-4">
+                <div class="bg-white rounded-3xl p-3 shadow-2xs border border-white">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-gray-500 pl-1">Herhalen</span>
+                        <div class="flex space-x-1">
+                            <button type="button" onclick="window.setRecurrence('none')" id="rec-btn-none" class="rec-btn px-3 py-1.5 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs shrink-0 transition-all">Eenmalig</button>
+                            <button type="button" onclick="window.setRecurrence('daily')" id="rec-btn-daily" class="rec-btn px-3 py-1.5 rounded-full bg-[#161618] text-white font-bold text-xs shrink-0 transition-all">Elke dag</button>
+                            <button type="button" onclick="window.setRecurrence('custom')" id="rec-btn-custom" class="rec-btn px-3 py-1.5 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs shrink-0 transition-all">Dagen...</button>
+                        </div>
+                    </div>
+                    <div id="custom-days-wrapper" class="hidden mt-2.5 pt-2.5 border-t border-gray-100 flex justify-between space-x-1">
+                        <button type="button" onclick="window.toggleCustomDay(1, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Ma</button>
+                        <button type="button" onclick="window.toggleCustomDay(2, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Di</button>
+                        <button type="button" onclick="window.toggleCustomDay(3, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Wo</button>
+                        <button type="button" onclick="window.toggleCustomDay(4, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Do</button>
+                        <button type="button" onclick="window.toggleCustomDay(5, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Vr</button>
+                        <button type="button" onclick="window.toggleCustomDay(6, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Za</button>
+                        <button type="button" onclick="window.toggleCustomDay(0, this)" class="w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all">Zo</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Grote donkere knop onderaan -->
-            <button onclick="window.saveSmartItem()" id="modal-submit-btn" class="w-full py-4 bg-[#161618] text-white rounded-full font-bold text-sm shadow-[0_12px_28px_rgba(22,22,24,0.25)] hover:bg-black active:scale-[0.99] transition-all">
+            <!-- Primaire actieknop onderaan -->
+            <button onclick="window.saveSmartItem()" id="modal-submit-btn" class="w-full py-3.5 bg-[#161618] text-white rounded-full font-extrabold text-sm shadow-md hover:bg-black active:scale-[0.99] transition-all">
                 Opslaan
             </button>
         </div>
@@ -1134,192 +1150,146 @@
         </div>
     </div>
 
-    <!-- POPUP VENSTER: MELDINGEN & IPHONE HERINNERINGEN OVERZICHT -->
-    <div id="reminders-center-modal" data-apple-sheet="closeRemindersCenter" class="hidden fixed inset-0 bg-[#161618]/55 backdrop-blur-sm z-[85] flex items-end sm:items-center justify-center">
+    <!-- POPUP VENSTER: MELDINGEN VOOR ELKE TELEFOON (IPHONE & ANDROID) EN SCHERM -->
+    <div id="reminders-center-modal" data-apple-sheet="closeRemindersCenter" class="hidden fixed inset-0 bg-[#161618]/50 backdrop-blur-sm z-[85] flex items-end sm:items-center justify-center">
         <div class="absolute inset-0 sheet-backdrop" onclick="window.closeRemindersCenter()"></div>
-        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[460px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet max-h-[88dvh] flex flex-col animate-slide-up shadow-2xl border-t border-white">
+        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[440px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet max-h-[88dvh] flex flex-col animate-slide-up shadow-2xl border-t border-white">
             <div class="sheet-grab-zone" aria-label="Sleep omlaag om te sluiten"><div class="sheet-grab-pill"></div></div>
             <div class="flex justify-between items-center mb-3.5 shrink-0">
                 <div class="flex items-center space-x-2.5">
-                    <div class="w-10 h-10 rounded-full bg-[#F09590] text-white flex items-center justify-center shadow-xs">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <div class="w-9 h-9 rounded-full bg-[#F09590] text-white flex items-center justify-center shadow-2xs">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-extrabold text-[#161618]">Meldingen op iPhone & Scherm</h3>
-                        <p class="text-[11px] font-medium text-gray-500">Ontvang herinneringen in de app én op je iPhone zelf</p>
+                        <h3 class="text-base font-extrabold text-[#161618]">Meldingen & Herinneringen</h3>
+                        <p class="text-[11px] font-medium text-gray-500">Werkt op iedere telefoon (Android & iPhone) en desktop</p>
                     </div>
                 </div>
-                <button onclick="window.closeRemindersCenter()" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 font-bold hover:bg-gray-50">✕</button>
+                <button onclick="window.closeRemindersCenter()" class="w-8 h-8 rounded-full bg-white shadow-2xs flex items-center justify-center text-gray-500 font-bold hover:text-[#161618]">✕</button>
             </div>
 
-            <!-- iPhone Meldingen & Systeem-notificaties kaart -->
-            <div class="bg-white rounded-3xl p-4 mb-3.5 shadow-xs border border-white space-y-3 shrink-0">
+            <!-- Universele Telefoon & Systeem-notificaties kaart -->
+            <div class="bg-white rounded-3xl p-4 mb-3.5 shadow-2xs border border-white space-y-3 shrink-0">
                 <div class="flex items-center justify-between gap-2">
                     <div>
-                        <p class="text-xs font-extrabold text-[#161618]">1. iPhone & Desktop Push-meldingen</p>
-                        <p id="notif-permission-status" class="text-[11px] font-medium text-gray-500">Zet aan voor directe systeemmeldingen op je iPhone (via Beginscherm-app)</p>
+                        <p class="text-xs font-extrabold text-[#161618]">1. Push-meldingen op je telefoon & scherm</p>
+                        <p id="notif-permission-status" class="text-[11px] font-medium text-gray-500">Ontvang direct een melding zodra een activiteit start</p>
                     </div>
                     <button onclick="window.requestBrowserNotificationPermission()" id="btn-enable-browser-notif" class="px-3.5 py-2 rounded-full bg-[#161618] hover:bg-black text-white text-[11px] font-extrabold transition-all shrink-0">
-                        Activeer op iPhone
+                        Schakel in
                     </button>
                 </div>
 
-                <!-- 2. iPhone Vergrendelscherm / iOS Kalender-wekker (.ics met VALARM) -->
+                <!-- 2. Telefoon Vergrendelscherm / Kalender-alarm (.ics met VALARM voor Android & iPhone) -->
                 <div class="pt-2.5 border-t border-gray-100 flex items-center justify-between gap-2">
                     <div>
-                        <p class="text-xs font-extrabold text-[#161618]">2. iPhone Vergrendelscherm-alarm (ook als app dicht is)</p>
-                        <p class="text-[11px] font-medium text-gray-500">Zet de geplande tijden van deze dag met 1 tik in je iPhone met geluid-melding</p>
+                        <p class="text-xs font-extrabold text-[#161618]">2. Telefoon-wekker / Agenda-melding</p>
+                        <p class="text-[11px] font-medium text-gray-500">Zet de tijden van vandaag met geluid in je telefoon (ook als app dicht is)</p>
                     </div>
                     <button onclick="window.exportDayTasksToIPhoneAlarm()" class="px-3.5 py-2 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white text-[11px] font-extrabold transition-all shrink-0 flex items-center space-x-1">
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                        <span>Zet in iPhone</span>
+                        <span>Zet in telefoon</span>
                     </button>
                 </div>
 
                 <div class="flex items-center gap-2 pt-2.5 border-t border-gray-100">
-                    <button onclick="window.triggerTestReminder()" class="flex-1 py-2.5 px-3 rounded-full bg-[#F3F2F5] text-[#161618] text-xs font-extrabold flex items-center justify-center space-x-1.5 hover:bg-gray-200 active:scale-95 transition-all">
-                        <svg class="w-3.5 h-3.5 text-[#E07A74]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <span>Test melding nu</span>
+                    <button onclick="window.triggerTestReminder()" class="flex-1 py-2 px-3 rounded-full bg-[#F6F5F8] text-[#161618] text-xs font-extrabold flex items-center justify-center space-x-1.5 hover:bg-gray-200 active:scale-95 transition-all">
+                        <span>Test melding</span>
                     </button>
-                    <button onclick="window.closeRemindersCenter(); window.openSmartModal();" class="py-2.5 px-4 rounded-full bg-[#161618] text-white text-xs font-extrabold hover:bg-black active:scale-95 transition-all">
+                    <button onclick="window.closeRemindersCenter(); window.openSmartModal();" class="py-2 px-4 rounded-full bg-[#161618] text-white text-xs font-extrabold hover:bg-black active:scale-95 transition-all">
                         + Plan tijd
                     </button>
                 </div>
             </div>
 
             <div class="flex items-center justify-between mb-2 px-1 shrink-0">
-                <span class="text-xs font-extrabold text-[#161618]">Geplande tijden op geselecteerde dag</span>
+                <span class="text-xs font-extrabold text-[#161618]">Geplande tijden op deze dag</span>
                 <span id="reminders-list-count" class="text-[11px] font-bold text-[#E07A74]">0 gepland</span>
             </div>
 
-            <div id="reminders-center-list" class="overflow-y-auto space-y-2.5 flex-1 pr-0.5"></div>
+            <div id="reminders-center-list" class="overflow-y-auto space-y-2 flex-1 pr-0.5"></div>
         </div>
     </div>
 
-    <!-- POPUP VENSTER: AI PLANNER & OVERZICHT ASSISTENT (Structured ✦ AI Tool) -->
-    <div id="ai-planner-modal" data-apple-sheet="closeAIPlannerModal" class="hidden fixed inset-0 bg-[#161618]/55 backdrop-blur-sm z-[88] flex items-end sm:items-center justify-center">
+    <!-- POPUP VENSTER: AI PLANNER & OVERZICHT ASSISTENT (Strak, rustig & gebruiksvriendelijk) -->
+    <div id="ai-planner-modal" data-apple-sheet="closeAIPlannerModal" class="hidden fixed inset-0 bg-[#161618]/50 backdrop-blur-sm z-[88] flex items-end sm:items-center justify-center">
         <div class="absolute inset-0 sheet-backdrop" onclick="window.closeAIPlannerModal()"></div>
-        <div class="sheet-panel relative modal-pastel-surface w-full max-w-[520px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 sm:p-6 safe-bottom-sheet max-h-[90dvh] flex flex-col animate-slide-up shadow-2xl border-t border-white">
+        <div id="ai-modal-panel" class="sheet-panel relative modal-pastel-surface w-full max-w-[440px] rounded-t-[2.25rem] sm:rounded-[2.25rem] p-5 safe-bottom-sheet max-h-[88dvh] flex flex-col animate-slide-up shadow-2xl border-t border-white">
             <div class="sheet-grab-zone" aria-label="Sleep omlaag om te sluiten"><div class="sheet-grab-pill"></div></div>
 
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-4 shrink-0">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-[#161618] text-white flex items-center justify-center shadow-sm">
-                        <svg class="w-5 h-5 text-[#F09590]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
+            <!-- Compacte Header -->
+            <div class="flex justify-between items-center mb-3.5 shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-full bg-[#161618] text-white flex items-center justify-center shadow-2xs">
+                        <svg class="w-4 h-4 text-[#F09590]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
                     </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h3 class="text-lg font-extrabold text-[#161618] tracking-tight">Structured AI Assistent</h3>
-                            <span id="ai-planner-date-badge" class="px-2 py-0.5 rounded-full bg-white text-[10px] font-extrabold text-[#E07A74] shadow-2xs">Vandaag</span>
-                        </div>
-                        <p class="text-[11px] font-medium text-gray-500">Helpt je met plannen, vrije ruimte bewaken en overzicht houden</p>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-base font-extrabold text-[#161618] tracking-tight">AI Planning</h3>
+                        <span id="ai-planner-date-badge" class="px-2.5 py-0.5 rounded-full bg-white text-[10px] font-extrabold text-[#E07A74] shadow-2xs">Vandaag</span>
+                        <span id="ai-overview-status-pill" class="hidden"></span>
                     </div>
                 </div>
-                <button onclick="window.closeAIPlannerModal()" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 font-bold hover:bg-gray-50">✕</button>
+                <button onclick="window.closeAIPlannerModal()" class="w-8 h-8 rounded-full bg-white shadow-2xs flex items-center justify-center text-gray-500 font-bold hover:text-[#161618]">✕</button>
             </div>
 
-            <div class="overflow-y-auto space-y-4 flex-1 pr-0.5">
-                <!-- 1. DAG-OVERZICHT & RUST-BALANS KAART -->
-                <div class="bg-white rounded-3xl p-4 shadow-xs border border-white">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Jouw Dag-Overzicht & Balans</span>
-                        <span id="ai-overview-status-pill" class="px-2.5 py-0.5 rounded-full bg-[#EEF7E6] text-[#5C8D38] text-[10px] font-extrabold">Rustig schema</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2.5 mb-3">
-                        <div class="bg-[#F7F6F9] rounded-2xl p-3">
-                            <span class="text-[10px] font-bold text-gray-400 block">Geplande tijd</span>
-                            <span id="ai-stat-scheduled-time" class="text-base font-extrabold text-[#161618]">0 u 00 m</span>
+            <div class="overflow-y-auto space-y-3 flex-1 pr-0.5">
+                <!-- 1. Compacte Samenvatting (1 rustige balk) -->
+                <div class="bg-white rounded-3xl p-3.5 shadow-2xs border border-white">
+                    <div class="grid grid-cols-3 gap-2 text-center mb-2.5">
+                        <div class="bg-[#F6F5F8] rounded-2xl py-2 px-2">
+                            <span class="text-[10px] font-bold text-gray-400 block">Ingepland</span>
+                            <span id="ai-stat-scheduled-time" class="text-xs font-extrabold text-[#161618]">0 u 00 m</span>
                         </div>
-                        <div class="bg-[#F7F6F9] rounded-2xl p-3">
-                            <span class="text-[10px] font-bold text-gray-400 block">Open taken</span>
-                            <span id="ai-stat-open-tasks" class="text-base font-extrabold text-[#161618]">0 open</span>
+                        <div class="bg-[#F6F5F8] rounded-2xl py-2 px-2">
+                            <span class="text-[10px] font-bold text-gray-400 block">Open</span>
+                            <span id="ai-stat-open-tasks" class="text-xs font-extrabold text-[#161618]">0 open</span>
                         </div>
-                        <div class="bg-[#F7F6F9] rounded-2xl p-3">
-                            <span class="text-[10px] font-bold text-gray-400 block">Los in Inbox</span>
-                            <span id="ai-stat-inbox-count" class="text-base font-extrabold text-[#E07A74]">0 zonder tijd</span>
+                        <div class="bg-[#F6F5F8] rounded-2xl py-2 px-2">
+                            <span class="text-[10px] font-bold text-gray-400 block">In Inbox</span>
+                            <span id="ai-stat-inbox-count" class="text-xs font-extrabold text-[#E07A74]">0 los</span>
                         </div>
                     </div>
-                    <div id="ai-overview-advice" class="text-xs font-semibold text-[#161618] bg-[#FDECEB]/70 border border-[#F09590]/30 rounded-2xl p-3 leading-relaxed">
-                        Je hebt vandaag nog volop ruimte. Typ hieronder wat je wilt doen of laat AI je Inbox-taken op vrije momenten zetten.
-                    </div>
+                    <p id="ai-overview-advice" class="text-[11px] font-semibold text-gray-600 px-1 leading-snug">
+                        Typ hieronder wat je wilt doen of kies een snelle actie.
+                    </p>
                 </div>
 
-                <!-- 2. SLIMME TEKST-NAAR-TIJDLIJN PLANNER -->
-                <div class="bg-white rounded-3xl p-4 shadow-xs border border-white">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label for="ai-natural-input" class="text-xs font-extrabold text-[#161618]">Typ je gedachten of dagplanning</label>
-                        <span class="text-[10px] font-bold text-[#E07A74]">Herkent tijden, duur & symbolen</span>
-                    </div>
-                    <p class="text-[11px] font-medium text-gray-500 mb-2.5">Schrijf in gewone taal wat je moet doen; AI maakt er direct gestructureerde tijdlijn-blokken van.</p>
-                    <textarea id="ai-natural-input" rows="3" placeholder="Bijv: Om 09:00 30 min Horeb voorbereiden, daarna om 10:00 koffie drinken, om 14:00 45 min Geschiedenis leren en planten water geven" class="w-full p-3.5 bg-[#F7F6F9] rounded-2xl outline-none focus:ring-2 focus:ring-[#F09590] text-xs font-semibold text-[#161618] resize-none placeholder-gray-400"></textarea>
+                <!-- 2. Snel plannen met tekst -->
+                <div class="bg-white rounded-3xl p-3.5 shadow-2xs border border-white space-y-2.5">
+                    <label for="ai-natural-input" class="block text-xs font-extrabold text-[#161618] px-0.5">Typ je dagplanning in gewone taal</label>
+                    <textarea id="ai-natural-input" rows="2" placeholder="Bijv: 09:00 30m Horeb voorbereiden, 14:00 45m Geschiedenis leren" class="w-full p-3 bg-[#F6F5F8] rounded-2xl outline-none focus:ring-2 focus:ring-[#F09590] text-xs font-semibold text-[#161618] resize-none placeholder-gray-400"></textarea>
 
-                    <!-- Snel-voorbeelden -->
-                    <div class="flex flex-wrap gap-1.5 mt-2 mb-3">
-                        <button type="button" onclick="window.fillAIPromptExample('Ochtendroutine: 08:30 opstaan, 08:45 douchen, 09:00 30 min ontbijt & koffie, 09:30 45 min Horeb voorbereiden')" class="px-2.5 py-1 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[10px] font-bold text-gray-600 transition-all">+ Ochtendblok</button>
-                        <button type="button" onclick="window.fillAIPromptExample('Studie & Werk: 13:30 45 min Geschiedenis leren, 14:30 15 min pauze & koffie, 15:00 30 min mail & administratie')" class="px-2.5 py-1 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[10px] font-bold text-gray-600 transition-all">+ Focus-middag</button>
-                        <button type="button" onclick="window.fillAIPromptExample('Avond: 18:00 45 min koken & eten, 19:15 Jax tandenpoetsen, 20:00 30 min lezen & dag afsluiten')" class="px-2.5 py-1 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[10px] font-bold text-gray-600 transition-all">+ Rustige avond</button>
-                    </div>
-
-                    <button type="button" onclick="window.generateAIPlanPreview()" class="w-full py-3 rounded-full bg-[#161618] hover:bg-black text-white text-xs font-extrabold flex items-center justify-center space-x-2 transition-all shadow-sm">
-                        <svg class="w-4 h-4 text-[#F09590]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
-                        <span>Maak overzichtelijk tijdlijn-voorstel</span>
+                    <button type="button" onclick="window.generateAIPlanPreview()" class="w-full py-2.5 rounded-full bg-[#161618] hover:bg-black text-white text-xs font-extrabold flex items-center justify-center space-x-1.5 transition-all">
+                        <svg class="w-3.5 h-3.5 text-[#F09590]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
+                        <span>Maak tijdlijn-voorstel</span>
                     </button>
 
                     <!-- Voorstel resultaat -->
-                    <div id="ai-plan-preview-container" class="hidden mt-3 pt-3 border-t border-gray-100 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-extrabold text-[#161618]">Voorgestelde blokken op jouw tijdlijn</span>
+                    <div id="ai-plan-preview-container" class="hidden pt-2.5 border-t border-gray-100 space-y-2">
+                        <div class="flex items-center justify-between px-0.5">
+                            <span class="text-[11px] font-extrabold text-[#161618]">Voorstel</span>
                             <span id="ai-preview-count" class="text-[10px] font-bold text-[#E07A74]">0 taken</span>
                         </div>
-                        <div id="ai-plan-preview-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-0.5"></div>
-                        <button type="button" onclick="window.ConfirmAIPlanPreview()" class="w-full py-3 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white text-xs font-extrabold transition-all shadow-xs">
-                            Zet op mijn tijdlijn
+                        <div id="ai-plan-preview-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-0.5"></div>
+                        <button type="button" onclick="window.ConfirmAIPlanPreview()" class="w-full py-2.5 rounded-full bg-[#F09590] hover:bg-[#E07A74] text-white text-xs font-extrabold transition-all">
+                            Toevoegen aan tijdlijn
                         </button>
                     </div>
                 </div>
 
-                <!-- 3. SLIMME 1-KLIK OVERZICHT ACTIES -->
-                <div class="bg-white rounded-3xl p-4 shadow-xs border border-white space-y-2">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block mb-1">Slimme Hulp voor Overzicht</span>
-
-                    <button type="button" onclick="window.aiAutoScheduleUntimedTasks()" class="w-full p-3 rounded-2xl bg-[#F7F6F9] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all group">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full bg-[#FDECEB] text-[#E07A74] flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                            </div>
-                            <div>
-                                <p class="text-xs font-extrabold text-[#161618]">Plan losse Inbox-taken automatisch in</p>
-                                <p class="text-[11px] font-medium text-gray-500">Zoekt vrije gaten op je tijdlijn en geeft elke losse taak een rustig tijdstip</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-extrabold text-gray-400 group-hover:text-[#161618] pl-2">›</span>
+                <!-- 3. Snelle 1-klik acties (Strak en zonder poespas) -->
+                <div class="bg-white rounded-3xl p-3 shadow-2xs border border-white space-y-1.5">
+                    <button type="button" onclick="window.aiAutoScheduleUntimedTasks()" class="w-full px-3.5 py-2.5 rounded-2xl bg-[#F6F5F8] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all">
+                        <span class="text-xs font-bold text-[#161618]">Plan losse Inbox-taken automatisch in</span>
+                        <span class="text-xs font-extrabold text-[#E07A74]">→</span>
                     </button>
-
-                    <button type="button" onclick="window.aiRescheduleOverdueTasks()" class="w-full p-3 rounded-2xl bg-[#F7F6F9] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all group">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full bg-[#EBF1F6] text-[#6886A6] flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                            </div>
-                            <div>
-                                <p class="text-xs font-extrabold text-[#161618]">Herverdeel gemiste of overlappende tijden</p>
-                                <p class="text-[11px] font-medium text-gray-500">Schuift onvoltooide taken van eerder vandaag netjes door vanaf nu</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-extrabold text-gray-400 group-hover:text-[#161618] pl-2">›</span>
+                    <button type="button" onclick="window.aiRescheduleOverdueTasks()" class="w-full px-3.5 py-2.5 rounded-2xl bg-[#F6F5F8] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all">
+                        <span class="text-xs font-bold text-[#161618]">Schuif gemiste tijden door vanaf nu</span>
+                        <span class="text-xs font-extrabold text-[#6886A6]">→</span>
                     </button>
-
-                    <button type="button" onclick="window.aiGenerateSmartSubtasksForDay()" class="w-full p-3 rounded-2xl bg-[#F7F6F9] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all group">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full bg-[#EEF7E6] text-[#74A850] flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg>
-                            </div>
-                            <div>
-                                <p class="text-xs font-extrabold text-[#161618]">Bedenk subtaken voor grote taken</p>
-                                <p class="text-[11px] font-medium text-gray-500">Voegt automatisch logische tussenstappen toe aan taken zonder subtaken</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-extrabold text-gray-400 group-hover:text-[#161618] pl-2">›</span>
+                    <button type="button" onclick="window.aiGenerateSmartSubtasksForDay()" class="w-full px-3.5 py-2.5 rounded-2xl bg-[#F6F5F8] hover:bg-[#ECECEF] flex items-center justify-between text-left transition-all">
+                        <span class="text-xs font-bold text-[#161618]">Splits open taken op in subtaken</span>
+                        <span class="text-xs font-extrabold text-[#74A850]">→</span>
                     </button>
                 </div>
             </div>
@@ -1574,16 +1544,61 @@
             return renderer(cls);
         };
 
+        window.updateModalLivePreview = () => {
+            const previewEl = document.getElementById('modal-live-icon-preview');
+            if (!previewEl) return;
+            const theme = window.taskColorThemes[window.currentTaskColor] || window.taskColorThemes.coral;
+            previewEl.style.backgroundColor = theme.solid;
+            previewEl.style.color = '#FFFFFF';
+            const titleVal = document.getElementById('modal-input')?.value || '';
+            previewEl.innerHTML = window.getTaskSymbolSVG(window.currentTaskIcon, titleVal, 'w-5 h-5');
+        };
+
+        window.onModalTitleInput = (val = '') => {
+            if (window.modalMode === 'vandaag' && (!window.editingItemId || window.currentTaskIcon === 'alarm')) {
+                const inferred = window.inferTaskIcon(val, 'alarm');
+                if (inferred && inferred !== window.currentTaskIcon) {
+                    window.setTaskIcon(inferred);
+                    return;
+                }
+            }
+            window.updateModalLivePreview();
+        };
+
+        window.setTaskDurationPill = (mins = 15) => {
+            const m = parseInt(mins, 10) || 15;
+            const durInput = document.getElementById('task-duration-input');
+            if (durInput) durInput.value = String(m);
+            document.querySelectorAll('.dur-pill-btn').forEach(btn => {
+                const bDur = parseInt(btn.getAttribute('data-dur'), 10);
+                if (bDur === m) {
+                    btn.className = "dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-[#161618] text-white transition-all";
+                } else {
+                    btn.className = "dur-pill-btn px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F5F8] text-gray-600 hover:text-[#161618] transition-all";
+                }
+            });
+        };
+
+        window.toggleTaskMoreOptions = (forceOpen) => {
+            const drawer = document.getElementById('task-more-options-drawer');
+            const chevron = document.getElementById('task-more-options-chevron');
+            if (!drawer) return;
+            const isOpen = forceOpen !== undefined ? forceOpen : drawer.classList.contains('hidden');
+            drawer.classList.toggle('hidden', !isOpen);
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        };
+
         window.setTaskIcon = (icon) => {
             const resolved = window.resolveTaskSymbolKey(icon);
             window.currentTaskIcon = resolved || 'alarm';
             document.querySelectorAll('.task-icon-btn').forEach(btn => {
                 if (btn.getAttribute('data-icon') === window.currentTaskIcon) {
-                    btn.className = "task-icon-btn w-9 h-9 rounded-full bg-[#161618] text-white flex items-center justify-center shrink-0 scale-110 shadow-xs transition-all";
+                    btn.className = "task-icon-btn w-8 h-8 rounded-full bg-[#161618] text-white flex items-center justify-center shrink-0 scale-105 shadow-2xs transition-all";
                 } else {
-                    btn.className = "task-icon-btn w-9 h-9 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 hover:bg-gray-200 transition-all";
+                    btn.className = "task-icon-btn w-8 h-8 rounded-full bg-[#F3F2F5] text-[#161618] flex items-center justify-center shrink-0 hover:bg-gray-200 transition-all";
                 }
             });
+            window.updateModalLivePreview();
         };
 
         window.setTaskColor = (colorKey) => {
@@ -1594,13 +1609,14 @@
                 const btn = document.getElementById(`color-btn-${k}`);
                 if (!btn) return;
                 if (k === colorKey) {
-                    btn.classList.add('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
-                    btn.innerHTML = `<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                    btn.classList.add('ring-2', 'ring-[#161618]', 'ring-offset-1', 'scale-105');
+                    btn.innerHTML = `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
                 } else {
-                    btn.classList.remove('ring-2', 'ring-[#161618]', 'ring-offset-2', 'scale-110');
+                    btn.classList.remove('ring-2', 'ring-[#161618]', 'ring-offset-1', 'scale-105');
                     btn.innerHTML = '';
                 }
             });
+            window.updateModalLivePreview();
         };
 
         // --- SUBTAKEN LOGICA IN MODAL EN OP TAAKKAART ---
@@ -3325,9 +3341,9 @@
                 const el = document.getElementById('rec-btn-' + b);
                 if (!el) return;
                 if(b === val) {
-                    el.className = "rec-btn px-4 py-2.5 rounded-full bg-[#161618] text-white font-bold text-xs shrink-0 transition-all shadow-xs";
+                    el.className = "rec-btn px-3 py-1.5 rounded-full bg-[#161618] text-white font-bold text-xs shrink-0 transition-all";
                 } else {
-                    el.className = "rec-btn px-4 py-2.5 rounded-full bg-white text-gray-600 font-bold text-xs shrink-0 transition-all shadow-xs border border-white";
+                    el.className = "rec-btn px-3 py-1.5 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs shrink-0 transition-all";
                 }
             });
             document.getElementById('custom-days-wrapper').classList.toggle('hidden', val !== 'custom');
@@ -3336,10 +3352,10 @@
         window.toggleCustomDay = (dayInt, el) => {
             if(window.customDays.includes(dayInt)) {
                 window.customDays = window.customDays.filter(d => d !== dayInt);
-                el.className = "w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs";
+                el.className = "w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all";
             } else {
                 window.customDays.push(dayInt);
-                el.className = "w-10 h-10 rounded-full bg-[#161618] text-white font-bold text-xs transition-all shadow-xs";
+                el.className = "w-9 h-9 rounded-full bg-[#161618] text-white font-bold text-xs transition-all";
             }
         };
 
@@ -3502,7 +3518,135 @@
                     </div>
                 `);
             }
+
+            if (typeof window.renderDrawerMonthGrid === 'function') {
+                window.renderDrawerMonthGrid();
+            }
         };
+
+        // --- UITKLAPBARE MAANDKALENDER LADE ONDER DE DATUM (Veeg het streepje naar beneden of klik erop) ---
+        window.isMonthDrawerOpen = false;
+
+        window.toggleMonthDrawer = (forceState) => {
+            const drawer = document.getElementById('expanded-month-drawer');
+            const pill = document.getElementById('calendar-pull-pill');
+            if (!drawer) return;
+            window.isMonthDrawerOpen = forceState !== undefined ? forceState : !window.isMonthDrawerOpen;
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+            if (window.isMonthDrawerOpen) {
+                window.renderDrawerMonthGrid();
+                drawer.classList.remove('hidden');
+                if (pill) pill.className = 'w-12 h-1.5 bg-[#F09590] rounded-full transition-all';
+            } else {
+                drawer.classList.add('hidden');
+                if (pill) pill.className = 'w-11 h-1.5 bg-gray-200 group-hover:bg-[#F09590]/70 rounded-full transition-all';
+            }
+        };
+
+        window.shiftCalendarMonth = (deltaMonths) => {
+            const next = new Date(window.selectedDate);
+            next.setMonth(next.getMonth() + deltaMonths);
+            next.setHours(0, 0, 0, 0);
+            window.selectedDate = next;
+            window.generateCalendar();
+            window.renderTasks();
+            window.renderHabits();
+            window.renderJournal();
+        };
+
+        window.renderDrawerMonthGrid = () => {
+            const gridEl = document.getElementById('drawer-month-grid');
+            const titleEl = document.getElementById('drawer-month-title');
+            if (!gridEl) return;
+            gridEl.innerHTML = '';
+
+            const sel = new Date(window.selectedDate);
+            sel.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (titleEl) {
+                titleEl.innerText = sel.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+            }
+
+            const year = sel.getFullYear();
+            const month = sel.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startOffset = (firstDay.getDay() + 6) % 7; // Maandag = 0
+
+            for (let i = 0; i < startOffset; i++) {
+                gridEl.insertAdjacentHTML('beforeend', `<div class="h-8"></div>`);
+            }
+
+            const fallbackPalette = ['#8CBE68', '#F09590', '#6886A6', '#F6B519', '#844A67', '#2B506E'];
+            for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+                const d = new Date(year, month, dayNum);
+                d.setHours(0, 0, 0, 0);
+                const dKey = window.getDateKey(d);
+                const isSelected = d.getTime() === sel.getTime();
+                const isToday = d.getTime() === today.getTime();
+
+                const dayTasks = (window.tasks || []).filter(t => window.shouldShowItemOnDate(t, d, false));
+                let dotHTML = '';
+                if (dayTasks.length > 0) {
+                    const firstTask = dayTasks[0];
+                    const theme = window.taskColorThemes[firstTask.color] || null;
+                    const color = theme ? theme.solid : fallbackPalette[dayNum % fallbackPalette.length];
+                    dotHTML = `<span style="background:${color};" class="w-1.5 h-1.5 rounded-full mt-0.5"></span>`;
+                } else {
+                    dotHTML = `<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>`;
+                }
+
+                const btnCls = isSelected
+                    ? 'bg-[#F09590] text-white font-extrabold shadow-2xs'
+                    : (isToday ? 'bg-[#FDECEB] text-[#E07A74] font-extrabold' : 'text-[#161618] hover:bg-[#F3F2F5] font-bold');
+
+                gridEl.insertAdjacentHTML('beforeend', `
+                    <button type="button" onclick="window.selectDate(${d.getTime()}); window.toggleMonthDrawer(false);" class="h-9 rounded-xl flex flex-col items-center justify-center text-xs transition-all ${btnCls}">
+                        <span class="leading-none">${dayNum}</span>
+                        ${dotHTML}
+                    </button>
+                `);
+            }
+        };
+
+        // Koppel swipe-omlaag & swipe-omhoog aan het streepje onder de datum (#calendar-pull-handle)
+        (() => {
+            const initCalendarPullGesture = () => {
+                const handle = document.getElementById('calendar-pull-handle');
+                const calStrip = document.getElementById('calendar-container');
+                if (!handle) return;
+
+                let startY = null;
+                const onStart = (y) => { startY = y; };
+                const onMove = (y) => {
+                    if (startY === null) return;
+                    const dy = y - startY;
+                    if (dy > 24 && !window.isMonthDrawerOpen) {
+                        startY = null;
+                        window.toggleMonthDrawer(true);
+                    } else if (dy < -24 && window.isMonthDrawerOpen) {
+                        startY = null;
+                        window.toggleMonthDrawer(false);
+                    }
+                };
+                const onEnd = () => { startY = null; };
+
+                [handle, calStrip].forEach(el => {
+                    if (!el) return;
+                    el.addEventListener('pointerdown', (e) => onStart(e.clientY));
+                    el.addEventListener('pointermove', (e) => onMove(e.clientY));
+                    el.addEventListener('pointerup', onEnd);
+                    el.addEventListener('pointercancel', onEnd);
+                });
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCalendarPullGesture);
+            } else {
+                setTimeout(initCalendarPullGesture, 0);
+            }
+        })();
 
         // --- NAV & MODALS (Met interruptible Apple Spring tab-pill + Desktop Top-bar sync) ---
         window.navPillState = { currentIndex: 0, velocity: 0, stopSpring: null };
@@ -3534,7 +3678,7 @@
                 }
             });
 
-            // Vloeiende, interruptible spring-animatie voor de actieve navigatie-pil
+            // Vloeiende, exact gecentreerde spring-animatie voor de actieve mobiele navigatie-pil (gap-0 -> exact 100% per kolom)
             const targetIdx = Math.max(0, NAV_TABS_ORDER.indexOf(tab));
             const pillEl = document.getElementById('nav-active-pill');
             if (pillEl && typeof window.appleSpring === 'function') {
@@ -3549,18 +3693,18 @@
                         onUpdate: (val, vel) => {
                             window.navPillState.currentIndex = val;
                             window.navPillState.velocity = vel;
-                            pillEl.style.transform = `translate3d(calc(${val * 100}% + ${val * 4}px), 0, 0)`;
+                            pillEl.style.transform = `translate3d(${val * 100}%, 0, 0)`;
                         },
                         onComplete: () => {
                             window.navPillState.currentIndex = targetIdx;
                             window.navPillState.velocity = 0;
-                            pillEl.style.transform = `translate3d(calc(${targetIdx * 100}% + ${targetIdx * 4}px), 0, 0)`;
+                            pillEl.style.transform = `translate3d(${targetIdx * 100}%, 0, 0)`;
                         }
                     }
                 );
             } else if (pillEl) {
                 window.navPillState.currentIndex = targetIdx;
-                pillEl.style.transform = `translate3d(calc(${targetIdx * 100}% + ${targetIdx * 4}px), 0, 0)`;
+                pillEl.style.transform = `translate3d(${targetIdx * 100}%, 0, 0)`;
             }
 
             const calContainer = document.getElementById('calendar-container');
@@ -3575,8 +3719,7 @@
             document.getElementById('journal-note-body').value = "";
             document.getElementById('task-notes-input').value = "";
             document.getElementById('time-input').value = "";
-            const durInput = document.getElementById('task-duration-input');
-            if (durInput) durInput.value = "15";
+            window.setTaskDurationPill(15);
             const remInput = document.getElementById('task-reminder-input');
             if (remInput) remInput.value = "both";
             const iosAlarmCheck = document.getElementById('task-ios-alarm-check');
@@ -3592,12 +3735,13 @@
             window.currentModalSubtasks = [];
             window.renderModalSubtasks();
             window.setTaskPriority('medium');
+            window.toggleTaskMoreOptions(false);
             const colorKeys = ['coral', 'green', 'blue', 'navy', 'plum', 'yellow', 'purple', 'teal'];
             const nextColor = colorKeys[(window.tasks ? window.tasks.length : 0) % colorKeys.length];
             window.setTaskColor(nextColor);
             window.setTaskIcon('alarm');
             document.querySelectorAll('#custom-days-wrapper button').forEach(el => {
-                el.className = "w-10 h-10 rounded-full bg-white text-gray-600 font-bold text-xs transition-all shadow-xs";
+                el.className = "w-9 h-9 rounded-full bg-[#F6F5F8] text-gray-600 font-bold text-xs transition-all";
             });
         };
 
@@ -3610,28 +3754,32 @@
                 if (timeEl) timeEl.value = prefillTime;
             }
             
-            window.presentAppleSheet('main-modal');
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
             document.getElementById('modal-recurrence-extra').classList.add('hidden');
             document.getElementById('modal-journal-type-switch').classList.add('hidden');
             document.getElementById('modal-workout-extra').classList.add('hidden');
             document.getElementById('modal-note-body-extra').classList.add('hidden');
+            const appBar = document.getElementById('modal-task-appearance-bar');
 
             if(window.currentTab === 'vandaag') {
-                document.getElementById('modal-title').innerText = 'Nieuwe activiteit plannen';
-                document.getElementById('modal-input-label').innerText = 'Naam van activiteit / taak';
-                document.getElementById('modal-input').placeholder = '';
+                document.getElementById('modal-title').innerText = 'Nieuwe taak';
+                document.getElementById('modal-input-label').innerText = 'Titel';
+                document.getElementById('modal-input').placeholder = 'Wat staat er op de planning?';
                 document.getElementById('modal-submit-btn').innerText = 'Toevoegen aan planning';
                 document.getElementById('modal-task-extra').classList.remove('hidden');
                 document.getElementById('modal-recurrence-extra').classList.remove('hidden');
+                if (appBar) appBar.classList.remove('hidden');
                 window.setRecurrence('none'); 
             } else if (window.currentTab === 'journal') {
                 document.getElementById('modal-title').innerText = 'Nieuw logboek item';
                 document.getElementById('modal-submit-btn').innerText = 'Item Opslaan';
                 document.getElementById('modal-journal-type-switch').classList.remove('hidden');
+                if (appBar) appBar.classList.add('hidden');
                 window.setJournalMode('note');
             }
+
+            window.presentAppleSheet('main-modal');
         };
 
         window.editTaskItem = (e, id) => {
@@ -3644,16 +3792,14 @@
             window.resetModalState();
             window.editingItemId = id;
 
-            window.presentAppleSheet('main-modal');
-            document.getElementById('modal-title').innerText = 'Activiteit aanpassen';
-            document.getElementById('modal-input-label').innerText = 'Naam van activiteit / taak';
-            document.getElementById('modal-input').placeholder = '';
-            document.getElementById('modal-submit-btn').innerText = 'Wijzigingen Opslaan';
+            document.getElementById('modal-title').innerText = 'Taak aanpassen';
+            document.getElementById('modal-input-label').innerText = 'Titel';
+            document.getElementById('modal-input').placeholder = 'Wat staat er op de planning?';
+            document.getElementById('modal-submit-btn').innerText = 'Wijzigingen opslaan';
             document.getElementById('modal-input').value = task.title || '';
             document.getElementById('task-notes-input').value = task.notes || '';
             document.getElementById('time-input').value = task.time || '';
-            const durInput = document.getElementById('task-duration-input');
-            if (durInput) durInput.value = String(task.duration || 15);
+            window.setTaskDurationPill(task.duration || 15);
             const remInput = document.getElementById('task-reminder-input');
             if (remInput) remInput.value = task.reminder || 'both';
             const taskDateInput = document.getElementById('task-date-input');
@@ -3665,7 +3811,10 @@
                 ? JSON.parse(JSON.stringify(task.subtasks))
                 : [];
             window.renderModalSubtasks();
+            if (task.notes) window.toggleTaskMoreOptions(true);
 
+            const appBar = document.getElementById('modal-task-appearance-bar');
+            if (appBar) appBar.classList.remove('hidden');
             document.getElementById('modal-task-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
@@ -3684,10 +3833,12 @@
                 const btns = document.querySelectorAll('#custom-days-wrapper button');
                 btns.forEach((btn, idx) => {
                     if (window.customDays.includes(dayMap[idx])) {
-                        btn.className = "w-10 h-10 rounded-full bg-[#161618] text-white font-bold text-xs transition-all shadow-xs";
+                        btn.className = "w-9 h-9 rounded-full bg-[#161618] text-white font-bold text-xs transition-all";
                     }
                 });
             }
+
+            window.presentAppleSheet('main-modal');
         };
 
         window.editJournalItem = (id) => {
@@ -3699,7 +3850,8 @@
             window.resetModalState();
             window.editingItemId = id;
 
-            window.presentAppleSheet('main-modal');
+            const appBar = document.getElementById('modal-task-appearance-bar');
+            if (appBar) appBar.classList.add('hidden');
             document.getElementById('modal-submit-btn').innerText = 'Wijzigingen Opslaan';
             document.getElementById('modal-task-extra').classList.add('hidden');
             document.getElementById('modal-custom-habit-extra').classList.add('hidden');
@@ -3716,13 +3868,15 @@
                 window.setJournalMode('note');
                 document.getElementById('journal-note-body').value = note.text || '';
             }
+            window.presentAppleSheet('main-modal');
         };
 
         window.openCustomHabitModal = () => {
             window.modalMode = 'custom_habit'; window.customizingIcon = '✨';
             window.resetModalState();
 
-            window.presentAppleSheet('main-modal');
+            const appBar = document.getElementById('modal-task-appearance-bar');
+            if (appBar) appBar.classList.add('hidden');
             document.getElementById('modal-title').innerText = 'Nieuw doel toevoegen';
             document.getElementById('modal-input-label').innerText = 'Naam van gewoonte';
             document.getElementById('modal-input').placeholder = '';
@@ -3734,7 +3888,8 @@
             document.getElementById('modal-custom-habit-extra').classList.remove('hidden');
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
-            window.setRecurrence('daily'); 
+            window.setRecurrence('daily');
+            window.presentAppleSheet('main-modal');
         };
 
         window.openCustomizeDiscover = (id) => {
@@ -3743,7 +3898,8 @@
             window.modalMode = 'custom_habit'; window.customizingIcon = challenge.icon;
             window.resetModalState();
 
-            window.presentAppleSheet('main-modal');
+            const appBar = document.getElementById('modal-task-appearance-bar');
+            if (appBar) appBar.classList.add('hidden');
             document.getElementById('modal-title').innerText = 'Doel instellen';
             document.getElementById('modal-input-label').innerText = 'Naam van gewoonte';
             document.getElementById('modal-submit-btn').innerText = 'Doel Toevoegen';
@@ -3758,6 +3914,7 @@
             document.getElementById('modal-recurrence-extra').classList.remove('hidden');
             
             window.setRecurrence('daily');
+            window.presentAppleSheet('main-modal');
         };
 
         window.closeSmartModal = (velocityY = 0) => {
@@ -5303,6 +5460,15 @@
             const backdrop = modal.querySelector(".sheet-backdrop");
             if (!panel) return;
 
+            // Zorg dat het popup-scherm ALTIJD helemaal bovenaan begint
+            const resetScrollToTop = () => {
+                panel.scrollTop = 0;
+                modal.scrollTop = 0;
+                modal.querySelectorAll('.overflow-y-auto').forEach(el => { el.scrollTop = 0; });
+            };
+            resetScrollToTop();
+            requestAnimationFrame(resetScrollToTop);
+
             panel.classList.remove("animate-slide-up");
             if (window.prefersReducedMotion()) {
                 panel.style.transform = "translate3d(0, 0, 0)";
@@ -5656,7 +5822,7 @@
             ].join('\r\n');
         };
 
-        window.triggerICSDownload = (icsString, filename = 'iphone-planning-melding.ics') => {
+        window.triggerICSDownload = (icsString, filename = 'telefoon-planning-melding.ics') => {
             const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -5688,7 +5854,7 @@
                 return;
             }
             const ics = window.buildICSContentForTasks(timedTasks, dKey);
-            window.triggerICSDownload(ics, `iphone-meldingen-${dKey}.ics`);
+            window.triggerICSDownload(ics, `telefoon-meldingen-${dKey}.ics`);
         };
 
         // Zacht Apple-achtig akkoord-belletje via Web Audio API bij een melding
@@ -5885,14 +6051,14 @@
         window.requestBrowserNotificationPermission = async () => {
             const statusEl = document.getElementById('notif-permission-status');
             if (!('Notification' in window)) {
-                if (statusEl) statusEl.innerText = 'Op iPhone: zet deze app eerst op je Beginscherm (Deel -> Zet op beginscherm) of gebruik knop 2 (Zet in iPhone).';
+                if (statusEl) statusEl.innerText = 'Zet deze app op je startscherm of gebruik Agenda-wekker voor meldingen op je telefoon.';
                 return;
             }
             const perm = await Notification.requestPermission();
             window.updateNotificationPermissionUI(perm);
             if (perm === 'granted') {
                 window.sendNativeSystemNotification(
-                    'iPhone & Schermmeldingen staan aan',
+                    'Telefoon- & Schermmeldingen staan aan',
                     'Je ontvangt nu meldingen zodra een geplande activiteit start!'
                 );
             }
@@ -5903,12 +6069,12 @@
             const btnEl = document.getElementById('btn-enable-browser-notif');
             if (!statusEl || !btnEl) return;
             if (perm === 'granted') {
-                statusEl.innerText = '✓ iPhone & Systeem Push-meldingen staan aan';
+                statusEl.innerText = '✓ Push-meldingen staan aan op dit toestel';
                 btnEl.innerText = 'Actief ✓';
                 btnEl.className = 'px-3.5 py-2 rounded-full bg-[#8CBE68]/20 text-[#4E7A2E] text-[11px] font-extrabold shrink-0';
             } else {
-                statusEl.innerText = 'Zet aan voor directe systeemmeldingen op je iPhone (via Beginscherm-app)';
-                btnEl.innerText = 'Activeer op iPhone';
+                statusEl.innerText = 'Werkt op elke telefoon (Android & iPhone) en computer';
+                btnEl.innerText = 'Inschakelen';
                 btnEl.className = 'px-3.5 py-2 rounded-full bg-[#161618] hover:bg-black text-white text-[11px] font-extrabold transition-all shrink-0';
             }
         };
@@ -5921,7 +6087,7 @@
                 id: 0,
                 title: 'Voorbeeld: Activiteit op je planning',
                 time: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
-                notes: 'Zo verschijnt een herinnering op je iPhone en bovenin je scherm zodra het tijd is!',
+                notes: 'Zo verschijnt een herinnering op je telefoon en bovenin je scherm zodra het tijd is!',
                 color: 'coral',
                 icon: 'alarm'
             };
@@ -5962,9 +6128,9 @@
 
             if (timedTasks.length === 0) {
                 listEl.innerHTML = `
-                    <div class="bg-white rounded-3xl p-5 text-center border border-white shadow-xs">
-                        <p class="text-sm font-extrabold text-[#161618]">Nog geen tijden ingesteld op deze dag</p>
-                        <p class="text-xs text-gray-400 mt-1">Geef bij het maken van een taak een tijdstip op (bijv. 09:00) om automatisch een melding op je iPhone en scherm te krijgen.</p>
+                    <div class="bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-xs">
+                        <p class="text-xs font-extrabold text-[#161618]">Nog geen tijden ingesteld op deze dag</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Geef bij een taak een tijdstip op (bijv. 09:00) om automatisch een melding op je telefoon en scherm te krijgen.</p>
                     </div>
                 `;
                 return;
@@ -5984,19 +6150,19 @@
                 const remText = remLabels[t.reminder || 'both'] || 'Actief';
 
                 listEl.insertAdjacentHTML('beforeend', `
-                    <div class="bg-white rounded-2xl p-3.5 border border-white shadow-xs flex items-center justify-between gap-2 hover:bg-gray-50 transition-all">
+                    <div class="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs flex items-center justify-between gap-2 hover:bg-gray-50 transition-all">
                         <div onclick="window.closeRemindersCenter(); window.editTaskItem(event, ${t.id});" class="flex items-center space-x-3 min-w-0 flex-1 cursor-pointer">
-                            <div style="background:${isDone ? '#ECECEF' : theme.solid}; color:${isDone ? '#9CA3AF' : '#FFF'};" class="w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                            <div style="background:${isDone ? '#ECECEF' : theme.solid}; color:${isDone ? '#9CA3AF' : '#FFF'};" class="w-9 h-9 rounded-full flex items-center justify-center shrink-0">
                                 ${symbolSVG}
                             </div>
                             <div class="min-w-0">
-                                <p class="text-[11px] font-bold text-gray-400">${t.time}–${endStr} • ${remText}</p>
-                                <h4 class="text-sm font-extrabold ${isDone ? 'line-through text-gray-400' : 'text-[#161618]'} truncate">${t.title}</h4>
+                                <p class="text-[10px] font-bold text-gray-400">${t.time}–${endStr} • ${remText}</p>
+                                <h4 class="text-xs font-extrabold ${isDone ? 'line-through text-gray-400' : 'text-[#161618]'} truncate">${t.title}</h4>
                             </div>
                         </div>
-                        <button type="button" onclick="window.exportSingleTaskToIPhoneAlarm(window.tasks.find(x => x.id === ${t.id}))" class="px-2.5 py-1.5 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[#161618] text-[10px] font-extrabold shrink-0 flex items-center space-x-1" title="Zet als iPhone Vergrendelscherm-wekker">
+                        <button type="button" onclick="window.exportSingleTaskToIPhoneAlarm(window.tasks.find(x => x.id === ${t.id}))" class="px-2.5 py-1.5 rounded-full bg-[#F3F2F5] hover:bg-gray-200 text-[#161618] text-[10px] font-extrabold shrink-0 flex items-center space-x-1" title="Zet als Vergrendelscherm-wekker op je telefoon">
                             <svg class="w-3 h-3 text-[#E07A74]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                            <span>iPhone</span>
+                            <span>Wekker</span>
                         </button>
                     </div>
                 `);
