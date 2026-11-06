@@ -806,6 +806,10 @@
                 <button onclick="window.closeHabitInput()" class="flex-1 py-3.5 bg-white font-bold rounded-full text-gray-600 text-sm shadow-sm hover:bg-gray-50 transition-colors">Annuleren</button>
                 <button onclick="window.saveHabitInput()" class="flex-1 py-3.5 bg-[#20212B] text-white font-bold rounded-full text-sm shadow-lg hover:bg-black transition-colors">Opslaan</button>
             </div>
+            <button type="button" onclick="window.deleteItemById(event, window.editHabitId, 'habit'); window.closeHabitInput();" class="mt-3 w-full py-2.5 rounded-full text-xs font-extrabold text-[#9E6752] hover:bg-[#9E6752]/10 transition-colors flex items-center justify-center space-x-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span>Doel verwijderen</span>
+            </button>
         </div>
     </div>
 
@@ -1013,10 +1017,16 @@
                 </div>
             </div>
 
-            <!-- Primaire actieknop onderaan -->
-            <button onclick="window.saveSmartItem()" id="modal-submit-btn" class="w-full py-3.5 bg-[#20212B] text-white rounded-full font-extrabold text-sm shadow-md hover:bg-black active:scale-[0.99] transition-all">
-                Opslaan
-            </button>
+            <!-- Primaire actieknoppen onderaan -->
+            <div class="space-y-2">
+                <button onclick="window.saveSmartItem()" id="modal-submit-btn" class="w-full py-3.5 bg-[#20212B] text-white rounded-full font-extrabold text-sm shadow-md hover:bg-black active:scale-[0.99] transition-all">
+                    Opslaan
+                </button>
+                <button type="button" onclick="window.deleteCurrentModalItem()" id="modal-delete-btn" class="hidden w-full py-3 bg-white text-[#9E6752] border border-[#9E6752]/30 rounded-full font-extrabold text-xs hover:bg-[#9E6752] hover:text-white active:scale-[0.99] transition-all flex items-center justify-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span>Verwijderen</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -3800,6 +3810,8 @@
         window.resetModalState = () => {
             window.editingItemId = null;
             window.userManuallyPickedTaskIcon = false;
+            const delBtn = document.getElementById('modal-delete-btn');
+            if (delBtn) delBtn.classList.add('hidden');
             document.getElementById('modal-input').value = "";
             document.getElementById('modal-input').classList.remove('hidden');
             document.getElementById('modal-title-group').classList.remove('hidden');
@@ -3878,6 +3890,8 @@
             window.modalMode = 'vandaag';
             window.resetModalState();
             window.editingItemId = id;
+            const delBtn = document.getElementById('modal-delete-btn');
+            if (delBtn) delBtn.classList.remove('hidden');
 
             document.getElementById('modal-title').innerText = 'Taak aanpassen';
             document.getElementById('modal-input-label').innerText = 'Titel';
@@ -3936,6 +3950,8 @@
             window.modalMode = 'journal';
             window.resetModalState();
             window.editingItemId = id;
+            const delBtn = document.getElementById('modal-delete-btn');
+            if (delBtn) delBtn.classList.remove('hidden');
 
             const appBar = document.getElementById('modal-task-appearance-bar');
             if (appBar) appBar.classList.add('hidden');
@@ -3956,6 +3972,36 @@
                 document.getElementById('journal-note-body').value = note.text || '';
             }
             window.presentAppleSheet('main-modal');
+        };
+
+        window.deleteItemById = (e, id, type = 'task') => {
+            if (e) e.stopPropagation();
+            if (id === undefined || id === null) return;
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
+
+            if (type === 'task') {
+                window.tasks = (window.tasks || []).filter(t => t.id !== id);
+            } else if (type === 'habit') {
+                window.habits = (window.habits || []).filter(h => h.id !== id);
+            } else if (type === 'journal') {
+                window.journalNotes = (window.journalNotes || []).filter(n => n.id !== id);
+            }
+
+            window.saveToLocal();
+            window.generateCalendar();
+            window.renderTasks();
+            window.renderHabits();
+            window.renderJournal();
+            if (typeof window.updateReminderBellBadge === 'function') window.updateReminderBellBadge();
+            if (typeof window.syncToCloud === 'function') window.syncToCloud();
+        };
+
+        window.deleteCurrentModalItem = () => {
+            if (!window.editingItemId) return;
+            const idToDelete = window.editingItemId;
+            const typeToDelete = window.modalMode === 'journal' ? 'journal' : 'task';
+            window.deleteItemById(null, idToDelete, typeToDelete);
+            window.closeSmartModal();
         };
 
         window.openCustomHabitModal = () => {
@@ -4209,6 +4255,9 @@
                         <button type="button" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" style="${circleStyle}" class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 hover:brightness-95 active:scale-95 relative">
                             ${symbolSVG}
                         </button>
+                        <button type="button" onclick="window.deleteItemById(event, ${t.id}, 'task')" class="w-5 h-5 rounded-full bg-white text-gray-400 hover:text-[#9E6752] hover:bg-[#F4F1ED] shadow-xs border border-gray-100 flex items-center justify-center text-[10px] font-extrabold absolute -top-0.5 -left-0.5 opacity-85 hover:opacity-100 transition-all" title="Taak verwijderen">
+                            ✕
+                        </button>
                         <button type="button" onclick="window.editTaskItem(event, ${t.id})" class="w-5 h-5 rounded-full bg-white text-gray-500 shadow-xs border border-gray-100 flex items-center justify-center text-[10px] font-bold absolute -top-0.5 -right-0.5 opacity-85 hover:opacity-100 transition-all" title="Bewerken">
                             ✎
                         </button>
@@ -4384,8 +4433,11 @@
                             ${subtasksHTML}
                         </div>
 
-                        <!-- Rechter kolom: Ronde gekleurde Check-cirkel -->
-                        <div class="flex items-center space-x-1.5 shrink-0 pl-1">
+                        <!-- Rechter kolom: Verwijderknop + Ronde gekleurde Check-cirkel -->
+                        <div class="flex items-center space-x-2 shrink-0 pl-1 group/actions">
+                            <button type="button" onclick="window.deleteItemById(event, ${t.id}, 'task')" class="w-6 h-6 rounded-full text-gray-300 hover:text-[#9E6752] hover:bg-[#F4F1ED] flex items-center justify-center transition-all active:scale-90" title="Taak verwijderen">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                             <button type="button" onclick="window.toggleTask(${t.id}, '${dateKeyForCard}')" style="${ringStyle}" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all active:scale-90" title="Afvinken">
                                 ${isCompleted ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
                             </button>
@@ -4452,7 +4504,8 @@
                         <div class="flex items-center space-x-1.5 shrink-0">
                             ${t.time ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-gray-700">${t.time}</span>` : ''}
                             ${subtaskCountBadge}
-                            <button onclick="window.editTaskItem(event, ${t.id})" class="w-6 h-6 rounded-full bg-white text-[#20212B] flex items-center justify-center text-[11px] font-bold shadow-2xs" title="Taak bewerken">✎</button>
+                            <button type="button" onclick="window.editTaskItem(event, ${t.id})" class="w-6 h-6 rounded-full bg-white text-[#20212B] flex items-center justify-center text-[11px] font-bold shadow-2xs" title="Taak bewerken">✎</button>
+                            <button type="button" onclick="window.deleteItemById(event, ${t.id}, 'task')" class="w-6 h-6 rounded-full bg-white text-gray-400 hover:text-[#9E6752] flex items-center justify-center text-[11px] font-bold shadow-2xs transition-colors" title="Taak verwijderen">✕</button>
                             <div style="${ringStyle}" class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0">
                                 ${isCompleted ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
                             </div>
@@ -4511,9 +4564,14 @@
                                 <h4 class="text-[13px] font-extrabold ${isDone ? 'line-through text-gray-400' : 'text-[#20212B]'} truncate leading-snug">${t.title}</h4>
                             </div>
                         </div>
-                        <button type="button" onclick="window.quickScheduleInboxTask(${t.id})" style="color: ${iconColor};" class="w-8 h-8 rounded-full hover:bg-[#F4F1ED] flex items-center justify-center font-bold text-lg shrink-0 transition-all" title="Zet op eerste vrije plek in je tijdlijn">
-                            +
-                        </button>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button type="button" onclick="window.deleteItemById(event, ${t.id}, 'task')" class="w-7 h-7 rounded-full text-gray-300 hover:text-[#9E6752] hover:bg-[#F4F1ED] flex items-center justify-center transition-all" title="Taak verwijderen">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                            <button type="button" onclick="window.quickScheduleInboxTask(${t.id})" style="color: ${iconColor};" class="w-8 h-8 rounded-full hover:bg-[#F4F1ED] flex items-center justify-center font-bold text-lg shrink-0 transition-all" title="Zet op eerste vrije plek in je tijdlijn">
+                                +
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -4986,10 +5044,13 @@
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
                             <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                             <div id="card-journal-${n.id}" style="touch-action: pan-y;" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" ontouchcancel="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#20212B]/20">
-                                <div class="flex justify-between items-center pointer-events-none">
-                                    <span class="text-xs font-bold text-[#20212B] bg-[#FED7A5] px-3 py-1 rounded-full">${displayDate} • Workout</span>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="w-7 h-7 rounded-full bg-[#F6F4F2] flex items-center justify-center text-xs font-bold text-[#20212B]">↗</span>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-[#20212B] bg-[#FED7A5] px-3 py-1 rounded-full pointer-events-none">${displayDate} • Workout</span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <button type="button" onclick="window.deleteItemById(event, ${n.id}, 'journal')" class="w-7 h-7 rounded-full bg-[#F6F4F2] text-gray-400 hover:text-[#9E6752] flex items-center justify-center transition-colors" title="Verwijderen">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                        <span class="w-7 h-7 rounded-full bg-[#F6F4F2] flex items-center justify-center text-xs font-bold text-[#20212B] pointer-events-none">↗</span>
                                     </div>
                                 </div>
                                 <h3 class="font-extrabold text-[#20212B] text-base mt-2 pointer-events-none">${n.text}</h3>
@@ -5002,11 +5063,14 @@
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
                             <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
                             <div id="card-journal-${n.id}" style="touch-action: pan-y;" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" ontouchcancel="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#20212B]/20">
-                                <div class="flex justify-between items-center mb-2 pointer-events-none">
-                                    <span class="text-xs font-bold text-gray-600 bg-[#F6F4F2] px-3 py-1 rounded-full">${displayDate}</span>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-lg">${n.emoji}</span>
-                                        <span class="w-7 h-7 rounded-full bg-[#F6F4F2] flex items-center justify-center text-xs font-bold text-[#20212B]">↗</span>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold text-gray-600 bg-[#F6F4F2] px-3 py-1 rounded-full pointer-events-none">${displayDate}</span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <span class="text-lg pointer-events-none">${n.emoji}</span>
+                                        <button type="button" onclick="window.deleteItemById(event, ${n.id}, 'journal')" class="w-7 h-7 rounded-full bg-[#F6F4F2] text-gray-400 hover:text-[#9E6752] flex items-center justify-center transition-colors" title="Verwijderen">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                        <span class="w-7 h-7 rounded-full bg-[#F6F4F2] flex items-center justify-center text-xs font-bold text-[#20212B] pointer-events-none">↗</span>
                                     </div>
                                 </div>
                                 <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed pointer-events-none">${n.text}</p>
@@ -5134,9 +5198,14 @@
                                 </div>
                             </div>
 
-                            <button onclick="window.quickAddHabit(event, ${h.id})" class="w-10 h-10 rounded-full ${isDone ? 'bg-[#FED7A5] text-[#20212B]' : 'bg-[#20212B] text-white'} hover:opacity-90 flex items-center justify-center font-bold text-lg shrink-0 transition-all shadow-sm z-20">
-                                ${isDone ? '✓' : '+'}
-                            </button>
+                            <div class="flex items-center space-x-2 shrink-0 z-20">
+                                <button type="button" onclick="window.deleteItemById(event, ${h.id}, 'habit')" class="w-8 h-8 rounded-full bg-[#F6F4F2] text-gray-400 hover:text-[#9E6752] flex items-center justify-center transition-all" title="Doel verwijderen">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                                <button onclick="window.quickAddHabit(event, ${h.id})" class="w-10 h-10 rounded-full ${isDone ? 'bg-[#FED7A5] text-[#20212B]' : 'bg-[#20212B] text-white'} hover:opacity-90 flex items-center justify-center font-bold text-lg shrink-0 transition-all shadow-sm">
+                                    ${isDone ? '✓' : '+'}
+                                </button>
+                            </div>
 
                         </div>
                     </div>`);
