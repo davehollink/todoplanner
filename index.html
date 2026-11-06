@@ -4262,10 +4262,10 @@
 
             return `
                 <div class="relative overflow-hidden rounded-3xl w-full">
-                    <div id="delete-bg-task-${t.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0 transition-opacity duration-150">
+                    <div id="delete-bg-task-${t.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-3xl flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </div>
-                    <div id="card-task-${t.id}" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" class="relative z-10 bg-white flex items-stretch gap-3 py-2 px-1 transition-all">
+                    <div id="card-task-${t.id}" style="touch-action: pan-y;" ontouchstart="window.hTStart(event, ${t.id}, 'task')" ontouchmove="window.hTMove(event, ${t.id}, 'task')" ontouchend="window.hTEnd(event, ${t.id}, 'task')" ontouchcancel="window.hTEnd(event, ${t.id}, 'task')" class="relative z-10 bg-white flex items-stretch gap-3 py-2 px-1">
                         <!-- Linker kolom: Starttijd, huidige tijd & eindtijd -->
                         <div class="w-10 shrink-0 flex flex-col justify-between text-right py-0.5 select-none">
                             <span class="text-[11px] font-semibold text-gray-400 leading-none">${startTime || '•'}</span>
@@ -4894,8 +4894,8 @@
 
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                            <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20 transition-all">
+                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="card-journal-${n.id}" style="touch-action: pan-y;" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" ontouchcancel="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20">
                                 <div class="flex justify-between items-center pointer-events-none">
                                     <span class="text-xs font-bold text-[#161618] bg-[#CBE86B] px-3 py-1 rounded-full">${displayDate} • Workout</span>
                                     <div class="flex items-center space-x-2">
@@ -4910,8 +4910,8 @@
                 } else {
                     list.insertAdjacentHTML('beforeend', `
                         <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                            <div id="card-journal-${n.id}" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20 transition-all">
+                            <div id="delete-bg-journal-${n.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                            <div id="card-journal-${n.id}" style="touch-action: pan-y;" onclick="window.editJournalItem(${n.id})" ontouchstart="window.hTStart(event, ${n.id}, 'journal')" ontouchmove="window.hTMove(event, ${n.id}, 'journal')" ontouchend="window.hTEnd(event, ${n.id}, 'journal')" ontouchcancel="window.hTEnd(event, ${n.id}, 'journal')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full cursor-pointer hover:border-[#161618]/20">
                                 <div class="flex justify-between items-center mb-2 pointer-events-none">
                                     <span class="text-xs font-bold text-gray-600 bg-[#F6F4F2] px-3 py-1 rounded-full">${displayDate}</span>
                                     <div class="flex items-center space-x-2">
@@ -5022,8 +5022,8 @@
 
                 list.insertAdjacentHTML('beforeend', `
                     <div class="relative overflow-hidden rounded-[1.5rem] w-full">
-                        <div id="delete-bg-habit-${h.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
-                        <div id="card-habit-${h.id}" ontouchstart="window.hTStart(event, ${h.id}, 'habit')" ontouchmove="window.hTMove(event, ${h.id}, 'habit')" ontouchend="window.hTEnd(event, ${h.id}, 'habit')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full flex items-center">
+                        <div id="delete-bg-habit-${h.id}" style="opacity: 0;" class="absolute inset-0 bg-[#FF4A4A] rounded-[1.5rem] flex items-center justify-end pr-6 z-0 transition-opacity duration-150 pointer-events-none"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></div>
+                        <div id="card-habit-${h.id}" style="touch-action: pan-y;" ontouchstart="window.hTStart(event, ${h.id}, 'habit')" ontouchmove="window.hTMove(event, ${h.id}, 'habit')" ontouchend="window.hTEnd(event, ${h.id}, 'habit')" ontouchcancel="window.hTEnd(event, ${h.id}, 'habit')" class="relative z-10 soft-card p-4 rounded-[1.5rem] w-full flex items-center">
                             
                             <div class="flex-1 cursor-pointer pr-3.5" onclick="window.clickHabit(${h.id})">
                                 <div class="flex justify-between items-center mb-2.5 pointer-events-none">
@@ -5053,136 +5053,231 @@
             });
         };
 
-        // --- SWIPE ARCHIVEER LOGICA (Apple 1:1 Tracking, Rubber-banding, Velocity Projection & Spring) ---
-        window.swipeState = { startX: 0, startY: 0, currX: 0, lastX: 0, lastT: 0, velocityX: 0, activeId: null, stopSpring: null };
-        window.hTStart = (e, id, t) => {
+        // --- SWIPE ARCHIVEER LOGICA (Stabiele Direction-Lock: negeer verticaal scrollen 100%, alleen bij duidelijk horizontaal vegen naar links of rechts) ---
+        window.swipeState = {
+            startX: 0,
+            startY: 0,
+            currX: 0,
+            lastX: 0,
+            lastT: 0,
+            velocityX: 0,
+            directionLock: null, // null | 'vertical' | 'horizontal'
+            lockOffsetX: 0,
+            visualOffset: 0,
+            activeKey: null,
+            stopSpring: null
+        };
+
+        window.resetActiveSwipeCard = () => {
             if (window.swipeState.stopSpring) {
                 window.swipeState.stopSpring();
                 window.swipeState.stopSpring = null;
             }
+            if (window.swipeState.activeKey) {
+                const prevCard = document.getElementById(`card-${window.swipeState.activeKey}`);
+                const prevBg = document.getElementById(`delete-bg-${window.swipeState.activeKey}`);
+                if (prevCard) {
+                    prevCard.style.transition = '';
+                    prevCard.style.transform = '';
+                }
+                if (prevBg) prevBg.style.opacity = '0';
+            }
+        };
+
+        window.hTStart = (e, id, t) => {
+            const key = `${t}-${id}`;
+            if (window.swipeState.activeKey && window.swipeState.activeKey !== key) {
+                window.resetActiveSwipeCard();
+            } else if (window.swipeState.stopSpring) {
+                window.swipeState.stopSpring();
+                window.swipeState.stopSpring = null;
+            }
+
             const pt = e.touches ? e.touches[0] : e;
             window.startX = pt.clientX;
-            window.currX = window.startX;
+            window.currX = pt.clientX;
             window.swipeState.startX = pt.clientX;
             window.swipeState.startY = pt.clientY;
             window.swipeState.currX = pt.clientX;
             window.swipeState.lastX = pt.clientX;
             window.swipeState.lastT = performance.now();
             window.swipeState.velocityX = 0;
+            window.swipeState.directionLock = null;
+            window.swipeState.lockOffsetX = 0;
+            window.swipeState.visualOffset = 0;
+            window.swipeState.activeKey = key;
             window.isSwiping = false;
-            const c = document.getElementById(`card-${t}-${id}`);
-            if (c) c.style.transition = 'none';
         };
+
         window.hTMove = (e, id, t) => {
+            // Als dit gebaar al als verticale scroll is herkend: doe helemaal niets!
+            if (window.swipeState.directionLock === 'vertical') return;
+
             const pt = e.touches ? e.touches[0] : e;
+            const rawDiffX = pt.clientX - window.swipeState.startX;
+            const rawDiffY = pt.clientY - window.swipeState.startY;
+            const absX = Math.abs(rawDiffX);
+            const absY = Math.abs(rawDiffY);
+
+            // Bepaal eerst de richting voordat de taak ook maar 1 pixel beweegt
+            if (window.swipeState.directionLock === null) {
+                // Binnen 10px deadzone: nog niets doen
+                if (absX < 10 && absY < 10) return;
+
+                // Zodra de vinger naar boven of beneden beweegt (of schuin verticaal): vergrendel op verticaal scrollen
+                if (absY >= 10 && absY >= absX * 0.75) {
+                    window.swipeState.directionLock = 'vertical';
+                    return;
+                }
+
+                // Alleen bij een overtuigende horizontale veeg (minstens 18px opzij én meer dan 2x zo horizontaal als verticaal)
+                if (absX >= 18 && absX > absY * 2.0) {
+                    window.swipeState.directionLock = 'horizontal';
+                    window.swipeState.lockOffsetX = rawDiffX;
+                    window.swipeState.lastX = pt.clientX;
+                    window.swipeState.lastT = performance.now();
+                    window.isSwiping = true;
+                    const cInit = document.getElementById(`card-${t}-${id}`);
+                    if (cInit) cInit.style.transition = 'none';
+                } else {
+                    return;
+                }
+            }
+
+            // Vanaf hier weten we 100% zeker dat de gebruiker bewust horizontaal veegt
+            if (e.cancelable) e.preventDefault();
+
             const now = performance.now();
             const dt = Math.max(1, now - window.swipeState.lastT);
             const instVel = ((pt.clientX - window.swipeState.lastX) / dt) * 1000;
             window.swipeState.velocityX = window.swipeState.velocityX * 0.35 + instVel * 0.65;
             window.swipeState.lastX = pt.clientX;
             window.swipeState.lastT = now;
-
             window.currX = pt.clientX;
-            const rawDiff = window.currX - window.startX;
-            const rawDiffY = pt.clientY - window.swipeState.startY;
 
-            if (!window.isSwiping && Math.abs(rawDiffY) > Math.abs(rawDiff) && Math.abs(rawDiffY) > 10) {
-                return;
-            }
-            if (Math.abs(rawDiff) > 8) window.isSwiping = true;
-
+            // Start vloeiend vanaf 0px op het punt waar de horizontale lock actief werd
+            const effectiveDiff = rawDiffX - window.swipeState.lockOffsetX;
             const c = document.getElementById(`card-${t}-${id}`);
             const bg = document.getElementById(`delete-bg-${t}-${id}`);
             if (!c) return;
 
-            let visualOffset = 0;
-            if (rawDiff < 0) {
-                // 1:1 tracking tot -110px, daarna Apple rubber-band weerstand
-                if (rawDiff < -110 && typeof window.rubberband === 'function') {
-                    visualOffset = -110 - window.rubberband(Math.abs(rawDiff + 110), 220, 0.55);
-                } else {
-                    visualOffset = rawDiff;
-                }
-            } else if (rawDiff > 0 && typeof window.rubberband === 'function') {
-                // Subtiele rubber-band bij naar rechts trekken
-                visualOffset = window.rubberband(rawDiff, 180, 0.25);
+            let visualOffset = effectiveDiff;
+            const maxFreeSlide = 115;
+            if (Math.abs(effectiveDiff) > maxFreeSlide && typeof window.rubberband === 'function') {
+                const sign = effectiveDiff < 0 ? -1 : 1;
+                visualOffset = sign * (maxFreeSlide + window.rubberband(Math.abs(effectiveDiff) - maxFreeSlide, 220, 0.55));
             }
+            window.swipeState.visualOffset = visualOffset;
 
             c.style.transform = `translate3d(${visualOffset}px, 0, 0)`;
             if (bg) {
-                const progress = Math.min(1, Math.max(0, Math.abs(Math.min(0, visualOffset)) / 75));
-                bg.style.opacity = visualOffset < -6 ? String(progress) : '0';
+                // Toon het prullenbak-icoon aan de kant die vrijkomt (links of rechts)
+                if (visualOffset > 0) {
+                    bg.classList.remove('justify-end', 'pr-6');
+                    bg.classList.add('justify-start', 'pl-6');
+                } else {
+                    bg.classList.remove('justify-start', 'pl-6');
+                    bg.classList.add('justify-end', 'pr-6');
+                }
+                const progress = Math.min(1, Math.max(0, (Math.abs(visualOffset) - 10) / 75));
+                bg.style.opacity = Math.abs(visualOffset) > 10 ? String(progress) : '0';
             }
         };
+
         window.hTEnd = (e, id, t) => {
-            const rawDiff = window.currX - window.startX;
             const c = document.getElementById(`card-${t}-${id}`);
             const bg = document.getElementById(`delete-bg-${t}-${id}`);
+
+            // Als er niet bewust horizontaal is geveegd, zet alles strak op 0 en stop direct
+            if (window.swipeState.directionLock !== 'horizontal') {
+                window.swipeState.directionLock = null;
+                window.isSwiping = false;
+                if (c) {
+                    c.style.transition = '';
+                    c.style.transform = '';
+                }
+                if (bg) bg.style.opacity = '0';
+                return;
+            }
+
+            window.swipeState.directionLock = null;
+            setTimeout(() => { window.isSwiping = false; }, 60);
             if (!c) return;
 
+            const currentOffset = window.swipeState.visualOffset || 0;
             const velX = window.swipeState.velocityX || 0;
-            const projectedDiff = rawDiff + (typeof window.projectMomentum === 'function' ? window.projectMomentum(velX, 0.996) : 0);
-            const shouldDelete = (rawDiff < -85) || (rawDiff < -35 && projectedDiff < -125 && velX < -320);
+            const projectedOffset = currentOffset + (typeof window.projectMomentum === 'function' ? window.projectMomentum(velX, 0.996) : 0);
+
+            // Verwijderen werkt bij een bewuste veeg naar links ÓF naar rechts
+            const deleteLeft = (currentOffset < -95) || (currentOffset < -45 && projectedOffset < -135 && velX < -340);
+            const deleteRight = (currentOffset > 95) || (currentOffset > 45 && projectedOffset > 135 && velX > 340);
+            const shouldDelete = deleteLeft || deleteRight;
 
             if (shouldDelete) {
                 if (typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
                 const width = c.offsetWidth || 360;
+                const targetX = deleteRight ? width * 1.15 : -width * 1.15;
+                const finalizeDelete = () => {
+                    const currentDKey = window.getDateKey(window.selectedDate);
+                    if (t === 'task') {
+                        const idx = window.tasks.findIndex(x => x.id === id);
+                        if (idx > -1) {
+                            if (window.tasks[idx].repeat && window.tasks[idx].repeat !== 'none') {
+                                window.tasks[idx].endDate = currentDKey;
+                            } else {
+                                window.tasks.splice(idx, 1);
+                            }
+                        }
+                    }
+                    if (t === 'habit') {
+                        const idx = window.habits.findIndex(x => x.id === id);
+                        if (idx > -1) {
+                            if (window.habits[idx].repeat && window.habits[idx].repeat !== 'none') {
+                                window.habits[idx].endDate = currentDKey;
+                            } else {
+                                window.habits.splice(idx, 1);
+                            }
+                        }
+                    }
+                    if (t === 'journal') {
+                        window.journalNotes = window.journalNotes.filter(x => x.id !== id);
+                    }
+                    window.swipeState.activeKey = null;
+                    window.saveToLocal(); window.renderTasks(); window.renderHabits(); window.renderJournal();
+                    if (typeof window.syncToCloud === 'function') window.syncToCloud();
+                };
+
                 if (typeof window.appleSpring === 'function') {
-                    window.swipeState.stopSpring = window.appleSpring(rawDiff, -width * 1.15, {
+                    window.swipeState.stopSpring = window.appleSpring(currentOffset, targetX, {
                         damping: 0.95,
                         response: 0.26,
                         velocity: velX,
                         onUpdate: (v) => { c.style.transform = `translate3d(${v}px, 0, 0)`; },
-                        onComplete: () => {
-                            const currentDKey = window.getDateKey(window.selectedDate);
-                            if (t === 'task') {
-                                const idx = window.tasks.findIndex(x => x.id === id);
-                                if (idx > -1) {
-                                    if (window.tasks[idx].repeat && window.tasks[idx].repeat !== 'none') {
-                                        window.tasks[idx].endDate = currentDKey;
-                                    } else {
-                                        window.tasks.splice(idx, 1);
-                                    }
-                                }
-                            }
-                            if (t === 'habit') {
-                                const idx = window.habits.findIndex(x => x.id === id);
-                                if (idx > -1) {
-                                    if (window.habits[idx].repeat && window.habits[idx].repeat !== 'none') {
-                                        window.habits[idx].endDate = currentDKey;
-                                    } else {
-                                        window.habits.splice(idx, 1);
-                                    }
-                                }
-                            }
-                            if (t === 'journal') {
-                                window.journalNotes = window.journalNotes.filter(x => x.id !== id);
-                            }
-                            window.saveToLocal(); window.renderTasks(); window.renderHabits(); window.renderJournal();
-                            if (typeof window.syncToCloud === 'function') window.syncToCloud();
-                        }
+                        onComplete: finalizeDelete
                     });
                 } else {
                     c.style.transition = 'transform 0.25s ease-out';
-                    c.style.transform = 'translate3d(-120%, 0, 0)';
+                    c.style.transform = `translate3d(${targetX}px, 0, 0)`;
+                    setTimeout(finalizeDelete, 250);
                 }
             } else {
                 if (typeof window.appleSpring === 'function') {
-                    window.swipeState.stopSpring = window.appleSpring(rawDiff, 0, {
-                        damping: 0.84,
-                        response: 0.32,
+                    window.swipeState.stopSpring = window.appleSpring(currentOffset, 0, {
+                        damping: 0.86,
+                        response: 0.30,
                         velocity: velX,
                         onUpdate: (v) => {
                             c.style.transform = `translate3d(${v}px, 0, 0)`;
-                            if (bg) bg.style.opacity = v < -6 ? String(Math.min(1, Math.abs(v) / 75)) : '0';
+                            if (bg) bg.style.opacity = Math.abs(v) > 10 ? String(Math.min(1, (Math.abs(v) - 10) / 75)) : '0';
                         },
                         onComplete: () => {
-                            c.style.transform = 'translate3d(0, 0, 0)';
+                            c.style.transform = '';
+                            c.style.transition = '';
                             if (bg) bg.style.opacity = '0';
                         }
                     });
                 } else {
-                    c.style.transition = 'transform 0.3s';
+                    c.style.transition = 'transform 0.25s ease-out';
                     c.style.transform = 'translate3d(0, 0, 0)';
                     if (bg) bg.style.opacity = '0';
                 }
